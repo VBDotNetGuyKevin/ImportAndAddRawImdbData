@@ -9,6 +9,9 @@
 ''' </summary>
 Public Class RawFileInfo
 
+    ''' <summary>
+    ''' This enumeration defines the different types of files that can be processed.
+    ''' </summary>
     Public Enum FileTypeEnum As Integer
         Unknown = -1
         OVERALL = 0
@@ -21,12 +24,20 @@ Public Class RawFileInfo
         TitleRatings = 7
     End Enum
 
+    ''' <summary>
+    ''' This property indicates whether the processing of the current file has been completed.
+    ''' </summary>
+    ''' <returns></returns>
     Public Property CompletedProcessing As Boolean = False
 
     ''' <summary>
     ''' This is the type of the current file being processed
     ''' </summary>
     Private _FileType As FT
+    ''' <summary>
+    ''' This property gets or sets the type of the current file being processed
+    ''' </summary>
+    ''' <returns></returns>
     Public Property FileType As FT
         Get
             Return _FileType
@@ -41,6 +52,11 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _CurrentStartTime As Date = Date.MinValue
+    ''' <summary>
+    ''' This property gets or sets the start time of the current run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property CurrentStartTime As Date
         Get
             Return _CurrentStartTime
@@ -55,6 +71,11 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _CurrentEndTime As Date = Date.MinValue
+    ''' <summary>
+    ''' This property gets or sets the end time of the current run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property CurrentEndTime As Date
         Get
             Return _CurrentEndTime
@@ -70,6 +91,11 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _PreviousStartTime As Date = Date.MinValue
+    ''' <summary>
+    ''' This property gets or sets the start time of the previous run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property PreviousStartTime As Date
         Get
             Return _PreviousStartTime
@@ -84,6 +110,11 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _PreviousEndTime As Date = Date.MinValue
+    ''' <summary>
+    ''' This property gets or sets the end time of the previous run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property PreviousEndTime As Date
         Get
             Return _PreviousEndTime
@@ -98,6 +129,11 @@ Public Class RawFileInfo
     ''' complete processing the current file
     ''' </summary>
     Private _EstimatedCommitCount As Integer
+    ''' <summary>
+    ''' This property gets or sets the estimated total number of commits to 
+    ''' complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property EstimatedCommitCount As Integer
         Get
             Return _EstimatedCommitCount
@@ -108,9 +144,15 @@ Public Class RawFileInfo
     End Property
 
     ''' <summary>
-    ''' This is the estimated remaining number of commits to complete processing the current file
+    ''' This is the estimated remaining number of commits to complete 
+    ''' processing the current file
     ''' </summary>
     Private _EstimatedRemainingCommitCount As Integer
+    ''' <summary>
+    ''' This property gets or sets the estimated remaining number of 
+    ''' commits to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property EstimatedRemainingCommitCount As Integer
         Get
             Return _EstimatedRemainingCommitCount
@@ -126,6 +168,12 @@ Public Class RawFileInfo
     ''' current file
     ''' </summary>
     Private _CurrentCommitTime As Date = Date.MinValue
+    ''' <summary>
+    ''' This property gets or sets the time of the current commit, which is used to 
+    ''' calculate the estimated time to complete processing the 
+    ''' current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property CurrentCommitTime As Date
         Get
             Return _CurrentCommitTime
@@ -157,6 +205,10 @@ Public Class RawFileInfo
     ''' This is the estimated amount of time in seconds to complete processing the current file
     ''' </summary>
     Dim _AmountOfSecondsPerCommit As Integer = 4 ' this is an initial guestimate based on my own system
+    ''' <summary>
+    ''' This property gets or sets the estimated amount of time in seconds to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property AmountOfSecondsPerCommit As Integer
         Get
             Return _AmountOfSecondsPerCommit
@@ -172,6 +224,11 @@ Public Class RawFileInfo
     ''' processing the current file
     ''' </summary>
     Private _PreviousCommitTime As Date = Date.MinValue
+    ''' <summary>
+    ''' This property gets or sets the time of the previous commit, which is 
+    ''' used to calculate the estimated time to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property PreviousCommitTime As Date
         Get
             Return _PreviousCommitTime
@@ -193,9 +250,15 @@ Public Class RawFileInfo
 
 
     ''' <summary>
-    ''' This is the estimated total time in seconds to complete processing the current file
+    ''' This is the estimated total time in seconds to complete 
+    ''' processing the current file
     ''' </summary>
     Private _EstimatedNumberOfSeconds As Integer
+    ''' <summary>
+    ''' This property gets or sets the estimated total time in 
+    ''' seconds to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property EstimatedNumberOfSeconds As Integer
         Get
             Return _EstimatedNumberOfSeconds
@@ -216,9 +279,15 @@ Public Class RawFileInfo
     End Property
 
     ''' <summary>
-    ''' This is the estimated remaining time in seconds to complete processing the current file
+    ''' This is the estimated remaining time in seconds to 
+    ''' complete processing the current file
     ''' </summary>
     Private _EstimatedRemainingSeconds As Integer
+    ''' <summary>
+    ''' This property gets or sets the estimated remaining time 
+    ''' in seconds to complete processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property EstimatedRemainingSeconds As Integer
         Get
             Return _EstimatedRemainingSeconds
@@ -232,6 +301,10 @@ Public Class RawFileInfo
     ''' This is the elapsed time in seconds since the start of processing the current file
     ''' </summary>
     Private _ElapsedSeconds As Integer
+    ''' <summary>
+    ''' This property gets or sets the elapsed time in seconds since the start of processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property ElapsedSeconds As Integer
         Get
             Return _ElapsedSeconds
@@ -251,7 +324,16 @@ Public Class RawFileInfo
         End Get
     End Property
 
+    ''' <summary>
+    ''' This is the current time, which is used to calculate the elapsed time 
+    ''' since the start of processing the current file
+    ''' </summary>
     Private _CurrentTime As Date = Date.MinValue
+    ''' <summary>
+    ''' This property gets or sets the current time, which is used to calculate 
+    ''' the elapsed time since the start of processing the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property CurrentTime As Date
         Get
             Return _CurrentTime
@@ -272,6 +354,9 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    ''' <summary>
+    ''' This is the saved row count from the last time (or zero if no previous runs)
+    ''' </summary>
     Private _LastRowCount As Long = 0
     ''' <summary>
     ''' Saved Row Count from the last time (or zero if no previous runs)
@@ -304,6 +389,9 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    ''' <summary>
+    ''' This is the current number of counted rows for the current file
+    ''' </summary>
     Private _CompressedCountedRowCount As Long = 0
     ''' <summary>
     ''' This is the current number of counted rows for the current file
@@ -344,7 +432,9 @@ Public Class RawFileInfo
         End Set
     End Property
 
-
+    ''' <summary>
+    ''' This is the current number of counted rows for the current file
+    ''' </summary>
     Private _CountedRowCount As Long = 0
     ''' <summary>
     ''' This is the current number of counted rows for the current file
@@ -382,6 +472,9 @@ Public Class RawFileInfo
     End Property
 
 
+    ''' <summary>
+    ''' This is the current number of committed rows for the current file
+    ''' </summary>
     Private _CurrentRowCount As Long = 0
     ''' <summary>
     ''' This is the current number of committed rows for the current file
@@ -422,41 +515,17 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    ''' <summary>
+    ''' This property indicates whether the object is currently being initialized. 
+    ''' It is used to prevent certain calculations from being performed during initialization.
+    ''' </summary>
+    ''' <returns></returns>
     Private Property Initializing As Boolean = True
 
-    'Public Sub New()
-
-    '    Me.FileType = FT.Unknown
-
-    '    Initializing = False
-
-    'End Sub
-
-    'Public Sub New(fileType As FT,
-    '               currentStartTime As Date,
-    '               currentEndTime As Date,
-    '               previousStartTime As Date,
-    '               previousEndTime As Date,
-    '               lastRowCount As Long,
-    '               currentRowCount As Long,
-    '               currentTime As Date)
-
-    '    Me.FileType = fileType
-    '    Me.CurrentStartTime = currentStartTime
-    '    Me.CurrentEndTime = currentEndTime
-    '    Me.PreviousStartTime = previousStartTime
-    '    Me.PreviousEndTime = previousEndTime
-    '    Me.LastRowCount = lastRowCount
-    '    Me.CurrentRowCount = currentRowCount
-    '    Me.CurrentTime = currentTime
-
-    '    Me.CurrentCommitTime = Date.MinValue
-    '    Me.PreviousCommitTime = Date.MinValue
-
-    '    Initializing = False
-
-    'End Sub
-
+    ''' <summary>
+    ''' This constructor initializes a new instance of the RawFileInfo class with the specified file type.
+    ''' </summary>
+    ''' <param name="fileType"></param>
     Public Sub New(fileType As FT)
 
         Me.FileType = fileType

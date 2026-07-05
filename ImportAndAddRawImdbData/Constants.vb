@@ -1,5 +1,10 @@
 ﻿Imports AH25 = ImportAndAddRawImdbData.Constants.AdHoc2_5TableNameEnum
 
+''' <summary>
+''' This class contains all the constants used in the ImportAndAddRawImdbData 
+''' project. It includes connection strings, file names, SQL commands, and 
+''' other configuration values that are used throughout the application.
+''' </summary>
 Public Class Constants
 
     Public Const DEFAULT_COMMIT_COUNT As Integer = 10000
@@ -828,6 +833,14 @@ Public Class Constants
 
     Public Const ADHOC_COUNT_3_MAX As Integer = 45
 
+    ''' <summary>
+    ''' Returns a sorted list of all the AdHoc SQL statements for Step #3, 
+    ''' which is the creation of the IMDB database schema and its associated 
+    ''' tables, indexes, and constraints. Each entry in the list is keyed by 
+    ''' an integer representing the step number and maps to a string containing 
+    ''' the corresponding SQL command.
+    ''' </summary>
+    ''' <returns>A sorted list of AdHoc SQL statements for Step #3.</returns>
     Public Shared ReadOnly Property AdHoc3List As New SortedList(Of Integer, String) From
         {
             {1, ADHOC_301}, {2, ADHOC_302}, {3, ADHOC_303}, {4, ADHOC_304}, {5, ADHOC_305},
@@ -1226,6 +1239,10 @@ Public Class Constants
     Public Const ADHOC_COUNT_4_MIN As Integer = 1
     Public Const ADHOC_COUNT_4_MAX As Integer = 26
 
+    ''' <summary>
+    ''' Returns a sorted list of the AdHoc SQL statements for Step #4, keyed by their index number.
+    ''' </summary>
+    ''' <returns></returns>
     Public Shared ReadOnly Property AdHoc4List As New SortedList(Of Integer, String) From
         {
             {1, ADHOC_401}, {2, ADHOC_402}, {3, ADHOC_403}, {4, ADHOC_404}, {5, ADHOC_405},
@@ -1236,6 +1253,11 @@ Public Class Constants
             {26, ADHOC_426}
         }
 
+    ''' <summary>
+    ''' Returns a sorted list of the timeout values for each 
+    ''' AdHoc SQL statement for Step #4, keyed by their index number.
+    ''' </summary>
+    ''' <returns></returns>
     Public Shared ReadOnly Property TimeOut4List As New SortedList(Of Integer, Integer) From
         {
             {1, 0},
@@ -1266,6 +1288,11 @@ Public Class Constants
             {26, 0}
         }
 
+    ''' <summary>
+    ''' Returns a sorted list of the approximate row counts for each 
+    ''' AdHoc SQL statement for Step #4, keyed by their index number.
+    ''' </summary>
+    ''' <returns></returns>
     Public Shared ReadOnly Property ApproxRows4 As New SortedList(Of Integer, Long) From
         {
             {1, 0},
@@ -1333,6 +1360,9 @@ Public Class Constants
     Public Const ADHOC_COUNT_5_MIN As AH25 = AH25.Attributes
     Public Const ADHOC_COUNT_5_MAX As AH25 = AH25.TitleTypes
 
+    ''' <summary>
+    ''' Returns a sorted list of the AdHoc SQL statements for Step #5, keyed by their index number.
+    ''' </summary>
     Public Enum AdHoc2_5TableNameEnum As Integer
         Attributes = 1
         Episodes = 2
@@ -1349,6 +1379,10 @@ Public Class Constants
         TitleTypes = 13
     End Enum
 
+    ''' <summary>
+    ''' Returns a sorted list of the AdHoc SQL statements for Step #5, keyed by their index number.
+    ''' </summary>
+    ''' <returns></returns>
     Public Shared ReadOnly Property AdHoc5List As New SortedList(Of AH25, String) From
         {
             {AH25.Attributes, ADHOC_501},
@@ -1366,6 +1400,11 @@ Public Class Constants
             {AH25.TitleTypes, ADHOC_513}
         }
 
+    ''' <summary>
+    ''' Returns a sorted list of the approximate row counts for each 
+    ''' AdHoc SQL statement for Step #5, keyed by their index number.
+    ''' </summary>
+    ''' <returns></returns>
     Public Shared ReadOnly Property ApproxRows5 As New SortedList(Of AH25, Long) From
         {
             {AH25.Attributes, 169},

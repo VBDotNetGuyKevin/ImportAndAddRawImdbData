@@ -48,9 +48,22 @@ Public Class MainForm2
         Decompressed
     End Enum
 
+    ''' <summary>
+    ''' This property holds the type of import being performed, which can 
+    ''' be either Compressed, Decompressed, or Unknown. It is used to 
+    ''' determine how to process the files during the import operation.
+    ''' </summary>
+    ''' <returns></returns>
     Private Property ImportType As ImportTypeEnum =
                                    ImportTypeEnum.Unknown
 
+    ''' <summary>
+    ''' This event handler is triggered when the "Choose Folder" button is clicked. It opens a folder
+    ''' browser dialog to allow the user to select a folder. If a folder is selected, it updates the
+    ''' FolderLocation property and the FolderLocationTextBox.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">An EventArgs that contains the event data.</param>
     Private Sub ChooseFolderButton_Click(sender As Object, e As EventArgs) _
         Handles ChooseFolderButton.Click
 
@@ -65,6 +78,9 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Gets the raw file information for each file type.
+    ''' </summary>
     Private Property MyRawFileInfo As New SortedList(Of FT, RawFileInfo) From
         {
             {FT.OVERALL, New RawFileInfo(FT.OVERALL)},
@@ -77,6 +93,12 @@ Public Class MainForm2
             {FT.TitleRatings, New RawFileInfo(FT.TitleRatings)}
         }
 
+    ''' <summary>
+    ''' This event handler is triggered when the form is loaded. It initializes the form's controls
+    ''' and loads the saved settings from the My.Settings file.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">An EventArgs that contains the event data.</param>
     Private Sub MainForm_Load(sender As Object, e As EventArgs) _
         Handles Me.Load
 
@@ -362,6 +384,12 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' This event handler is triggered when the form is closed. It saves the current settings to the My.Settings file,
+    ''' so that they can be reloaded the next time the application is run.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A FormClosedEventArgs that contains the event data.</param>
     Private Sub MainForm_FormClosed(sender As Object, e As FormClosedEventArgs) _
         Handles Me.FormClosed
 
@@ -501,6 +529,15 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' This event handler is triggered when the text in the FolderLocationTextBox changes. 
+    ''' It checks if the specified folder location exists and updates the UI accordingly. If 
+    ''' the folder exists, it enables the DownloadUpdatedArchivesButton and other related 
+    ''' controls, and sets the FolderLocation property. If the folder does not exist, it 
+    ''' disables those controls and clears the FolderLocation property.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub FolderLocationTextBox_TextChanged(sender As Object, e As EventArgs) _
         Handles FolderLocationTextBox.TextChanged
 
@@ -527,8 +564,23 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Gets or sets the type of import being performed, which can be either Compressed, Decompressed, or Unknown.
+    ''' It is used to determine how to process the files during the import operation.
+    ''' </summary>
     Private Property ProcessFileType As PFT = PFT.Compressed
 
+    ''' <summary>
+    ''' This event handler is triggered when the "Load All Data Files" 
+    ''' button is clicked. It checks which files exist in the specified 
+    ''' folder location and sets the ProcessFileType accordingly 
+    ''' (Compressed or Decompressed). It then opens a dialog to allow 
+    ''' the user to choose whether to count rows or insert data, and 
+    ''' if the user confirms, it starts a background worker to process 
+    ''' the selected files.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub LoadAllDataFilesButton_Click(sender As Object, e As EventArgs) _
         Handles LoadAllDataFilesButton.Click
 
@@ -616,6 +668,14 @@ Public Class MainForm2
     ' https://datasets.imdbws.com/title.principals.tsv.gz
     ' https://datasets.imdbws.com/title.ratings.tsv.gz
 
+    ''' <summary>
+    ''' Downloads a file from the specified URL to the specified destination path, while reporting progress. 
+    ''' It uses HttpClient to send an asynchronous GET request and reads the response stream in chunks, writing them to a file. 
+    ''' The progress is calculated based on the total bytes read and the total content length, and it updates a progress bar in the UI.
+    ''' </summary>
+    ''' <param name="url"></param>
+    ''' <param name="destinationPath"></param>
+    ''' <returns></returns>
     Public Async Function DownloadFileWithProgress(url As String,
                                                    destinationPath As String) As Task
 
@@ -693,12 +753,27 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Gets the location of the folder where the files are stored.
+    ''' </summary>
+    ''' <returns>The folder location as a string.</returns>
     Public ReadOnly Property FilesLocation As String
         Get
             Return FolderLocation
         End Get
     End Property
 
+    ''' <summary>
+    ''' This event handler is triggered when the "Download Updated Archives" 
+    ''' button is clicked. It disables other buttons and controls in the UI 
+    ''' to prevent user interaction during the download process. It then iterates 
+    ''' through a list of archive URLs, determines the file type based on the 
+    ''' filename, and updates the UI to show the progress of each file download. 
+    ''' The actual download is performed asynchronously, and progress is reported 
+    ''' back to the UI.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Async Sub DownloadUpdatedArchivesButton_Click(sender As Object, e As EventArgs) _
         Handles DownloadUpdatedArchivesButton.Click
 
@@ -1031,12 +1106,22 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Gets the display string for the file length, either "GB" or "MB".
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>A string representing the file length unit.</returns>
     Private Function GetFileDisplayLengthString(fileLength As Long) As String
 
         Return IIf(FileIsGbOrLarger(fileLength), "GB", "MB")
 
     End Function
 
+    ''' <summary>
+    ''' Gets the display string for the file length value.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>A string representing the file length value.</returns>
     Private Function GetFileDisplayLength(fileLength As Long) As String
 
         Return CType(IIf(FileIsGbOrLarger(fileLength),
@@ -1046,24 +1131,48 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Determines if the file length is greater than or equal to 1 GB.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>True if the file length is greater than or equal to 1 GB, otherwise False.</returns>
     Private Function FileIsGbOrLarger(fileLength As Long) As Boolean
 
         Return (GetMBDisplayLength(fileLength) >= 1024.0)
 
     End Function
 
+    ''' <summary>
+    ''' Gets the display length in gigabytes for the given file length in bytes.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>The display length in gigabytes.</returns>
     Private Function GetGBDisplayLength(fileLength As Long) As Double
 
         Return CType((fileLength / (1024 * 1024 * 1024)), Double)
 
     End Function
 
+    ''' <summary>
+    ''' Gets the display length in megabytes for the given file length in bytes.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>The display length in megabytes.</returns>
     Private Function GetMBDisplayLength(fileLength As Long) As Double
 
         Return CType((fileLength / (1024 * 1024)), Double)
 
     End Function
 
+    ''' <summary>
+    ''' Decompresses a downloaded GZip file asynchronously. It reads the 
+    ''' compressed file, decompresses it, and writes the decompressed data 
+    ''' to the specified output path. The function returns the size of the 
+    ''' decompressed file in bytes.
+    ''' </summary>
+    ''' <param name="zipPath">The path to the compressed GZip file.</param>
+    ''' <param name="outputPath">The path where the decompressed file will be written.</param>
+    ''' <returns>The size of the decompressed file in bytes.</returns>
     Private Async Function DecompressDownloadedGZipFile(zipPath As String, outputPath As String) As Task(Of Long)
 
         Dim decompAsync =
@@ -1099,6 +1208,12 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Decompresses a GZip file. It reads the compressed file, decompresses 
+    ''' it, and writes the decompressed data to the specified output path.
+    ''' </summary>
+    ''' <param name="zipPath">The path to the compressed GZip file.</param>
+    ''' <param name="outputPath">The path where the decompressed file will be written.</param>
     Public Sub DecompressGZipFile(zipPath As String,
                                   outputPath As String)
 
@@ -1132,6 +1247,16 @@ Public Class MainForm2
     Private Property TitlePrincipalsCounted As Boolean = False
     Private Property TitleRatingsCounted As Boolean = False
 
+    ''' <summary>
+    ''' Handles the click event for the "End Things" button. Depending 
+    ''' on the button's text, it either cancels any ongoing background 
+    ''' worker operations or exits the application. If the button's text 
+    ''' is "&Cancel", it checks which background worker is busy and 
+    ''' requests cancellation. If the button's text is "E&xit", it 
+    ''' closes the application.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The event data.</param>
     Private Sub EndThingsButton_Click(sender As Object, e As EventArgs) _
         Handles EndThingsButton.Click
 
@@ -1178,6 +1303,11 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Counts the number of rows in a specified file and updates the corresponding text box.
+    ''' </summary>
+    ''' <param name="fileName">The name of the file to count rows for.</param>
+    ''' <returns>The number of rows in the file.</returns>
     Private Function CountFileRows(ByVal fileName As String) As Long
 
         Dim rowCount As Long = IO.File.ReadLines(Path.Combine(FolderLocation, fileName)).Count - 1
@@ -1196,6 +1326,11 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Counts the number of rows in a specified compressed file and updates the corresponding text box.
+    ''' </summary>
+    ''' <param name="fileName">The name of the compressed file to count rows for.</param>
+    ''' <returns>The number of rows in the compressed file.</returns>
     Private Function CountCompressedFileRows(ByVal fileName As String) As Long
 
         Dim rowCount As Long = 0
@@ -1388,6 +1523,16 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Handles the click event for the "Count Archive Rows" button. It 
+    ''' initializes the counting process for the rows in the compressed 
+    ''' archive files. Depending on the user's choice, it can count the 
+    ''' rows sequentially or in parallel. The method updates the UI with 
+    ''' the row counts as they are calculated, providing feedback to the 
+    ''' user on the progress of the counting operation.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The event data.</param>
     Private Sub CountArchiveRowsButton_Click(sender As Object, e As EventArgs) _
         Handles CountArchiveRowsButton.Click
 
@@ -1573,9 +1718,29 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Gets or sets the list of files to be counted.
+    ''' </summary>
+    ''' <returns></returns>
     Private Property CountFilesList As New List(Of String)
+
+    ''' <summary>
+    ''' Gets or sets the list of files to be inserted into the database.
+    ''' </summary>
+    ''' <returns></returns>
     Private Property InsertDataFilesList As New List(Of String)
 
+    ''' <summary>
+    ''' Handles the click event for the "Count TSV Rows" button. It 
+    ''' initializes the counting process for the rows in the 
+    ''' decompressed TSV files. Depending on the user's choice, it 
+    ''' can count the rows sequentially or in parallel. The method 
+    ''' updates the UI with the row counts as they are calculated, 
+    ''' providing feedback to the user on the progress of the 
+    ''' counting operation.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub CountTsvRowsButton_Click(sender As Object, e As EventArgs) _
         Handles CountTsvRowsButton.Click
 
@@ -1680,6 +1845,15 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Counts the number of lines in a GZip compressed file quickly by 
+    ''' reading the file in chunks and counting newline characters. It 
+    ''' uses a buffer to read the file in 64 KB chunks, which improves 
+    ''' performance for large files. The method returns the total line 
+    ''' count minus one to account for the header row.
+    ''' </summary>
+    ''' <param name="filePath">The path to the GZip compressed file.</param>
+    ''' <returns>The number of lines in the file, excluding the header row.</returns>
     Private Function CountGZipLinesFast(filePath As String) As Long
 
         Dim lineCount As Long = 0
@@ -1717,8 +1891,21 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Gets or sets a value indicating whether any of the background worker 
+    ''' operations have been cancelled. This property is used to track the 
+    ''' cancellation state of the operations and to control the 
+    ''' enabling/disabling of UI controls based on that state.
+    ''' </summary>
+    ''' <returns></returns>
     Private Property CancelledOperations As Boolean = False
 
+    ''' <summary>
+    ''' Checks if all the data files have been counted and updates the UI controls accordingly. 
+    ''' If all files are counted or if any operation has been cancelled, it re-enables the relevant 
+    ''' UI controls (FolderLocationTextBox, ChooseFolderButton, LoadAllDataFilesButton, DownloadUpdatedArchivesButton). 
+    ''' It also resets the EndThingsButton text to "E&xit" if it was previously set to "&Cancel".
+    ''' </summary>
     Private Sub CheckAllCounted()
 
         Dim allCounted As Boolean = (NameBasicsCounted AndAlso
@@ -1750,6 +1937,14 @@ Public Class MainForm2
     End Sub
 
 #Region "BackgroundWorker Objects DoWork Event Handlers"
+    ''' <summary>
+    ''' Handles the DoWork event for the NameBasicsBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests from other background workers and
+    ''' counts the rows in the NameBasics data file based on the import type.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub NameBasicsBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles NameBasicsBackgroundWorker.DoWork
 
@@ -1775,6 +1970,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the DoWork event for the TitleAkasBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests from other background workers and
+    ''' counts the rows in the TitleAkas data file based on the import type.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param> 
     Private Sub TitleAkasBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles TitleAkasBackgroundWorker.DoWork
 
@@ -1799,6 +2002,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the DoWork event for the TitleBasicsBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests from other background workers and
+    ''' counts the rows in the TitleBasics data file based on the import type.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub TitleBasicsBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles TitleBasicsBackgroundWorker.DoWork
 
@@ -1823,6 +2034,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the DoWork event for the TitleCrewBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests from other background workers and
+    ''' counts the rows in the TitleCrew data file based on the import type.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub TitleCrewBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles TitleCrewBackgroundWorker.DoWork
 
@@ -1847,6 +2066,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the DoWork event for the TitleEpisodeBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests from other background workers and
+    ''' counts the rows in the TitleEpisode data file based on the import type.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub TitleEpisodeBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles TitleEpisodeBackgroundWorker.DoWork
 
@@ -1871,6 +2098,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the DoWork event for the TitlePrincipalsBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests from other background workers and
+    ''' counts the rows in the TitlePrincipals data file based on the import type.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub TitlePrincipalsBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles TitlePrincipalsBackgroundWorker.DoWork
 
@@ -1895,6 +2130,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the DoWork event for the TitleRatingsBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests from other background workers and
+    ''' counts the rows in the TitleRatings data file based on the import type.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub TitleRatingsBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles TitleRatingsBackgroundWorker.DoWork
 
@@ -1919,6 +2162,13 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the DoWork event for the AllArchivesBackgroundWorker.
+    ''' This event is triggered when the background worker starts its operation.
+    ''' It checks for cancellation requests and processes each file in the CountFilesList.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub AllArchivesBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles AllArchivesBackgroundWorker.DoWork
 
@@ -2158,6 +2408,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Determines the file type based on the provided file name. It checks 
+    ''' the file name against known IMDB data file names and returns the 
+    ''' corresponding file type enumeration (FT). If the file name does 
+    ''' not match any known types, it returns FT.Unknown.
+    ''' </summary>
+    ''' <param name="fileName">The name of the file to check.</param>
+    ''' <returns>The file type enumeration (FT) corresponding to the file name.</returns>
     Private Function GetFileTypeBasedOnFileName(fileName As String) As FT
 
         Dim result As FT = FT.Unknown
@@ -2200,6 +2458,16 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Handles the DoWork event for the SqlBackgroundWorker. This event 
+    ''' is triggered when the background worker starts its operation. It 
+    ''' processes each file in the InsertDataFilesList, reads the data 
+    ''' line by line, and inserts it into the corresponding SQL Server 
+    ''' table. The method also handles cancellation requests and updates 
+    ''' the UI with progress information.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub SqlBackgroundWorker_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) _
         Handles SqlBackgroundWorker.DoWork
 
@@ -2700,6 +2968,14 @@ Public Class MainForm2
     End Sub
 #End Region
 
+    ''' <summary>
+    ''' Logs error messages to a file named "error_log.txt" in the 
+    ''' application's base directory. Each log entry includes a 
+    ''' timestamp and the provided error message. If an exception 
+    ''' occurs while attempting to write to the log file, it is 
+    ''' caught and printed to the debug output.
+    ''' </summary>
+    ''' <param name="errorMessage">The error message to log.</param>
     Public Sub LogErrorsToFile(errorMessage As String)
         Try
             Dim logPath As String = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error_log.txt")
@@ -2717,6 +2993,14 @@ Public Class MainForm2
     End Sub
 
 #Region "BackgroundWorker Objects RunWorkerCompleted Event Handlers"
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the NameBasicsBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It sets the NameBasicsCounted flag to True and calls CheckAllCounted() to verify 
+    ''' if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub NameBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles NameBasicsBackgroundWorker.RunWorkerCompleted
 
@@ -2726,6 +3010,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the TitleAkasBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It sets the TitleAkasCounted flag to True and calls CheckAllCounted() to verify 
+    ''' if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub TitleAkasBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleAkasBackgroundWorker.RunWorkerCompleted
 
@@ -2735,6 +3027,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the TitleBasicsBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It sets the TitleBasicsCounted flag to True and calls CheckAllCounted() to verify 
+    ''' if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub TitleBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleBasicsBackgroundWorker.RunWorkerCompleted
 
@@ -2744,6 +3044,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the TitleCrewBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It sets the TitleCrewCounted flag to True and calls CheckAllCounted() to verify 
+    ''' if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub TitleCrewBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleCrewBackgroundWorker.RunWorkerCompleted
 
@@ -2753,6 +3061,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the TitleEpisodeBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It sets the TitleEpisodeCounted flag to True and calls CheckAllCounted() to verify 
+    ''' if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub TitleEpisodeBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleEpisodeBackgroundWorker.RunWorkerCompleted
 
@@ -2762,6 +3078,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the TitlePrincipalsBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It sets the TitlePrincipalsCounted flag to True and calls CheckAllCounted() to verify 
+    ''' if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub TitlePrincipalsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitlePrincipalsBackgroundWorker.RunWorkerCompleted
 
@@ -2771,6 +3095,14 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the TitleRatingsBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It sets the TitleRatingsCounted flag to True and calls CheckAllCounted() to verify 
+    ''' if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub TitleRatingsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleRatingsBackgroundWorker.RunWorkerCompleted
 
@@ -2780,6 +3112,13 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the AllArchivesBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It calls CheckAllCounted() to verify if all counting operations are complete.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub AllArchivesBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles AllArchivesBackgroundWorker.RunWorkerCompleted
 
@@ -2787,6 +3126,13 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event for the SqlBackgroundWorker. 
+    ''' This event is triggered when the background worker has completed its operation. 
+    ''' It updates the UI elements to reflect the completion of the SQL operations.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
     Private Sub SqlBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles SqlBackgroundWorker.RunWorkerCompleted
 
@@ -2808,6 +3154,9 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Defines the types of raw files that can be processed, with each type associated with an integer value.
+    ''' </summary>
     Public Enum RawFileTypeEnum As Integer
         UNKNOWN = -1
         NameBasics = 0
@@ -2819,6 +3168,9 @@ Public Class MainForm2
         TitleRatings = 6
     End Enum
 
+    ''' <summary>
+    ''' Defines the types of SQL commands that can be executed, with each type associated with an integer value.
+    ''' </summary>
     Public Enum SqlCmdTypeEnum As Integer
         INSERT
         UPDATE
@@ -2827,6 +3179,19 @@ Public Class MainForm2
         DROP_CONSTRAINT
     End Enum
 
+    ''' <summary>
+    ''' Counts the number of rows in a specified table in the database. 
+    ''' It executes a SQL command to retrieve the row count and handles 
+    ''' potential SQL exceptions, including timeouts, with retry logic. 
+    ''' The function updates the approximate row count for the specified 
+    ''' table and logs progress messages to a progress log text box.
+    ''' </summary>
+    ''' <param name="currentTable">The table for which to count rows.</param>
+    ''' <param name="sqlConn">The SQL connection to use for the operation.</param>
+    ''' <param name="sqlCmd">The SQL command to execute.</param>
+    ''' <param name="lastTable">The last table in the sequence, used for logging purposes.</param>
+    ''' <param name="timeOutForExecution">The timeout value for the SQL command execution.</param>
+    ''' <returns>True if the operation was successful; otherwise, False.</returns>
     Private Function CountTable(currentTable As AH25,
                           ByRef sqlConn As SqlConnection,
                           ByRef sqlCmd As SqlCommand,
@@ -2926,6 +3291,20 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Truncates the specified table in the database. It executes a 
+    ''' SQL command to remove all rows from the table and handles 
+    ''' potential SQL exceptions, including timeouts, with retry 
+    ''' logic. The function logs progress messages to a progress 
+    ''' log text box and returns a boolean indicating the success 
+    ''' of the operation.
+    ''' </summary>
+    ''' <param name="currentTable">The table to truncate.</param>
+    ''' <param name="sqlConn">The SQL connection object.</param>
+    ''' <param name="sqlCmd">The SQL command object.</param>
+    ''' <param name="lastTable">The last table in the process.</param>
+    ''' <param name="timeOutForExecution">The timeout for the SQL command execution.</param>
+    ''' <returns>True if the operation was successful, otherwise False.</returns>
     Private Function TruncateTable(currentTable As AH25,
                              ByRef sqlConn As SqlConnection,
                              ByRef sqlCmd As SqlCommand,
@@ -3033,11 +3412,34 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Defines an enumeration for the operations of dropping or adding table constraints in a database. 
+    ''' The enumeration has two members: DROP and ADD, which represent the respective operations.
+    ''' </summary>
     Private Enum DropAddEnum As Integer
+        ''' <summary>
+        ''' Represents the operation of dropping a table constraint.
+        ''' </summary>
         DROP
+        ''' <summary>
+        ''' Represents the operation of adding a table constraint.
+        ''' </summary>
         ADD
     End Enum
 
+    ''' <summary>
+    ''' Adds or drops a table constraint in the database based on the specified operation (drop or add). 
+    ''' It executes the appropriate SQL command to either drop or add the constraint and handles potential 
+    ''' SQL exceptions, including timeouts, with retry logic. The function logs progress messages to a 
+    ''' progress log text box and returns a boolean indicating the success of the operation.
+    ''' </summary>
+    ''' <param name="currentStep">The current step in the process.</param>
+    ''' <param name="lastStep">The last step in the process.</param>
+    ''' <param name="sqlConn">The SQL connection object.</param>
+    ''' <param name="sqlCmd">The SQL command object.</param>
+    ''' <param name="dropOrAdd">The operation to perform (drop or add).</param>
+    ''' <param name="timeOutForExecution">The timeout for the SQL command execution.</param>
+    ''' <returns>True if the operation was successful, otherwise False.</returns>
     Private Function AddOrDropTableConstraint(currentStep As Integer,
                                               lastStep As Integer,
                                         ByRef sqlConn As SqlConnection,
@@ -3221,6 +3623,20 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Inserts or updates data in a specified table in the database. It 
+    ''' executes a SQL command to perform the insert or update operation 
+    ''' and handles potential SQL exceptions, including timeouts, with 
+    ''' retry logic. The function logs progress messages to a progress 
+    ''' log text box and returns a boolean indicating the success of 
+    ''' the operation.
+    ''' </summary>
+    ''' <param name="currentStep">The current step in the process.</param>
+    ''' <param name="lastStep">The last step in the process.</param>
+    ''' <param name="rowsAffected">The number of rows affected by the operation.</param>
+    ''' <param name="sqlConn">The SQL connection object.</param>
+    ''' <param name="sqlCmd">The SQL command object.</param>
+    ''' <returns>True if the operation was successful, otherwise False.</returns>
     Private Function InsertOrUpdateTable(currentStep As Integer,
                                          lastStep As Integer,
                                    ByRef rowsAffected As Long,
@@ -3384,6 +3800,15 @@ Public Class MainForm2
 
     End Function
 
+    ''' <summary>
+    ''' Handles the click event of the ImportDataButton. It prompts the 
+    ''' user for confirmation before proceeding with the data import 
+    ''' operation. If confirmed, it disables relevant controls, sets 
+    ''' up the background worker for SQL import, and starts the 
+    ''' asynchronous operation to import data into the database.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub ImportDataButton_Click(sender As Object, e As EventArgs) _
         Handles ImportDataButton.Click
 
@@ -3436,6 +3861,13 @@ Public Class MainForm2
     Private Property CountTsvRowsEnabled As Boolean = False
     Private Property DecompressAfterDownloadEnabled As Boolean = False
 
+    ''' <summary>
+    ''' Handles the DoWork event of the SqlImportBackgroundWorker. It processes
+    ''' the database commands to load the data into the proper tables from the
+    ''' [Raw] Data Tables.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub SqlImportBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles SqlImportBackgroundWorker.DoWork
 
@@ -3598,6 +4030,12 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event of the SqlImportBackgroundWorker. It re-enables
+    ''' the controls and updates the UI after the background worker has completed its operation.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub SqlImportBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles SqlImportBackgroundWorker.RunWorkerCompleted
 
