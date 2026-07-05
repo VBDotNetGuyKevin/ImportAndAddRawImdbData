@@ -1,0 +1,535 @@
+﻿Imports FT = ImportAndAddRawImdbData.RawFileInfo.FileTypeEnum
+
+''' <summary>
+''' This class is used to store information about the 
+''' current file being processed, including the file type, 
+''' start and end times, estimated commit counts, and 
+''' estimated time remaining. It also provides methods 
+''' to calculate elapsed time and format time strings.
+''' </summary>
+Public Class RawFileInfo
+
+    Public Enum FileTypeEnum As Integer
+        Unknown = -1
+        OVERALL = 0
+        NameBasics = 1
+        TitleBasics = 2
+        TitleAkas = 3
+        TitleCrew = 4
+        TitleEpisode = 5
+        TitlePrincipals = 6
+        TitleRatings = 7
+    End Enum
+
+    Public Property CompletedProcessing As Boolean = False
+
+    ''' <summary>
+    ''' This is the type of the current file being processed
+    ''' </summary>
+    Private _FileType As FT
+    Public Property FileType As FT
+        Get
+            Return _FileType
+        End Get
+        Set(value As FT)
+            _FileType = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the start time of the current run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    Private _CurrentStartTime As Date = Date.MinValue
+    Public Property CurrentStartTime As Date
+        Get
+            Return _CurrentStartTime
+        End Get
+        Set(value As Date)
+            _CurrentStartTime = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the end time of the current run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    Private _CurrentEndTime As Date = Date.MinValue
+    Public Property CurrentEndTime As Date
+        Get
+            Return _CurrentEndTime
+        End Get
+        Set(value As Date)
+            _CurrentEndTime = value
+            CompletedProcessing = True
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the start time of the previous run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    Private _PreviousStartTime As Date = Date.MinValue
+    Public Property PreviousStartTime As Date
+        Get
+            Return _PreviousStartTime
+        End Get
+        Set(value As Date)
+            _PreviousStartTime = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the end time of the previous run, which is used to calculate 
+    ''' the estimated time to complete processing the current file
+    ''' </summary>
+    Private _PreviousEndTime As Date = Date.MinValue
+    Public Property PreviousEndTime As Date
+        Get
+            Return _PreviousEndTime
+        End Get
+        Set(value As Date)
+            _PreviousEndTime = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the estimated total number of commits to 
+    ''' complete processing the current file
+    ''' </summary>
+    Private _EstimatedCommitCount As Integer
+    Public Property EstimatedCommitCount As Integer
+        Get
+            Return _EstimatedCommitCount
+        End Get
+        Private Set(value As Integer)
+            _EstimatedCommitCount = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the estimated remaining number of commits to complete processing the current file
+    ''' </summary>
+    Private _EstimatedRemainingCommitCount As Integer
+    Public Property EstimatedRemainingCommitCount As Integer
+        Get
+            Return _EstimatedRemainingCommitCount
+        End Get
+        Private Set(value As Integer)
+            _EstimatedRemainingCommitCount = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the time of the current commit, which is used to 
+    ''' calculate the estimated time to complete processing the 
+    ''' current file
+    ''' </summary>
+    Private _CurrentCommitTime As Date = Date.MinValue
+    Public Property CurrentCommitTime As Date
+        Get
+            Return _CurrentCommitTime
+        End Get
+        Set(value As Date)
+            _CurrentCommitTime = value
+
+            ' this is the first commit, so we will set the 
+            ' previous commit time to the current commit time
+            If Not Initializing Then
+                If (PreviousCommitTime = Date.MinValue) Then
+                    PreviousCommitTime = CurrentCommitTime
+                End If
+
+                If ((Not PreviousCommitTime = Date.MinValue) AndAlso
+                    (Not CurrentCommitTime = Date.MinValue)) Then
+                    ' we know that there has been at least 2 commits performed, so we can estimate 
+                    ' the total time based on the amount of time between commits
+                    AmountOfSecondsPerCommit =
+                        Convert.ToInt32(
+                            Math.Truncate(
+                                CType((CurrentCommitTime - PreviousCommitTime), TimeSpan).TotalSeconds))
+                End If
+            End If
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the estimated amount of time in seconds to complete processing the current file
+    ''' </summary>
+    Dim _AmountOfSecondsPerCommit As Integer = 4 ' this is an initial guestimate based on my own system
+    Public Property AmountOfSecondsPerCommit As Integer
+        Get
+            Return _AmountOfSecondsPerCommit
+        End Get
+        Private Set(value As Integer)
+            _AmountOfSecondsPerCommit = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the time of the previous commit, which is 
+    ''' used to calculate the estimated time to complete 
+    ''' processing the current file
+    ''' </summary>
+    Private _PreviousCommitTime As Date = Date.MinValue
+    Public Property PreviousCommitTime As Date
+        Get
+            Return _PreviousCommitTime
+        End Get
+        Set(value As Date)
+            _PreviousCommitTime = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the estimated total time in the format of HH:MM:SS
+    ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property EstimatedTotalTimeString As String
+        Get
+            Return GetTimeStringFromSeconds(EstimatedNumberOfSeconds)
+        End Get
+    End Property
+
+
+    ''' <summary>
+    ''' This is the estimated total time in seconds to complete processing the current file
+    ''' </summary>
+    Private _EstimatedNumberOfSeconds As Integer
+    Public Property EstimatedNumberOfSeconds As Integer
+        Get
+            Return _EstimatedNumberOfSeconds
+        End Get
+        Private Set(value As Integer)
+            _EstimatedNumberOfSeconds = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the estimated remaining time in the format of HH:MM:SS
+    ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property EstimatedRemainingTimeString As String
+        Get
+            Return GetTimeStringFromSeconds(EstimatedRemainingSeconds)
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' This is the estimated remaining time in seconds to complete processing the current file
+    ''' </summary>
+    Private _EstimatedRemainingSeconds As Integer
+    Public Property EstimatedRemainingSeconds As Integer
+        Get
+            Return _EstimatedRemainingSeconds
+        End Get
+        Private Set(value As Integer)
+            _EstimatedRemainingSeconds = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the elapsed time in seconds since the start of processing the current file
+    ''' </summary>
+    Private _ElapsedSeconds As Integer
+    Public Property ElapsedSeconds As Integer
+        Get
+            Return _ElapsedSeconds
+        End Get
+        Private Set(value As Integer)
+            _ElapsedSeconds = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' This is the elapsed time in the format of HH:MM:SS
+    ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property ElapsedTimeString As String
+        Get
+            Return GetTimeStringFromSeconds(ElapsedSeconds)
+        End Get
+    End Property
+
+    Private _CurrentTime As Date = Date.MinValue
+    Public Property CurrentTime As Date
+        Get
+            Return _CurrentTime
+        End Get
+        Set(value As Date)
+            _CurrentTime = value
+
+            If Not Initializing Then
+                ' as long as the current end time is not the default value, 
+                ' we can calculate the elapsed seconds each time the current time is updated
+                If Not CompletedProcessing Then
+                    ElapsedSeconds =
+                        Convert.ToInt32(
+                            Math.Truncate(
+                                CType((CurrentTime - CurrentStartTime), TimeSpan).TotalSeconds))
+                End If
+            End If
+        End Set
+    End Property
+
+    Private _LastRowCount As Long = 0
+    ''' <summary>
+    ''' Saved Row Count from the last time (or zero if no previous runs)
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property LastRowCount As Long
+        Get
+            Return _LastRowCount
+        End Get
+        Set(value As Long)
+            _LastRowCount = value
+
+            If Not Initializing Then
+                ' once we have the last row count, we can estimate the number 
+                ' of commits and the estimated time to complete
+                If _LastRowCount > 0 Then
+                    Dim modCommits As Integer = _LastRowCount Mod Constants.DEFAULT_COMMIT_COUNT
+                    Dim quotCommits As Integer = _LastRowCount \ Constants.DEFAULT_COMMIT_COUNT
+
+                    If modCommits > 0 Then
+                        EstimatedCommitCount = quotCommits + 1
+                    Else
+                        EstimatedCommitCount = quotCommits
+                    End If
+
+                    EstimatedNumberOfSeconds =
+                        (EstimatedCommitCount * AmountOfSecondsPerCommit)
+                End If
+            End If
+        End Set
+    End Property
+
+    Private _CompressedCountedRowCount As Long = 0
+    ''' <summary>
+    ''' This is the current number of counted rows for the current file
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property CompressedCountedRowCount As Long
+        Get
+            Return _CompressedCountedRowCount
+        End Get
+        Set(value As Long)
+            _CompressedCountedRowCount = value
+
+            If Not Initializing Then
+                ' once we have the current row count, we can estimate the 
+                ' number of commits and the estimated time remaining to complete
+                ' this will be updated each time a commit is performed, 
+                ' so that the estimated time remaining is updated as well
+                If Not CompletedProcessing Then
+
+                    If _CompressedCountedRowCount > 0 Then
+                        Dim modCommits As Integer =
+                            _CompressedCountedRowCount Mod Constants.DEFAULT_COMMIT_COUNT
+
+                        Dim quotCommits As Integer =
+                            _CompressedCountedRowCount \ Constants.DEFAULT_COMMIT_COUNT
+
+                        If modCommits > 0 Then
+                            EstimatedCommitCount = quotCommits + 1
+                        Else
+                            EstimatedCommitCount = quotCommits
+                        End If
+
+                        EstimatedNumberOfSeconds =
+                            (EstimatedCommitCount * AmountOfSecondsPerCommit)
+                    End If
+                End If
+            End If
+        End Set
+    End Property
+
+
+    Private _CountedRowCount As Long = 0
+    ''' <summary>
+    ''' This is the current number of counted rows for the current file
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property CountedRowCount As Long
+        Get
+            Return _CountedRowCount
+        End Get
+        Set(value As Long)
+            _CountedRowCount = value
+
+            If Not Initializing Then
+                ' once we have the current row count, we can estimate the 
+                ' number of commits and the estimated time remaining to complete
+                ' this will be updated each time a commit is performed, 
+                ' so that the estimated time remaining is updated as well
+                If Not CompletedProcessing Then
+                    If _CountedRowCount > 0 Then
+                        Dim modCommits As Integer = _CountedRowCount Mod Constants.DEFAULT_COMMIT_COUNT
+                        Dim quotCommits As Integer = _CountedRowCount \ Constants.DEFAULT_COMMIT_COUNT
+
+                        If modCommits > 0 Then
+                            EstimatedCommitCount = quotCommits + 1
+                        Else
+                            EstimatedCommitCount = quotCommits
+                        End If
+
+                        EstimatedNumberOfSeconds =
+                            (EstimatedCommitCount * AmountOfSecondsPerCommit)
+                    End If
+                End If
+            End If
+        End Set
+    End Property
+
+
+    Private _CurrentRowCount As Long = 0
+    ''' <summary>
+    ''' This is the current number of committed rows for the current file
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property CurrentRowCount As Long
+        Get
+            Return _CurrentRowCount
+        End Get
+        Set(value As Long)
+            _CurrentRowCount = value
+
+            If Not Initializing Then
+                ' once we have the current row count, we can estimate the 
+                ' number of commits and the estimated time remaining to complete
+                ' this will be updated each time a commit is performed, 
+                ' so that the estimated time remaining is updated as well
+                If Not CompletedProcessing Then
+                    If _CurrentRowCount > 0 Then
+                        Dim modCommits As Integer =
+                            ((LastRowCount - _CurrentRowCount) Mod Constants.DEFAULT_COMMIT_COUNT)
+
+                        Dim quotCommits As Integer =
+                            ((LastRowCount - _CurrentRowCount) \ Constants.DEFAULT_COMMIT_COUNT)
+
+                        If modCommits > 0 Then
+                            EstimatedRemainingCommitCount = quotCommits + 1
+                        Else
+                            EstimatedRemainingCommitCount = quotCommits
+                        End If
+
+                        EstimatedRemainingSeconds =
+                            (EstimatedRemainingCommitCount *
+                             AmountOfSecondsPerCommit)
+                    End If
+                End If
+            End If
+        End Set
+    End Property
+
+    Private Property Initializing As Boolean = True
+
+    'Public Sub New()
+
+    '    Me.FileType = FT.Unknown
+
+    '    Initializing = False
+
+    'End Sub
+
+    'Public Sub New(fileType As FT,
+    '               currentStartTime As Date,
+    '               currentEndTime As Date,
+    '               previousStartTime As Date,
+    '               previousEndTime As Date,
+    '               lastRowCount As Long,
+    '               currentRowCount As Long,
+    '               currentTime As Date)
+
+    '    Me.FileType = fileType
+    '    Me.CurrentStartTime = currentStartTime
+    '    Me.CurrentEndTime = currentEndTime
+    '    Me.PreviousStartTime = previousStartTime
+    '    Me.PreviousEndTime = previousEndTime
+    '    Me.LastRowCount = lastRowCount
+    '    Me.CurrentRowCount = currentRowCount
+    '    Me.CurrentTime = currentTime
+
+    '    Me.CurrentCommitTime = Date.MinValue
+    '    Me.PreviousCommitTime = Date.MinValue
+
+    '    Initializing = False
+
+    'End Sub
+
+    Public Sub New(fileType As FT)
+
+        Me.FileType = fileType
+
+        Initializing = False
+
+    End Sub
+
+    Public Shared Function GetTimeStringFromSeconds(totalSeconds As Integer) As String
+
+        'Dim hours As Integer = totalSeconds \ 3600
+        'Dim minutes As Integer = (totalSeconds Mod 3600) \ 60
+        'Dim seconds As Integer = totalSeconds Mod 60
+        Dim result As String = String.Empty
+
+        Dim hours As Integer =
+            (totalSeconds \ (60 * 60))
+
+        Dim minutes As Integer =
+            (
+                (totalSeconds \ 60) -
+                (hours * 60)
+            )
+
+        Dim seconds As Integer =
+            (
+                totalSeconds -
+                (hours * 60 * 60) -
+                (minutes * 60)
+            )
+
+        result = $"{hours:D2}:{minutes:D2}:{seconds:D2}"
+
+        If result.StartsWith("00:") Then
+            result = result.Substring(3)
+        End If
+
+        Return result
+
+    End Function
+
+    Public Shared Function GetTimeStringFromSeconds_General(totalSeconds As Integer) As String
+
+        Dim result As String = String.Empty
+
+        Dim hours As Integer =
+            (totalSeconds \ (60 * 60))
+
+        Dim minutes As Integer =
+            (
+                (totalSeconds \ 60) -
+                (hours * 60)
+            )
+
+        Dim seconds As Integer =
+            (
+                totalSeconds -
+                (hours * 60 * 60) -
+                (minutes * 60)
+            )
+
+        If hours > 0 Then
+            result = $"{hours:D2}:{minutes:D2}:{seconds:D2}"
+
+        ElseIf minutes > 0 Then
+            result = $"{minutes:D2}:{seconds:D2}"
+
+        Else
+            result = $"{seconds:D2}"
+
+        End If
+
+        Return result
+    End Function
+
+End Class

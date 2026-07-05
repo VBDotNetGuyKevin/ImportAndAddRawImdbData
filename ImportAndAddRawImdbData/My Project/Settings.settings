@@ -1,0 +1,288 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="FolderLocation" Type="System.String" Scope="User">
+      <Value Profile="(Default)">E:\DLs\IMDB\Compressed</Value>
+    </Setting>
+    <Setting Name="ArchiveList" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;string&gt;https://datasets.imdbws.com/name.basics.tsv.gz&lt;/string&gt;
+  &lt;string&gt;https://datasets.imdbws.com/title.akas.tsv.gz&lt;/string&gt;
+  &lt;string&gt;https://datasets.imdbws.com/title.basics.tsv.gz&lt;/string&gt;
+  &lt;string&gt;https://datasets.imdbws.com/title.crew.tsv.gz&lt;/string&gt;
+  &lt;string&gt;https://datasets.imdbws.com/title.episode.tsv.gz&lt;/string&gt;
+  &lt;string&gt;https://datasets.imdbws.com/title.principals.tsv.gz&lt;/string&gt;
+  &lt;string&gt;https://datasets.imdbws.com/title.ratings.tsv.gz&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="OverallSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NameBasicsSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleAkasSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleBasicsSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleCrewSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleEpisodeSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitlePrincipalsSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleRatingsSavedStartTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="OverallSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NameBasicsSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleAkasSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleBasicsSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleCrewSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleEpisodeSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitlePrincipalsSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="TitleRatingsSavedEndTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NameBasicsSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">15427319</Value>
+    </Setting>
+    <Setting Name="TitleAkasSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">57452364</Value>
+    </Setting>
+    <Setting Name="TitleBasicsSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">12541389</Value>
+    </Setting>
+    <Setting Name="TitleCrewSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">12541389</Value>
+    </Setting>
+    <Setting Name="TitleEpisodeSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">9687178</Value>
+    </Setting>
+    <Setting Name="TitlePrincipalsSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">99764730</Value>
+    </Setting>
+    <Setting Name="TitleRatingsSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">1683289</Value>
+    </Setting>
+    <Setting Name="OverallSavedRowCount" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">209653830</Value>
+    </Setting>
+    <Setting Name="SavedRowCount401" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">15380979</Value>
+    </Setting>
+    <Setting Name="SavedRowCount402" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">47</Value>
+    </Setting>
+    <Setting Name="SavedRowCount403" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="SavedRowCount404" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">17114040</Value>
+    </Setting>
+    <Setting Name="SavedRowCount405" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">28</Value>
+    </Setting>
+    <Setting Name="SavedRowCount406" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">11</Value>
+    </Setting>
+    <Setting Name="SavedRowCount407" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">12541389</Value>
+    </Setting>
+    <Setting Name="SavedRowCount408" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="SavedRowCount409" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">35</Value>
+    </Setting>
+    <Setting Name="SavedRowCount410" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">19644165</Value>
+    </Setting>
+    <Setting Name="SavedRowCount411" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">57452364</Value>
+    </Setting>
+    <Setting Name="SavedRowCount412" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">163</Value>
+    </Setting>
+    <Setting Name="SavedRowCount413" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">311606</Value>
+    </Setting>
+    <Setting Name="SavedRowCount414" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">6</Value>
+    </Setting>
+    <Setting Name="SavedRowCount415" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">314710</Value>
+    </Setting>
+    <Setting Name="SavedRowCount416" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="SavedRowCount417" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">1666</Value>
+    </Setting>
+    <Setting Name="SavedRowCount418" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">99764730</Value>
+    </Setting>
+    <Setting Name="SavedRowCount419" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">10642136</Value>
+    </Setting>
+    <Setting Name="SavedRowCount420" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">48687272</Value>
+    </Setting>
+    <Setting Name="SavedRowCount421" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">3401367</Value>
+    </Setting>
+    <Setting Name="SavedRowCount422" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="SavedRowCount423" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">19</Value>
+    </Setting>
+    <Setting Name="SavedRowCount424" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">3401367</Value>
+    </Setting>
+    <Setting Name="SavedRowCount425" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">9687178</Value>
+    </Setting>
+    <Setting Name="SavedRowCount426" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">1676404</Value>
+    </Setting>
+    <Setting Name="SavedCountPrincipals" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">15454479</Value>
+    </Setting>
+    <Setting Name="SavedCountProfessions" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">49</Value>
+    </Setting>
+    <Setting Name="SavedCountTitleCharacters" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">48942647</Value>
+    </Setting>
+    <Setting Name="SavedCountTitleGenres" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">19644165</Value>
+    </Setting>
+    <Setting Name="SavedCountTitleNameAttributes" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">630492</Value>
+    </Setting>
+    <Setting Name="SavedCountTitleNames" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">58185048</Value>
+    </Setting>
+    <Setting Name="SavedCountTitlePrincipals" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">103668658</Value>
+    </Setting>
+    <Setting Name="SavedCountTitles" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">12611790</Value>
+    </Setting>
+    <Setting Name="SavedCountTitleTypes" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">12</Value>
+    </Setting>
+    <Setting Name="SavedCountAttributes" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">169</Value>
+    </Setting>
+    <Setting Name="SavedCountEpisodes" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">9743260</Value>
+    </Setting>
+    <Setting Name="SavedCountGenres" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">28</Value>
+    </Setting>
+    <Setting Name="SavedCountPrimaryProfessions" Type="System.Int64" Scope="User">
+      <Value Profile="(Default)">17185592</Value>
+    </Setting>
+    <Setting Name="TimeOut401" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">40</Value>
+    </Setting>
+    <Setting Name="TimeOut402" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">46</Value>
+    </Setting>
+    <Setting Name="TimeOut403" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut404" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">106</Value>
+    </Setting>
+    <Setting Name="TimeOut405" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut406" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut407" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">74</Value>
+    </Setting>
+    <Setting Name="TimeOut408" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut409" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">112</Value>
+    </Setting>
+    <Setting Name="TimeOut410" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">96</Value>
+    </Setting>
+    <Setting Name="TimeOut411" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">814</Value>
+    </Setting>
+    <Setting Name="TimeOut412" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut413" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="TimeOut414" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut415" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">52</Value>
+    </Setting>
+    <Setting Name="TimeOut416" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">232</Value>
+    </Setting>
+    <Setting Name="TimeOut417" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">192</Value>
+    </Setting>
+    <Setting Name="TimeOut418" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">844</Value>
+    </Setting>
+    <Setting Name="TimeOut419" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">270</Value>
+    </Setting>
+    <Setting Name="TimeOut420" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">600</Value>
+    </Setting>
+    <Setting Name="TimeOut421" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="TimeOut422" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut423" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="TimeOut424" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="TimeOut425" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">90</Value>
+    </Setting>
+    <Setting Name="TimeOut426" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">20</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -1,0 +1,7 @@
+SELECT FORMAT(COUNT(*), 'N0') AS [name.basics total row count]		FROM [IMDB].[Raw].[name.basics.tsv.gz]
+SELECT FORMAT(COUNT(*), 'N0') AS [title.akas total row count]		FROM [IMDB].[Raw].[title.akas.tsv.gz]
+SELECT FORMAT(COUNT(*), 'N0') AS [title.basics total row count]		FROM [IMDB].[Raw].[title.basics.tsv.gz]
+SELECT FORMAT(COUNT(*), 'N0') AS [title.crew total row count]		FROM [IMDB].[Raw].[title.crew.tsv.gz]
+SELECT FORMAT(COUNT(*), 'N0') AS [title.episode total row count]	FROM [IMDB].[Raw].[title.episode.tsv.gz]
+SELECT FORMAT(COUNT(*), 'N0') AS [title.principals total row count]	FROM [IMDB].[Raw].[title.principals.tsv.gz]
+SELECT FORMAT(COUNT(*), 'N0') AS [title.ratings total row count]	FROM [IMDB].[Raw].[title.ratings.tsv.gz]
