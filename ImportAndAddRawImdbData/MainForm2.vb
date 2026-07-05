@@ -1312,15 +1312,20 @@ Public Class MainForm2
 
         Dim rowCount As Long = IO.File.ReadLines(Path.Combine(FolderLocation, fileName)).Count - 1
 
-        Select Case GetFileTypeBasedOnFileName(fileName)
-            Case FT.NameBasics : TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-            Case FT.TitleAkas : TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
-            Case FT.TitleBasics : TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-            Case FT.TitleCrew : TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
-            Case FT.TitleEpisode : TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
-            Case FT.TitlePrincipals : TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-            Case FT.TitleRatings : TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-        End Select
+        Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
+        Dim localFileType As FT = GetFileTypeBasedOnFileName(fileName, localImportType)
+
+        If localImportType = ImportTypeEnum.Decompressed Then
+            Select Case localFileType
+                Case FT.NameBasics : TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleAkas : TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleBasics : TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleCrew : TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleEpisode : TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitlePrincipals : TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleRatings : TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+            End Select
+        End If
 
         Return rowCount
 
@@ -1334,6 +1339,7 @@ Public Class MainForm2
     Private Function CountCompressedFileRows(ByVal fileName As String) As Long
 
         Dim rowCount As Long = 0
+        Dim actualRowCount As Long = 0
 
         Dim fileInfoObj As New FileInfo(Path.Combine(FolderLocation, fileName))
         Dim gzipFileStream As FileStream = IO.File.OpenRead(fileInfoObj.FullName)
@@ -1348,7 +1354,11 @@ Public Class MainForm2
                         myStreamReader.ReadLine()
 
                     Do While (line IsNot Nothing)
-                        rowCount += 1
+                        actualRowCount += 1
+
+                        If actualRowCount > 1 Then
+                            rowCount += 1
+                        End If
 
                         Dim weShouldExitNow As Boolean = False
 
@@ -1462,44 +1472,48 @@ Public Class MainForm2
                             ' is fully counted and then updating the UI with that info
 
                             'Debug.Print(rowCount.ToString())
+                            Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
+                            Dim localFileType As FT = GetFileTypeBasedOnFileName(fileName, localImportType)
 
-                            Select Case GetFileTypeBasedOnFileName(fileName)
-                                Case FT.NameBasics
-                                    TS.SetText(NameBasicsCountTextBox,
-                                               rowCount.ToString(C.COMMA_MASK))
-                                    'Debug.Print(C.TitleAkasCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                            If localImportType = ImportTypeEnum.Compressed Then
+                                Select Case localFileType
+                                    Case FT.NameBasics
+                                        TS.SetText(NameBasicsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
+                                        'Debug.Print(C.NameBasicsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
 
-                                Case FT.TitleAkas
-                                    TS.SetText(TitleAkasCountTextBox,
-                                               rowCount.ToString(C.COMMA_MASK))
-                                    'Debug.Print(C.TitleAkasCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                    Case FT.TitleAkas
+                                        TS.SetText(TitleAkasCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
+                                        'Debug.Print(C.TitleAkasCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
 
-                                Case FT.TitleBasics
-                                    TS.SetText(TitleBasicsCountTextBox,
-                                               rowCount.ToString(C.COMMA_MASK))
-                                    'Debug.Print(C.TitleBasicsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                    Case FT.TitleBasics
+                                        TS.SetText(TitleBasicsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
+                                        'Debug.Print(C.TitleBasicsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
 
-                                Case FT.TitleCrew
-                                    TS.SetText(TitleCrewCountTextBox,
-                                               rowCount.ToString(C.COMMA_MASK))
-                                    'Debug.Print(C.TitleCrewCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                    Case FT.TitleCrew
+                                        TS.SetText(TitleCrewCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
+                                        'Debug.Print(C.TitleCrewCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
 
-                                Case FT.TitleEpisode
-                                    TS.SetText(TitleEpisodeCountTextBox,
-                                               rowCount.ToString(C.COMMA_MASK))
-                                    'Debug.Print(C.TitleEpisodeCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                    Case FT.TitleEpisode
+                                        TS.SetText(TitleEpisodeCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
+                                        'Debug.Print(C.TitleEpisodeCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
 
-                                Case FT.TitlePrincipals
-                                    TS.SetText(TitlePrincipalsCountTextBox,
-                                               rowCount.ToString(C.COMMA_MASK))
-                                    'Debug.Print(C.TitlePrincipalsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                    Case FT.TitlePrincipals
+                                        TS.SetText(TitlePrincipalsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
+                                        'Debug.Print(C.TitlePrincipalsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
 
-                                Case FT.TitleRatings
-                                    TS.SetText(TitleRatingsCountTextBox,
-                                               rowCount.ToString(C.COMMA_MASK))
-                                    'Debug.Print(C.TitleRatingsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                    Case FT.TitleRatings
+                                        TS.SetText(TitleRatingsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
+                                        'Debug.Print(C.TitleRatingsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
 
-                            End Select
+                                End Select
+                            End If
                         End If
 
                         line = myStreamReader.ReadLine()
@@ -1574,8 +1588,13 @@ Public Class MainForm2
                 Exit Sub
             End If
 
-            ' get list of files to process from the CountOrInsertData form, and then kick off the counting of rows in those files,
-            ' and then update the UI with that info as it becomes available, so the user has a sense of how many rows are in each file, and can see the progress of that counting as it happens, rather than waiting until all the counting is done and then updating the UI with that info
+            ' get list of files to process from the CountOrInsertData form, 
+            ' then kick off the counting of rows in those files,
+            ' then update the UI with that info as it becomes available, 
+            ' so the user has a sense of how many rows are in each file, 
+            ' and can see the progress of that counting as it happens, rather 
+            ' than waiting until all the counting is done and then updating 
+            ' the UI with that info
             Dim filesToProcess As List(Of String) = countOrInsertDataForm.ProcessFilesList
             Dim gzFilesToProcess As String() = countOrInsertDataForm.ProcessFilesList.ToArray
 
@@ -1628,64 +1647,69 @@ Public Class MainForm2
                     Dim fileName As String = kvp.Key
                     Dim lineCount As Long = kvp.Value
 
-                    Select Case GetFileTypeBasedOnFileName(Path.GetFileName(fileName))
-                        Case FT.NameBasics
-                            MyRawFileInfo(FT.NameBasics).CompressedCountedRowCount = lineCount
+                    Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
+                    Dim localFileType As FT = GetFileTypeBasedOnFileName(Path.GetFileName(fileName), localImportType)
 
-                            NameBasicsRowCount = MyRawFileInfo(FT.NameBasics).CompressedCountedRowCount
-                            NameBasicsCounted = True
+                    If localImportType = ImportTypeEnum.Compressed Then
+                        Select Case localFileType
+                            Case FT.NameBasics
+                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
 
-                            TS.SetText(NameBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                NameBasicsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                NameBasicsCounted = True
 
-                        Case FT.TitleAkas
-                            MyRawFileInfo(FT.TitleAkas).CompressedCountedRowCount = lineCount
+                                TS.SetText(NameBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            TitleAkasRowCount = MyRawFileInfo(FT.TitleAkas).CompressedCountedRowCount
-                            TitleAkasCounted = True
+                            Case FT.TitleAkas
+                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
 
-                            TS.SetText(TitleAkasCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TitleAkasRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleAkasCounted = True
 
-                        Case FT.TitleBasics
-                            MyRawFileInfo(FT.TitleBasics).CompressedCountedRowCount = lineCount
+                                TS.SetText(TitleAkasCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            TitleBasicsRowCount = MyRawFileInfo(FT.TitleBasics).CompressedCountedRowCount
-                            TitleBasicsCounted = True
+                            Case FT.TitleBasics
+                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
 
-                            TS.SetText(TitleBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TitleBasicsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleBasicsCounted = True
 
-                        Case FT.TitleCrew
-                            MyRawFileInfo(FT.TitleCrew).CompressedCountedRowCount = lineCount
+                                TS.SetText(TitleBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            TitleCrewRowCount = MyRawFileInfo(FT.TitleCrew).CompressedCountedRowCount
-                            TitleCrewCounted = True
+                            Case FT.TitleCrew
+                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
 
-                            TS.SetText(TitleCrewCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TitleCrewRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleCrewCounted = True
 
-                        Case FT.TitleEpisode
-                            MyRawFileInfo(FT.TitleEpisode).CompressedCountedRowCount = lineCount
+                                TS.SetText(TitleCrewCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            TitleEpisodeRowCount = MyRawFileInfo(FT.TitleEpisode).CompressedCountedRowCount
-                            TitleEpisodeCounted = True
+                            Case FT.TitleEpisode
+                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
 
-                            TS.SetText(TitleEpisodeCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TitleEpisodeRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleEpisodeCounted = True
 
-                        Case FT.TitlePrincipals
-                            MyRawFileInfo(FT.TitlePrincipals).CompressedCountedRowCount = lineCount
+                                TS.SetText(TitleEpisodeCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            TitlePrincipalsRowCount = MyRawFileInfo(FT.TitlePrincipals).CompressedCountedRowCount
-                            TitlePrincipalsCounted = True
+                            Case FT.TitlePrincipals
+                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
 
-                            TS.SetText(TitlePrincipalsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TitlePrincipalsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitlePrincipalsCounted = True
 
-                        Case FT.TitleRatings
-                            MyRawFileInfo(FT.TitleRatings).CompressedCountedRowCount = lineCount
+                                TS.SetText(TitlePrincipalsCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            TitleRatingsRowCount = MyRawFileInfo(FT.TitleRatings).CompressedCountedRowCount
-                            TitleRatingsCounted = True
+                            Case FT.TitleRatings
+                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
 
-                            TS.SetText(TitleRatingsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TitleRatingsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleRatingsCounted = True
 
-                    End Select
+                                TS.SetText(TitleRatingsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+
+                        End Select
+                    End If
 
                 Next
 
@@ -1825,16 +1849,22 @@ Public Class MainForm2
                         fileToProcess = Path.GetFileName(fileToProcess)
                     End If
 
-                    If File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
-                        Select Case fileToProcess
-                            Case C.NameBasicsDecompFileName : NameBasicsBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case C.TitleAkasDecompFileName : TitleAkasBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case C.TitleBasicsDecompFileName : TitleBasicsBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case C.TitleCrewDecompFileName : TitleCrewBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case C.TitleEpisodeDecompFileName : TitleEpisodeBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case C.TitlePrincipalsDecompFileName : TitlePrincipalsBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case C.TitleRatingsDecompFileName : TitleRatingsBackgroundWorker.RunWorkerAsync(fileToProcess)
+                    Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
+                    Dim localFileType As FT = GetFileTypeBasedOnFileName(fileToProcess, localImportType)
+
+                    If localImportType = ImportTypeEnum.Decompressed AndAlso
+                       File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
+
+                        Select Case localFileType
+                            Case FT.NameBasics : NameBasicsBackgroundWorker.RunWorkerAsync(fileToProcess)
+                            Case FT.TitleAkas : TitleAkasBackgroundWorker.RunWorkerAsync(fileToProcess)
+                            Case FT.TitleBasics : TitleBasicsBackgroundWorker.RunWorkerAsync(fileToProcess)
+                            Case FT.TitleCrew : TitleCrewBackgroundWorker.RunWorkerAsync(fileToProcess)
+                            Case FT.TitleEpisode : TitleEpisodeBackgroundWorker.RunWorkerAsync(fileToProcess)
+                            Case FT.TitlePrincipals : TitlePrincipalsBackgroundWorker.RunWorkerAsync(fileToProcess)
+                            Case FT.TitleRatings : TitleRatingsBackgroundWorker.RunWorkerAsync(fileToProcess)
                         End Select
+
                     End If
                 Next
             End If
@@ -2172,7 +2202,11 @@ Public Class MainForm2
     Private Sub AllArchivesBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles AllArchivesBackgroundWorker.DoWork
 
+        Dim fileNumber As Integer = 0
+
         For Each fileToProcess As String In CountFilesList
+            fileNumber += 1
+
             If AllArchivesBackgroundWorker.CancellationPending Then
                 CancelledOperations = True
 
@@ -2183,226 +2217,114 @@ Public Class MainForm2
                 fileToProcess = Path.GetFileName(fileToProcess)
             End If
 
+            Dim localFileType As FT = GetFileTypeBasedOnFileName(fileToProcess)
+            Dim localRowCount As Long = 0
+            Dim fileCounted As Boolean = False
+
             If File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
                 Select Case ImportType
-                    Case ImportTypeEnum.Compressed
-                        Select Case fileToProcess
-                            Case C.NameBasicsCompressedFileName
-                                MyRawFileInfo(FT.NameBasics).CountedRowCount = CountCompressedFileRows(fileToProcess) - 1
 
-                                NameBasicsRowCount = MyRawFileInfo(FT.NameBasics).CountedRowCount
+                    Case ImportTypeEnum.Compressed
+                        localRowCount = CountCompressedFileRows(fileToProcess)
+
+                        MyRawFileInfo(localFileType).CountedRowCount = localRowCount
+
+                        fileCounted = True
+
+                        Select Case localFileType
+                            Case FT.NameBasics
+                                NameBasicsRowCount = localRowCount
                                 NameBasicsCounted = True
 
-                                ' update the log textbox with the row count for the NameBasics file, 
-                                ' as this is the first file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {NameBasicsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleAkasCompressedFileName
-                                MyRawFileInfo(FT.TitleAkas).CountedRowCount = CountCompressedFileRows(fileToProcess) - 1
-
-                                TitleAkasRowCount = MyRawFileInfo(FT.TitleAkas).CountedRowCount
+                            Case FT.TitleAkas
+                                TitleAkasRowCount = localRowCount
                                 TitleAkasCounted = True
 
-                                ' update the log textbox with the row count for the TitleAkas file, 
-                                ' as this is the second file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleAkasRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleBasicsCompressedFileName
-                                MyRawFileInfo(FT.TitleBasics).CountedRowCount = CountCompressedFileRows(fileToProcess) - 1
-
-                                TitleBasicsRowCount = MyRawFileInfo(FT.TitleBasics).CountedRowCount
+                            Case FT.TitleBasics
+                                TitleBasicsRowCount = localRowCount
                                 TitleBasicsCounted = True
 
-                                ' update the log textbox with the row count for the TitleBasics file, 
-                                ' as this is the third file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleBasicsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleCrewCompressedFileName
-                                MyRawFileInfo(FT.TitleCrew).CountedRowCount = CountCompressedFileRows(fileToProcess) - 1
-
-                                TitleCrewRowCount = MyRawFileInfo(FT.TitleCrew).CountedRowCount
+                            Case FT.TitleCrew
+                                TitleCrewRowCount = localRowCount
                                 TitleCrewCounted = True
 
-                                ' update the log textbox with the row count for the TitleCrew file, 
-                                ' as this is the fourth file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleCrewRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleEpisodeCompressedFileName
-                                MyRawFileInfo(FT.TitleEpisode).CountedRowCount = CountCompressedFileRows(fileToProcess) - 1
-
-                                TitleEpisodeRowCount = MyRawFileInfo(FT.TitleEpisode).CountedRowCount
+                            Case FT.TitleEpisode
+                                TitleEpisodeRowCount = localRowCount
                                 TitleEpisodeCounted = True
 
-                                ' update the log textbox with the row count for the TitleEpisode file, 
-                                ' as this is the fifth file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleEpisodeRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitlePrincipalsCompressedFileName
-                                MyRawFileInfo(FT.TitlePrincipals).CountedRowCount = CountCompressedFileRows(fileToProcess) - 1
-
-                                TitlePrincipalsRowCount = MyRawFileInfo(FT.TitlePrincipals).CountedRowCount
+                            Case FT.TitlePrincipals
+                                TitlePrincipalsRowCount = localRowCount
                                 TitlePrincipalsCounted = True
 
-                                ' update the log textbox with the row count for the TitlePrincipals file, 
-                                ' as this is the sixth file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitlePrincipalsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleRatingsCompressedFileName
-                                MyRawFileInfo(FT.TitleRatings).CountedRowCount = CountCompressedFileRows(fileToProcess) - 1
-
-                                TitleRatingsRowCount = MyRawFileInfo(FT.TitleRatings).CountedRowCount
+                            Case FT.TitleRatings
+                                TitleRatingsRowCount = localRowCount
                                 TitleRatingsCounted = True
 
-                                ' update the log textbox with the row count for the TitleRatings file, 
-                                ' as this is the seventh file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleRatingsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
+                            Case FT.Unknown
+                                fileCounted = False
 
                         End Select
 
                     Case ImportTypeEnum.Decompressed
-                        Select Case fileToProcess
-                            Case C.NameBasicsDecompFileName
-                                MyRawFileInfo(FT.NameBasics).CountedRowCount = CountFileRows(fileToProcess)
+                        localRowCount = CountFileRows(fileToProcess)
 
-                                NameBasicsRowCount = MyRawFileInfo(FT.NameBasics).CountedRowCount
+                        MyRawFileInfo(localFileType).CountedRowCount = localRowCount
+
+                        fileCounted = True
+
+                        Select Case localFileType
+                            Case FT.NameBasics
+                                NameBasicsRowCount = localRowCount
                                 NameBasicsCounted = True
 
-                                ' update the log textbox with the row count for the NameBasics file, 
-                                ' as this is the first file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {NameBasicsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleAkasDecompFileName
-                                MyRawFileInfo(FT.TitleAkas).CountedRowCount = CountFileRows(fileToProcess)
-
-                                TitleAkasRowCount = MyRawFileInfo(FT.TitleAkas).CountedRowCount
+                            Case FT.TitleAkas
+                                TitleAkasRowCount = localRowCount
                                 TitleAkasCounted = True
 
-                                ' update the log textbox with the row count for the TitleAkas file, 
-                                ' as this is the second file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleAkasRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleBasicsDecompFileName
-                                MyRawFileInfo(FT.TitleBasics).CountedRowCount = CountFileRows(fileToProcess)
-
-                                TitleBasicsRowCount = MyRawFileInfo(FT.TitleBasics).CountedRowCount
+                            Case FT.TitleBasics
+                                TitleBasicsRowCount = localRowCount
                                 TitleBasicsCounted = True
 
-                                ' update the log textbox with the row count for the TitleBasics file, 
-                                ' as this is the third file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleBasicsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleCrewDecompFileName
-                                MyRawFileInfo(FT.TitleCrew).CountedRowCount = CountFileRows(fileToProcess)
-
-                                TitleCrewRowCount = MyRawFileInfo(FT.TitleCrew).CountedRowCount
+                            Case FT.TitleCrew
+                                TitleCrewRowCount = localRowCount
                                 TitleCrewCounted = True
 
-                                ' update the log textbox with the row count for the TitleCrew file, 
-                                ' as this is the fourth file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleCrewRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleEpisodeDecompFileName
-                                MyRawFileInfo(FT.TitleEpisode).CountedRowCount = CountFileRows(fileToProcess)
-
-                                TitleEpisodeRowCount = MyRawFileInfo(FT.TitleEpisode).CountedRowCount
+                            Case FT.TitleEpisode
+                                TitleEpisodeRowCount = localRowCount
                                 TitleEpisodeCounted = True
 
-                                ' update the log textbox with the row count for the TitleEpisode file, 
-                                ' as this is the fifth file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleEpisodeRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitlePrincipalsDecompFileName
-                                MyRawFileInfo(FT.TitlePrincipals).CountedRowCount = CountFileRows(fileToProcess)
-
-                                TitlePrincipalsRowCount = MyRawFileInfo(FT.TitlePrincipals).CountedRowCount
+                            Case FT.TitlePrincipals
+                                TitlePrincipalsRowCount = localRowCount
                                 TitlePrincipalsCounted = True
 
-                                ' update the log textbox with the row count for the TitlePrincipals file, 
-                                ' as this is the sixth file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitlePrincipalsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
-
-                            Case C.TitleRatingsDecompFileName
-                                MyRawFileInfo(FT.TitleRatings).CountedRowCount = CountFileRows(fileToProcess)
-
-                                TitleRatingsRowCount = MyRawFileInfo(FT.TitleRatings).CountedRowCount
+                            Case FT.TitleRatings
+                                TitleRatingsRowCount = localRowCount
                                 TitleRatingsCounted = True
 
-                                ' update the log textbox with the row count for the TitleRatings file, 
-                                ' as this is the seventh file to be processed, and we want to show the 
-                                ' user that we're making progress on counting the rows in the files, 
-                                ' rather than waiting until all the files are counted and then updating 
-                                ' the UI with that info
-
-                                TS.AppendText(ProgressLogTextBox,
-                                              $"Row count for {fileToProcess}: {TitleRatingsRowCount.ToString(C.COMMA_MASK)}" & Environment.NewLine)
+                            Case FT.Unknown
+                                fileCounted = False
 
                         End Select
                 End Select
+
+                ' update the log textbox with the row count for the current file, 
+                ' as we want to show the user that we're making progress on counting 
+                ' the rows in the files, rather than waiting until all the files are 
+                ' counted and then updating the UI with that info
+
+                If fileCounted Then
+                    Dim rowCountMessage As String =
+                        "Row count for " & fileToProcess & ": " & localRowCount.ToString(C.COMMA_MASK) & Environment.NewLine
+                    ' 
+                    If fileNumber = 1 Then
+                        TS.AppendText(ProgressLogTextBox,
+                                      Environment.NewLine &
+                                      Environment.NewLine)
+                    End If
+
+                    TS.AppendText(ProgressLogTextBox,
+                                  rowCountMessage)
+                End If
             End If
         Next
 
@@ -2458,6 +2380,90 @@ Public Class MainForm2
 
     End Function
 
+    Private Function GetFileTypeBasedOnFileName(fileName As String,
+                                          ByRef importType As ImportTypeEnum) As FT
+
+        Dim result As FT = FT.Unknown
+
+        Select Case fileName
+            ' Name.Basics
+            Case C.NameBasicsCompressedFileName
+                result = FT.NameBasics
+                importType = ImportTypeEnum.Compressed
+
+            Case C.NameBasicsDecompFileName
+                result = FT.NameBasics
+                importType = ImportTypeEnum.Decompressed
+
+                ' Title.Akas
+            Case C.TitleAkasCompressedFileName
+                result = FT.TitleAkas
+                importType = ImportTypeEnum.Compressed
+
+            Case C.TitleAkasDecompFileName
+                result = FT.TitleAkas
+                importType = ImportTypeEnum.Decompressed
+
+
+                ' Title.Basics
+            Case C.TitleBasicsCompressedFileName
+                result = FT.TitleBasics
+                importType = ImportTypeEnum.Compressed
+
+            Case C.TitleBasicsDecompFileName
+                result = FT.TitleBasics
+                importType = ImportTypeEnum.Decompressed
+
+
+                ' Title.Crew
+            Case C.TitleCrewCompressedFileName
+                result = FT.TitleCrew
+                importType = ImportTypeEnum.Compressed
+
+            Case C.TitleCrewDecompFileName
+                result = FT.TitleCrew
+                importType = ImportTypeEnum.Decompressed
+
+
+                ' Title.Episode
+            Case C.TitleEpisodeCompressedFileName
+                result = FT.TitleEpisode
+                importType = ImportTypeEnum.Compressed
+
+            Case C.TitleEpisodeDecompFileName
+                result = FT.TitleEpisode
+                importType = ImportTypeEnum.Decompressed
+
+
+                ' Title.Principals
+            Case C.TitlePrincipalsCompressedFileName
+                result = FT.TitlePrincipals
+                importType = ImportTypeEnum.Compressed
+
+            Case C.TitlePrincipalsDecompFileName
+                result = FT.TitlePrincipals
+                importType = ImportTypeEnum.Decompressed
+
+
+                ' Title.Ratings
+            Case C.TitleRatingsCompressedFileName
+                result = FT.TitleRatings
+                importType = ImportTypeEnum.Compressed
+
+            Case C.TitleRatingsDecompFileName
+                result = FT.TitleRatings
+                importType = ImportTypeEnum.Decompressed
+
+            Case Else
+                result = FT.Unknown
+                importType = ImportTypeEnum.Unknown
+
+        End Select
+
+        Return result
+
+    End Function
+
     ''' <summary>
     ''' Handles the DoWork event for the SqlBackgroundWorker. This event 
     ''' is triggered when the background worker starts its operation. It 
@@ -2468,7 +2474,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
-    Private Sub SqlBackgroundWorker_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) _
+    Private Sub SqlBackgroundWorker_DoWork(sender As Object,
+                                           e As System.ComponentModel.DoWorkEventArgs) _
         Handles SqlBackgroundWorker.DoWork
 
         ' refer to the backgroundworker by its name: SqlBackgroundWorker
@@ -2493,23 +2500,21 @@ Public Class MainForm2
         Dim previousTimeBetweenTransactions As TimeSpan = Nothing
         Dim currentTransactionTime As DateTime = Date.MinValue
         Dim previousTransactionTime As DateTime = Date.MinValue
+        Dim myStreamReader As StreamReader = Nothing
+        Dim fileInfo As FileInfo = Nothing ' New FileInfo(filePath)
+        Dim gzipFileStream As FileStream = Nothing
+        Dim decompressedFileStream As FileStream = Nothing
+        Dim decompressionStream As Comp.GZipStream = Nothing
+        Dim columnNamesList As New List(Of String)
+
+        Dim curentFileNumber As Integer = 1
+        Dim maxFileNumber As Integer = InsertDataFilesList.Count
 
         Using conn As New SqlConnection(C.IMDB_CONNECTION_STRING)
 
             conn.Open()
 
             ' break up the files into the file TYPES based on the 7 files...
-
-            Dim fileInfo As FileInfo = Nothing ' New FileInfo(filePath)
-            Dim gzipFileStream As FileStream = Nothing
-            Dim decompressedFileStream As FileStream = Nothing
-            Dim decompressionStream As Comp.GZipStream = Nothing
-
-            Dim columnNamesList As New List(Of String)
-
-            Dim curentFileNumber As Integer = 1
-            Dim maxFileNumber As Integer = InsertDataFilesList.Count
-
             For Each fileToProcess As String In InsertDataFilesList
                 If SqlBackgroundWorker.CancellationPending Then
                     CancelledOperations = True
@@ -2522,37 +2527,6 @@ Public Class MainForm2
                 End If
 
                 rawFileType = GetFileTypeBasedOnFileName(fileToProcess)
-
-                'Select Case fileToProcess
-                '    Case C.NameBasicsCompressedFileName,
-                '         C.NameBasicsDecompFileName
-                '        rawFileType = FT.NameBasics
-
-                '    Case C.TitleAkasCompressedFileName,
-                '         C.TitleAkasDecompFileName
-                '        rawFileType = FT.TitleAkas
-
-                '    Case C.TitleBasicsCompressedFileName,
-                '         C.TitleBasicsDecompFileName
-                '        rawFileType = FT.TitleBasics
-
-                '    Case C.TitleCrewCompressedFileName,
-                '         C.TitleCrewDecompFileName
-                '        rawFileType = FT.TitleCrew
-
-                '    Case C.TitleEpisodeCompressedFileName,
-                '         C.TitleEpisodeDecompFileName
-                '        rawFileType = FT.TitleEpisode
-
-                '    Case C.TitlePrincipalsCompressedFileName,
-                '         C.TitlePrincipalsDecompFileName
-                '        rawFileType = FT.TitlePrincipals
-
-                '    Case C.TitleRatingsCompressedFileName,
-                '         C.TitleRatingsDecompFileName
-                '        rawFileType = FT.TitleRatings
-
-                'End Select
 
                 TS.SetText(OverallEstimatedProcessingTimeTextBox,
                            MyRawFileInfo(FT.OVERALL).EstimatedTotalTimeString)
@@ -2593,25 +2567,22 @@ Public Class MainForm2
 
                 fileInfo = New FileInfo(Path.Combine(FolderLocation, fileToProcess))
 
-                Dim myStreamReader As StreamReader = Nothing
-
                 Select Case ProcessFileType
                     Case PFT.Compressed
-                        gzipFileStream = IO.File.OpenRead(fileInfo.FullName)
+                        gzipFileStream = File.OpenRead(fileInfo.FullName)
 
-                        decompressionStream = New Comp.GZipStream(gzipFileStream,
-                                                                  Comp.CompressionMode.Decompress)
+                        decompressionStream = New GZipStream(gzipFileStream,
+                                                             CompressionMode.Decompress)
 
                         myStreamReader = New StreamReader(decompressionStream)
 
                     Case PFT.Decompressed
-                        decompressedFileStream = IO.File.OpenRead(fileInfo.FullName)
+                        decompressedFileStream = File.OpenRead(fileInfo.FullName)
 
                         myStreamReader = New StreamReader(decompressedFileStream)
 
                 End Select
 
-                'Dim myStreamReader As New StreamReader(decompressionStream)
                 Dim cmd As SqlCommand =
                     conn.CreateCommand()
 
@@ -2633,17 +2604,15 @@ Public Class MainForm2
 
                     Dim line As String = Nothing
 
+                    Dim localTableFromFileName As String =
+                        "[IMDB].[Raw].[" & fileInfo.Name
+
                     Select Case ProcessFileType
-                        Case PFT.Compressed
-                            cmd.CommandText =
-                                "TRUNCATE TABLE [Raw].[" & fileInfo.Name & "];"
-
-                        Case PFT.Decompressed
-                            cmd.CommandText =
-                                "TRUNCATE TABLE [Raw].[" & fileInfo.Name & ".gz];"
-
+                        Case PFT.Compressed : localTableFromFileName &= "]"
+                        Case PFT.Decompressed : localTableFromFileName &= ".gz]"
                     End Select
 
+                    cmd.CommandText = "TRUNCATE TABLE " & localTableFromFileName & ";"
                     cmd.ExecuteNonQuery()
 
                     Dim insertCommandText As String = String.Empty
@@ -2683,21 +2652,10 @@ Public Class MainForm2
                                 End Select
                             Next
 
-                            Select Case ProcessFileType
-                                Case PFT.Compressed
-                                    insertCommandText = " INSERT INTO [Raw].[" & fileInfo.Name & "] " & Environment.NewLine &
-                                                        "     ( " & String.Join(", ", columnNamesList.Select(Function(c) c)) & " )" & Environment.NewLine &
-                                                        " VALUES " & Environment.NewLine &
-                                                        "     ( YYYY );"
-
-                                Case PFT.Decompressed
-                                    insertCommandText = " INSERT INTO [Raw].[" & fileInfo.Name & ".gz] " & Environment.NewLine &
-                                                        "     ( " & String.Join(", ", columnNamesList.Select(Function(c) c)) & " )" & Environment.NewLine &
-                                                        " VALUES " & Environment.NewLine &
-                                                        "     ( YYYY );"
-
-                            End Select
-
+                            insertCommandText = " INSERT INTO " & localTableFromFileName & " " & Environment.NewLine &
+                                                "     ( " & String.Join(", ", columnNamesList.Select(Function(c) c)) & " )" & Environment.NewLine &
+                                                " VALUES " & Environment.NewLine &
+                                                "     ( YYYY );"
                         Else
                             dataRowNumber += 1
 
@@ -2730,11 +2688,6 @@ Public Class MainForm2
                                     TS.SetText(CurrentRowNumberTextBox,
                                                rowNumber.ToString(C.COMMA_MASK))
 
-                                    'If cmdResult <> -1 Then
-                                    '    Debug.Print(cmd.CommandText)
-                                    '    Debug.Print("cmdResult = " & cmdResult.ToString())
-                                    'End If
-
                                 Catch ex As Exception
                                     If Not conn.State = ConnectionState.Open Then
                                         Throw
@@ -2748,12 +2701,6 @@ Public Class MainForm2
                                                   "Data File Row Number: " & rowNumber.ToString(C.COMMA_MASK) & Environment.NewLine &
                                                   " Error inserting row: " & Environment.NewLine &
                                                   ex.Message & Environment.NewLine)
-
-                                    'TS.AppendText(ProgressLogTextBox,
-                                    '              rowNumber.ToString() &
-                                    '              " Cannot insert Duplicate Key: " &
-                                    '              columnNamesList(0) & " = '" &
-                                    '              valuesList(0) & "'" & Environment.NewLine)
                                 End Try
                             End If
                         End If
@@ -2769,10 +2716,6 @@ Public Class MainForm2
                         '   2) start a new transaction. 
 
                         ' This effectively batches the log writes, which improves the overall INSERT performance.
-                        If dataRowNumber = 0 Then
-                            'Debug.Print("here we are!")
-                        End If
-
                         If ((dataRowNumber Mod 10000) = 0) AndAlso
                             (dataRowNumber > 0) Then
                             If SqlBackgroundWorker.CancellationPending Then
@@ -2805,7 +2748,6 @@ Public Class MainForm2
                                 currentTimeBetweenTransactions = currentTransactionTime - previousTransactionTime
 
                             End If
-                            'Debug.Print(CurrentUploadFilenameAndRowCount)
 
                             Debug.Print(Now.ToLongTimeString() & vbTab &
                                         CurrentUploadFilenameAndRowCount)
@@ -2862,7 +2804,9 @@ Public Class MainForm2
                             End If
 
                             MyRawFileInfo(rawFileType).CurrentRowCount = dataRowNumber
-                            MyRawFileInfo(FT.OVERALL).CurrentRowCount += 10000          ' not sure about this one, but it should be close enough for the overall time remaining estimate
+
+                            ' not sure about this one, but it should be close enough for the overall time remaining estimate
+                            MyRawFileInfo(FT.OVERALL).CurrentRowCount += 10000
 
                             ' update the textboxes with the elapsed time and 
                             ' estimated time remaining for the current file 
@@ -2882,11 +2826,6 @@ Public Class MainForm2
                         End If
 
                         line = myStreamReader.ReadLine()
-
-                        'If Not String.IsNullOrEmpty(line) Then
-                        '    dataRowNumber += 1
-                        '    rowNumber += 1
-                        'End If
 
                     Loop While Not String.IsNullOrEmpty(line)
 
@@ -2933,8 +2872,6 @@ Public Class MainForm2
 
                     TS.AppendText(ProgressLogTextBox,
                                   $"Exception: {ex.ToString()}" & Environment.NewLine)
-
-                    'transaction.Rollback()
 
                 Finally
                     myStreamReader.Close()
@@ -3001,7 +2938,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub NameBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub NameBasicsBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                              e As RunWorkerCompletedEventArgs) _
         Handles NameBasicsBackgroundWorker.RunWorkerCompleted
 
         NameBasicsCounted = True
@@ -3018,7 +2956,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleAkasBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleAkasBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                             e As RunWorkerCompletedEventArgs) _
         Handles TitleAkasBackgroundWorker.RunWorkerCompleted
 
         TitleAkasCounted = True
@@ -3035,7 +2974,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleBasicsBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                               e As RunWorkerCompletedEventArgs) _
         Handles TitleBasicsBackgroundWorker.RunWorkerCompleted
 
         TitleBasicsCounted = True
@@ -3052,7 +2992,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleCrewBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleCrewBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                             e As RunWorkerCompletedEventArgs) _
         Handles TitleCrewBackgroundWorker.RunWorkerCompleted
 
         TitleCrewCounted = True
@@ -3069,7 +3010,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleEpisodeBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleEpisodeBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                                e As RunWorkerCompletedEventArgs) _
         Handles TitleEpisodeBackgroundWorker.RunWorkerCompleted
 
         TitleEpisodeCounted = True
@@ -3086,7 +3028,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitlePrincipalsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub TitlePrincipalsBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                                   e As RunWorkerCompletedEventArgs) _
         Handles TitlePrincipalsBackgroundWorker.RunWorkerCompleted
 
         TitlePrincipalsCounted = True
@@ -3103,7 +3046,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleRatingsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleRatingsBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                                e As RunWorkerCompletedEventArgs) _
         Handles TitleRatingsBackgroundWorker.RunWorkerCompleted
 
         TitleRatingsCounted = True
@@ -3119,7 +3063,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub AllArchivesBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub AllArchivesBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                               e As RunWorkerCompletedEventArgs) _
         Handles AllArchivesBackgroundWorker.RunWorkerCompleted
 
         CheckAllCounted()
@@ -3133,7 +3078,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub SqlBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub SqlBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                       e As RunWorkerCompletedEventArgs) _
         Handles SqlBackgroundWorker.RunWorkerCompleted
 
         ' refer to the backgroundworker by its name: SqlBackgroundWorker
@@ -3371,6 +3317,7 @@ Public Class MainForm2
                     LogErrorsToFile($"SQL Exception: {sqlEx.ToString()}")
                     LogErrorsToFile($"Command: {commandText}")
 
+                    ' Retry logic for SQL command timeout
                     If sqlEx.Message.StartsWith("Execution Timeout Expired") Then
                         retryCount += 1
 
@@ -3528,22 +3475,26 @@ Public Class MainForm2
         ' 45  #3-45:  IMDB - #3-45 - CREATE FK_TitleCharacters_Episode
 
         Dim success As Boolean = True
+
         Dim retryAfterCommandTimeOut As Boolean = True
         Dim retryCount As Integer = 0
         Dim maxRetryAttempts As Integer = 3
 
-        Dim stepLogMsg As String = "Step " & currentStep.ToString() & " of " & lastStep.ToString()
+        Dim stepLogMsg As String =
+            "Step " & currentStep.ToString() &
+            " of " & lastStep.ToString()
+
         Dim basicLogMsg As String = String.Empty
         Dim commandText As String = ""
 
         Select Case dropOrAdd
             Case DropAddEnum.DROP
-                basicLogMsg = "#1 Dropping All Constraints from the IMDB Db Tables" &
+                basicLogMsg = C.BASIC_LOG_MESSAGE_1 &
                               Environment.NewLine
                 commandText = C.AdHoc1List(currentStep)
 
             Case DropAddEnum.ADD
-                basicLogMsg = "#3 Re-Adding all of the Constraints (Keys, Foreign Keys, and Indexes to the IMDB Db Tables" &
+                basicLogMsg = C.BASIC_LOG_MESSAGE_3 &
                               Environment.NewLine
                 commandText = C.AdHoc3List(currentStep)
 
@@ -3670,7 +3621,7 @@ Public Class MainForm2
         '== #4-23 - INSERT into [IMDB].[dbo].[Principals] from #writers_directors
         '== #4-24 - INSERT into [IMDB].[dbo].[TitlePrincipals] from #writers_directors
         '== #4-25 - INSERT into [IMDB].[dbo].[Episodes]
-        '== #4-26 - UPDATE data in [IMDB].[dbo].[Titles] for Votes and Average Ratings
+        '== #4-26 - UPDATE [IMDB].[dbo].[Titles] for Votes and Average Ratings
 
         Dim success As Boolean = True
         Dim retryAfterCommandTimeOut As Boolean = True
@@ -3715,7 +3666,9 @@ Public Class MainForm2
                         TS.AppendText(ProgressLogTextBox,
                                       Environment.NewLine &
                                       Environment.NewLine &
-                                      "Command Timeout set to: " & RFI.GetTimeStringFromSeconds_General(timeOutForExecution) & " - PLEASE WAIT")
+                                      "Command Timeout set to: " &
+                                      RFI.GetTimeStringFromSeconds_General(timeOutForExecution) &
+                                      " - PLEASE WAIT")
                     End If
 
                     rowsAffected = .ExecuteNonQuery()
@@ -3729,6 +3682,7 @@ Public Class MainForm2
                                       Environment.NewLine &
                                       "                         " &
                                       rowsAffected.ToString(C.COMMA_MASK) & " Row(s) " & finalLogText)
+
                     Else
                         TS.AppendText(ProgressLogTextBox,
                                       Environment.NewLine &
@@ -4036,7 +3990,8 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub SqlImportBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+    Private Sub SqlImportBackgroundWorker_RunWorkerCompleted(sender As Object,
+                                                             e As RunWorkerCompletedEventArgs) _
         Handles SqlImportBackgroundWorker.RunWorkerCompleted
 
         ImportDataButton.Enabled = True

@@ -79,6 +79,9 @@ Public Class Constants
     '  STEP #1
     '===================================================================================
 
+    Public Const BASIC_LOG_MESSAGE_1 As String =
+        "#1 Dropping All Constraints from the IMDB Db Tables"
+
     '-----------------------------------------------------------------------------------
     '  IMDB - #1-01 - DROP PK_Episodes.sql
     '-----------------------------------------------------------------------------------
@@ -345,6 +348,9 @@ Public Class Constants
     '  STEP #3
     '===================================================================================
 
+    Public Const BASIC_LOG_MESSAGE_3 As String =
+        "#3 Re-Adding all of the Constraints (Keys, Foreign Keys, and Indexes to the IMDB Db Tables"
+
     '-----------------------------------------------------------------------------------
     ' ADHOC_301 : ..\IMDB - #3-01 - CREATE PK_Principals.sql
     '-----------------------------------------------------------------------------------
@@ -403,7 +409,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_305 As String =
         "ALTER TABLE [IMDB].[dbo].[PrimaryProfessions] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_PrimaryProfession_Principal];"
+        "        CHECK CONSTRAINT [FK_PrimaryProfession_Principal];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_306 : ..\IMDB - #3-06 - CREATE FK_PrimaryProfession_Profession.sql
@@ -421,7 +427,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_307 As String =
         "ALTER TABLE [IMDB].[dbo].[PrimaryProfessions] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_PrimaryProfession_Profession];"
+        "        CHECK CONSTRAINT [FK_PrimaryProfession_Profession];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_308 : ..\IMDB - #3-08 - CREATE PK_Genres.sql
@@ -481,7 +487,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_312 As String =
         "ALTER TABLE [IMDB].[dbo].[Titles] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_Titles_TitleType];"
+        "        CHECK CONSTRAINT [FK_Titles_TitleType];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_313 : ..\IMDB - #3-13 - CREATE PK_TitleGenres.sql
@@ -513,7 +519,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_315 As String =
         "ALTER TABLE [IMDB].[dbo].[TitleGenres] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleGenres_Title];"
+        "        CHECK CONSTRAINT [FK_TitleGenres_Title];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_316 : ..\IMDB - #3-16 - CREATE FK_TitleGenres_Genre.sql
@@ -531,7 +537,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_317 As String =
         "ALTER TABLE [IMDB].[dbo].[TitleGenres] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleGenres_Genre];"
+        "        CHECK CONSTRAINT [FK_TitleGenres_Genre];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_318 : ..\IMDB - #3-18 - CREATE PK_TitleNames.sql
@@ -563,7 +569,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_320 As String =
         "ALTER TABLE [IMDB].[dbo].[TitleNames] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleNames_Title];"
+        "        CHECK CONSTRAINT [FK_TitleNames_Title];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_321 : ..\IMDB - #3-21 - CREATE IX_TitleNames_Original.sql
@@ -644,7 +650,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_326 As String =
         "ALTER TABLE [IMDB].[dbo].[TitleNameAttributes] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleNameAttributes_TitleName];"
+        "        CHECK CONSTRAINT [FK_TitleNameAttributes_TitleName];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_327 : ..\IMDB - #3-27 - CREATE FK_TitleNameAttributes_Attribute.sql
@@ -662,7 +668,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_328 As String =
         "ALTER TABLE [IMDB].[dbo].[TitleNameAttributes] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleNameAttributes_Attribute];"
+        "        CHECK CONSTRAINT [FK_TitleNameAttributes_Attribute];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_329 : ..\IMDB - #3-29 - CREATE PK_TitlePrincipals.sql
@@ -694,7 +700,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_331 As String =
         "ALTER TABLE [IMDB].[dbo].[TitlePrincipals] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitlePrincipals_Title];"
+        "        CHECK CONSTRAINT [FK_TitlePrincipals_Title];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_332 : ..\IMDB - #3-32 - CREATE FK_TitlePrincipals_Principal.sql
@@ -712,7 +718,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_333 As String =
         "ALTER TABLE [IMDB].[dbo].[TitlePrincipals] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitlePrincipals_Principal];"
+        "        CHECK CONSTRAINT [FK_TitlePrincipals_Principal];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_334 : ..\IMDB - #3-34 - CREATE FK_TitlePrincipals_Profession.sql
@@ -730,7 +736,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_335 As String =
         "ALTER TABLE [IMDB].[dbo].[TitlePrincipals] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitlePrincipals_Profession];"
+        "        CHECK CONSTRAINT [FK_TitlePrincipals_Profession];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_336 : ..\IMDB - #3-36 - CREATE FK_TitleCharacters_Title.sql
@@ -748,7 +754,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_337 As String =
         "ALTER TABLE [IMDB].[dbo].[TitleCharacters] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleCharacters_Title];"
+        "        CHECK CONSTRAINT [FK_TitleCharacters_Title];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_338 : ..\IMDB - #3-38 - CREATE FK_TitleCharacters_Principal.sql
@@ -766,7 +772,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_339 As String =
         "ALTER TABLE [IMDB].[dbo].[TitleCharacters] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleCharacters_Principal];"
+        "        CHECK CONSTRAINT [FK_TitleCharacters_Principal];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_340 : ..\IMDB - #3-40 - CREATE IX_TitleCharacters.sql
@@ -811,7 +817,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_343 As String =
         "ALTER TABLE [IMDB].[dbo].[Episodes] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleCharacters_Parent];"
+        "        CHECK CONSTRAINT [FK_TitleCharacters_Parent];"
 
     '-----------------------------------------------------------------------------------
     ' ADHOC_344 : ..\IMDB - #3-44 - CREATE FK_TitleCharacters_Episode.sql
@@ -829,7 +835,7 @@ Public Class Constants
     '-----------------------------------------------------------------------------------
     Public Const ADHOC_345 As String =
         "ALTER TABLE [IMDB].[dbo].[Episodes] " & vbCrLf &
-        "CHECK CONSTRAINT [FK_TitleCharacters_Episode];"
+        "        CHECK CONSTRAINT [FK_TitleCharacters_Episode];"
 
     Public Const ADHOC_COUNT_3_MAX As Integer = 45
 

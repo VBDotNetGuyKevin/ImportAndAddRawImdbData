@@ -130,19 +130,6 @@ Public Class CountOrInsertData
 
     End Sub
 
-    'Private Sub ChooseArchivesCheckedListBox_SelectedIndexChanged(sender As Object, e As EventArgs) _
-    '    Handles ChooseArchivesCheckedListBox.SelectedIndexChanged
-
-    '    For Each selectedItem As String In ChooseArchivesCheckedListBox.CheckedItems
-    '        ProcessFilesList.Clear()
-
-    '        If Not ProcessFilesList.Contains(selectedItem) Then
-    '            ProcessFilesList.Add(selectedItem)
-    '        End If
-    '    Next
-
-    'End Sub
-
     Private Sub ChooseAllOrSpecificComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) _
         Handles ChooseAllOrSpecificComboBox.SelectedIndexChanged
 
