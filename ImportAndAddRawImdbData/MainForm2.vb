@@ -447,7 +447,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.NameBasics).CompletedProcessing Then
                 .NameBasicsSavedStartTime = MyRawFileInfo(FT.NameBasics).CurrentStartTime
                 .NameBasicsSavedEndTime = MyRawFileInfo(FT.NameBasics).CurrentEndTime
-                .NameBasicsSavedRowCount = MyRawFileInfo(FT.NameBasics).CurrentRowCount
+                .NameBasicsSavedRowCount = MyRawFileInfo(FT.NameBasics).CountedRows
             Else
                 .NameBasicsSavedStartTime = MyRawFileInfo(FT.NameBasics).PreviousStartTime
                 .NameBasicsSavedEndTime = MyRawFileInfo(FT.NameBasics).PreviousEndTime
@@ -457,7 +457,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.TitleAkas).CompletedProcessing Then
                 .TitleAkasSavedStartTime = MyRawFileInfo(FT.TitleAkas).CurrentStartTime
                 .TitleAkasSavedEndTime = MyRawFileInfo(FT.TitleAkas).CurrentEndTime
-                .TitleAkasSavedRowCount = MyRawFileInfo(FT.TitleAkas).CurrentRowCount
+                .TitleAkasSavedRowCount = MyRawFileInfo(FT.TitleAkas).CountedRows
             Else
                 .TitleAkasSavedStartTime = MyRawFileInfo(FT.TitleAkas).PreviousStartTime
                 .TitleAkasSavedEndTime = MyRawFileInfo(FT.TitleAkas).PreviousEndTime
@@ -467,7 +467,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.TitleBasics).CompletedProcessing Then
                 .TitleBasicsSavedStartTime = MyRawFileInfo(FT.TitleBasics).CurrentStartTime
                 .TitleBasicsSavedEndTime = MyRawFileInfo(FT.TitleBasics).CurrentEndTime
-                .TitleBasicsSavedRowCount = MyRawFileInfo(FT.TitleBasics).CurrentRowCount
+                .TitleBasicsSavedRowCount = MyRawFileInfo(FT.TitleBasics).CountedRows
             Else
                 .TitleBasicsSavedStartTime = MyRawFileInfo(FT.TitleBasics).PreviousStartTime
                 .TitleBasicsSavedEndTime = MyRawFileInfo(FT.TitleBasics).PreviousEndTime
@@ -477,7 +477,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.TitleCrew).CompletedProcessing Then
                 .TitleCrewSavedStartTime = MyRawFileInfo(FT.TitleCrew).CurrentStartTime
                 .TitleCrewSavedEndTime = MyRawFileInfo(FT.TitleCrew).CurrentEndTime
-                .TitleCrewSavedRowCount = MyRawFileInfo(FT.TitleCrew).CurrentRowCount
+                .TitleCrewSavedRowCount = MyRawFileInfo(FT.TitleCrew).CountedRows
             Else
                 .TitleCrewSavedStartTime = MyRawFileInfo(FT.TitleCrew).PreviousStartTime
                 .TitleCrewSavedEndTime = MyRawFileInfo(FT.TitleCrew).PreviousEndTime
@@ -487,7 +487,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.TitleEpisode).CompletedProcessing Then
                 .TitleEpisodeSavedStartTime = MyRawFileInfo(FT.TitleEpisode).CurrentStartTime
                 .TitleEpisodeSavedEndTime = MyRawFileInfo(FT.TitleEpisode).CurrentEndTime
-                .TitleEpisodeSavedRowCount = MyRawFileInfo(FT.TitleEpisode).CurrentRowCount
+                .TitleEpisodeSavedRowCount = MyRawFileInfo(FT.TitleEpisode).CountedRows
             Else
                 .TitleEpisodeSavedStartTime = MyRawFileInfo(FT.TitleEpisode).PreviousStartTime
                 .TitleEpisodeSavedEndTime = MyRawFileInfo(FT.TitleEpisode).PreviousEndTime
@@ -497,7 +497,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.TitlePrincipals).CompletedProcessing Then
                 .TitlePrincipalsSavedStartTime = MyRawFileInfo(FT.TitlePrincipals).CurrentStartTime
                 .TitlePrincipalsSavedEndTime = MyRawFileInfo(FT.TitlePrincipals).CurrentEndTime
-                .TitlePrincipalsSavedRowCount = MyRawFileInfo(FT.TitlePrincipals).CurrentRowCount
+                .TitlePrincipalsSavedRowCount = MyRawFileInfo(FT.TitlePrincipals).CountedRows
             Else
                 .TitlePrincipalsSavedStartTime = MyRawFileInfo(FT.TitlePrincipals).PreviousStartTime
                 .TitlePrincipalsSavedEndTime = MyRawFileInfo(FT.TitlePrincipals).PreviousEndTime
@@ -507,7 +507,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.TitleRatings).CompletedProcessing Then
                 .TitleRatingsSavedStartTime = MyRawFileInfo(FT.TitleRatings).CurrentStartTime
                 .TitleRatingsSavedEndTime = MyRawFileInfo(FT.TitleRatings).CurrentEndTime
-                .TitleRatingsSavedRowCount = MyRawFileInfo(FT.TitleRatings).CurrentRowCount
+                .TitleRatingsSavedRowCount = MyRawFileInfo(FT.TitleRatings).CountedRows
             Else
                 .TitleRatingsSavedStartTime = MyRawFileInfo(FT.TitleRatings).PreviousStartTime
                 .TitleRatingsSavedEndTime = MyRawFileInfo(FT.TitleRatings).PreviousEndTime
@@ -517,7 +517,7 @@ Public Class MainForm2
             If MyRawFileInfo(FT.OVERALL).CompletedProcessing Then
                 .OverallSavedStartTime = MyRawFileInfo(FT.OVERALL).CurrentStartTime
                 .OverallSavedEndTime = MyRawFileInfo(FT.OVERALL).CurrentEndTime
-                .OverallSavedRowCount = MyRawFileInfo(FT.OVERALL).CurrentRowCount
+                .OverallSavedRowCount = MyRawFileInfo(FT.OVERALL).CountedRows
             Else
                 .OverallSavedStartTime = MyRawFileInfo(FT.OVERALL).PreviousStartTime
                 .OverallSavedEndTime = MyRawFileInfo(FT.OVERALL).PreviousEndTime
@@ -1626,6 +1626,7 @@ Public Class MainForm2
                 Parallel.ForEach(gzFilesToProcess,
                                  Sub(currentFile)
                                      Dim lines As Long = CountGZipLinesFast(currentFile)
+
                                      fileLineCounts.TryAdd(currentFile, lines)
                                  End Sub)
 
@@ -1653,60 +1654,67 @@ Public Class MainForm2
                     If localImportType = ImportTypeEnum.Compressed Then
                         Select Case localFileType
                             Case FT.NameBasics
-                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
+                                MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                NameBasicsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                NameBasicsRowCount = lineCount
                                 NameBasicsCounted = True
 
-                                TS.SetText(NameBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TS.SetText(NameBasicsCountTextBox,
+                                           lineCount.ToString(C.COMMA_MASK))
 
                             Case FT.TitleAkas
-                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
+                                MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                TitleAkasRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleAkasRowCount = lineCount
                                 TitleAkasCounted = True
 
-                                TS.SetText(TitleAkasCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TS.SetText(TitleAkasCountTextBox,
+                                           lineCount.ToString(C.COMMA_MASK))
 
                             Case FT.TitleBasics
-                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
+                                MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                TitleBasicsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleBasicsRowCount = lineCount
                                 TitleBasicsCounted = True
 
-                                TS.SetText(TitleBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TS.SetText(TitleBasicsCountTextBox,
+                                           lineCount.ToString(C.COMMA_MASK))
 
                             Case FT.TitleCrew
-                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
+                                MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                TitleCrewRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleCrewRowCount = lineCount
                                 TitleCrewCounted = True
 
-                                TS.SetText(TitleCrewCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TS.SetText(TitleCrewCountTextBox,
+                                           lineCount.ToString(C.COMMA_MASK))
 
                             Case FT.TitleEpisode
-                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
+                                MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                TitleEpisodeRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleEpisodeRowCount = lineCount
                                 TitleEpisodeCounted = True
 
-                                TS.SetText(TitleEpisodeCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TS.SetText(TitleEpisodeCountTextBox,
+                                           lineCount.ToString(C.COMMA_MASK))
 
                             Case FT.TitlePrincipals
-                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
+                                MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                TitlePrincipalsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitlePrincipalsRowCount = lineCount
                                 TitlePrincipalsCounted = True
 
-                                TS.SetText(TitlePrincipalsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TS.SetText(TitlePrincipalsCountTextBox,
+                                           lineCount.ToString(C.COMMA_MASK))
 
                             Case FT.TitleRatings
-                                MyRawFileInfo(localFileType).CompressedCountedRowCount = lineCount
+                                MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                TitleRatingsRowCount = MyRawFileInfo(localFileType).CompressedCountedRowCount
+                                TitleRatingsRowCount = lineCount
                                 TitleRatingsCounted = True
 
-                                TS.SetText(TitleRatingsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                TS.SetText(TitleRatingsCountTextBox,
+                                           lineCount.ToString(C.COMMA_MASK))
 
                         End Select
                     End If
@@ -1721,14 +1729,13 @@ Public Class MainForm2
                     TitlePrincipalsCounted AndAlso
                     TitleRatingsCounted) Then
 
-                    MyRawFileInfo(FT.OVERALL).CompressedCountedRowCount =
-                        (MyRawFileInfo(FT.NameBasics).CompressedCountedRowCount +
-                         MyRawFileInfo(FT.TitleAkas).CompressedCountedRowCount +
-                         MyRawFileInfo(FT.TitleBasics).CompressedCountedRowCount +
-                         MyRawFileInfo(FT.TitleCrew).CompressedCountedRowCount +
-                         MyRawFileInfo(FT.TitleEpisode).CompressedCountedRowCount +
-                         MyRawFileInfo(FT.TitlePrincipals).CompressedCountedRowCount +
-                         MyRawFileInfo(FT.TitleRatings).CompressedCountedRowCount)
+                    MyRawFileInfo(FT.OVERALL).CountedRows = (MyRawFileInfo(FT.NameBasics).CountedRows +
+                                                             MyRawFileInfo(FT.TitleAkas).CountedRows +
+                                                             MyRawFileInfo(FT.TitleBasics).CountedRows +
+                                                             MyRawFileInfo(FT.TitleCrew).CountedRows +
+                                                             MyRawFileInfo(FT.TitleEpisode).CountedRows +
+                                                             MyRawFileInfo(FT.TitlePrincipals).CountedRows +
+                                                             MyRawFileInfo(FT.TitleRatings).CountedRows)
 
                 End If
             End If
@@ -2227,7 +2234,7 @@ Public Class MainForm2
                     Case ImportTypeEnum.Compressed
                         localRowCount = CountCompressedFileRows(fileToProcess)
 
-                        MyRawFileInfo(localFileType).CountedRowCount = localRowCount
+                        MyRawFileInfo(localFileType).CountedRows = localRowCount
 
                         fileCounted = True
 
@@ -2268,7 +2275,7 @@ Public Class MainForm2
                     Case ImportTypeEnum.Decompressed
                         localRowCount = CountFileRows(fileToProcess)
 
-                        MyRawFileInfo(localFileType).CountedRowCount = localRowCount
+                        MyRawFileInfo(localFileType).CountedRows = localRowCount
 
                         fileCounted = True
 
@@ -2489,7 +2496,10 @@ Public Class MainForm2
         Dim rawFileType As FT = FT.Unknown
 
         Dim lastRowCount As Long = 0
-        Dim countedRowCount As Long = 0
+        Dim countedRows As Long = 0
+
+        TS.SetMinimum(ImportArchiveFileProgressBar, 0)
+        TS.SetMaximum(ImportArchiveFileProgressBar, 100)
 
         With MyRawFileInfo(FT.OVERALL)
             .CurrentStartTime = Now
@@ -2522,6 +2532,8 @@ Public Class MainForm2
                     Exit For
                 End If
 
+                TS.SetValue(ImportArchiveFileProgressBar, 0)
+
                 If fileToProcess.StartsWith(FolderLocation) Then
                     fileToProcess = Path.GetFileName(fileToProcess)
                 End If
@@ -2533,7 +2545,7 @@ Public Class MainForm2
 
                 With MyRawFileInfo(rawFileType)
                     lastRowCount = .LastRowCount
-                    countedRowCount = .CountedRowCount
+                    countedRows = .CountedRows
 
                     TS.SetText(FileEstimatedProcessingTimeTextBox,
                                .EstimatedTotalTimeString)
@@ -2722,12 +2734,12 @@ Public Class MainForm2
                                 Exit Do
                             End If
 
-                            If countedRowCount > 0 Then
+                            If countedRows > 0 Then
                                 CurrentUploadFilenameAndRowCount =
                                     Environment.NewLine &
                                     "Processing file: " & CurrentlyUploadingFilename & vbTab &
                                     "Rows Committed to Database: " & dataRowNumber.ToString(C.COMMA_MASK) & vbTab &
-                                    "of " & countedRowCount.ToString(C.COMMA_MASK) &
+                                    "of " & countedRows.ToString(C.COMMA_MASK) &
                                     " rows"
 
                             Else
@@ -2786,27 +2798,31 @@ Public Class MainForm2
                             previousTimeBetweenTransactions = currentTimeBetweenTransactions
                             previousTransactionTime = currentTransactionTime
 
-                            MyRawFileInfo(rawFileType).CurrentTime = Now
-                            MyRawFileInfo(FT.OVERALL).CurrentTime = MyRawFileInfo(rawFileType).CurrentTime
+                            'MyRawFileInfo(rawFileType).CurrentTime = Now
+                            MyRawFileInfo(FT.OVERALL).CurrentTime = currentTransactionTime
 
-                            currentTransactionTime = MyRawFileInfo(rawFileType).CurrentTime
+                            With MyRawFileInfo(rawFileType)
+                                .CurrentTime = currentTransactionTime
 
-                            ' the first commit will be the time between the current transaction time and the start time for the file,
-                            ' and subsequent commits will be the time between the current transaction time and the previous transaction time
-                            If dataRowNumber <= 10000 Then
-                                currentTimeBetweenTransactions =
-                                    (currentTransactionTime - MyRawFileInfo(rawFileType).CurrentStartTime)
+                                ' the first commit will be the time between the current transaction time and the start time for the file,
+                                ' and subsequent commits will be the time between the current transaction time and the previous transaction time
+                                If dataRowNumber <= 10000 Then
+                                    currentTimeBetweenTransactions =
+                                        (currentTransactionTime - .CurrentStartTime)
 
-                            Else
-                                currentTimeBetweenTransactions =
-                                    (currentTransactionTime - previousTransactionTime)
+                                Else
+                                    currentTimeBetweenTransactions =
+                                        (currentTransactionTime - previousTransactionTime)
 
-                            End If
+                                End If
 
-                            MyRawFileInfo(rawFileType).CurrentRowCount = dataRowNumber
+                                .CurrentRowNumber = dataRowNumber
+
+                                TS.SetValue(ImportArchiveFileProgressBar, .ProgressCompleted)
+                            End With
 
                             ' not sure about this one, but it should be close enough for the overall time remaining estimate
-                            MyRawFileInfo(FT.OVERALL).CurrentRowCount += 10000
+                            MyRawFileInfo(FT.OVERALL).CurrentRowNumber += 10000
 
                             ' update the textboxes with the elapsed time and 
                             ' estimated time remaining for the current file 
@@ -2857,7 +2873,7 @@ Public Class MainForm2
                     TS.SetText(ProgressLogTextBox,
                                AllPreviouslyUploadedFilenamesAndRowCountsPlusCurrent)
 
-                    MyRawFileInfo(rawFileType).CurrentRowCount = dataRowNumber
+                    MyRawFileInfo(rawFileType).CurrentRowNumber = dataRowNumber
 
                 Catch ex As Exception
                     LogErrorsToFile($"Error processing file: {fileToProcess}")

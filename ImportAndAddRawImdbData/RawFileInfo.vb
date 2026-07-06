@@ -389,128 +389,161 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    '''' <summary>
+    '''' This is the current number of counted rows for the current file
+    '''' </summary>
+    'Private _CompressedCountedRowCount As Long = 0
+    '''' <summary>
+    '''' This is the current number of counted rows for the current file
+    '''' </summary>
+    '''' <returns></returns>
+    'Public Property CompressedCountedRowCount As Long
+    '    Get
+    '        Return _CompressedCountedRowCount
+    '    End Get
+    '    Set(value As Long)
+    '        _CompressedCountedRowCount = value
+
+    '        If Not Initializing Then
+    '            ' once we have the current row count, we can estimate the 
+    '            ' number of commits and the estimated time remaining to complete
+    '            ' this will be updated each time a commit is performed, 
+    '            ' so that the estimated time remaining is updated as well
+    '            If Not CompletedProcessing Then
+
+    '                If _CompressedCountedRowCount > 0 Then
+    '                    Dim modCommits As Integer =
+    '                        _CompressedCountedRowCount Mod Constants.DEFAULT_COMMIT_COUNT
+
+    '                    Dim quotCommits As Integer =
+    '                        _CompressedCountedRowCount \ Constants.DEFAULT_COMMIT_COUNT
+
+    '                    If modCommits > 0 Then
+    '                        EstimatedCommitCount = quotCommits + 1
+    '                    Else
+    '                        EstimatedCommitCount = quotCommits
+    '                    End If
+
+    '                    EstimatedNumberOfSeconds =
+    '                        (EstimatedCommitCount * AmountOfSecondsPerCommit)
+    '                End If
+    '            End If
+    '        End If
+    '    End Set
+    'End Property
+
+    Private Property RowsWereCounted As Boolean = False
+
     ''' <summary>
     ''' This is the current number of counted rows for the current file
     ''' </summary>
-    Private _CompressedCountedRowCount As Long = 0
+    Private _CountedRows As Long = 0
     ''' <summary>
     ''' This is the current number of counted rows for the current file
     ''' </summary>
     ''' <returns></returns>
-    Public Property CompressedCountedRowCount As Long
+    Public Property CountedRows As Long
         Get
-            Return _CompressedCountedRowCount
+            Return _CountedRows
         End Get
         Set(value As Long)
-            _CompressedCountedRowCount = value
+            _CountedRows = value
 
-            If Not Initializing Then
+            RowsWereCounted = True
+
+            If ((Not Initializing) AndAlso
+                (Not CompletedProcessing) AndAlso
+                (value > 0)) Then
                 ' once we have the current row count, we can estimate the 
                 ' number of commits and the estimated time remaining to complete
                 ' this will be updated each time a commit is performed, 
                 ' so that the estimated time remaining is updated as well
-                If Not CompletedProcessing Then
+                Dim modCommits As Integer =
+                    (value Mod Constants.DEFAULT_COMMIT_COUNT)
 
-                    If _CompressedCountedRowCount > 0 Then
-                        Dim modCommits As Integer =
-                            _CompressedCountedRowCount Mod Constants.DEFAULT_COMMIT_COUNT
+                Dim quotCommits As Integer =
+                    (value \ Constants.DEFAULT_COMMIT_COUNT)
 
-                        Dim quotCommits As Integer =
-                            _CompressedCountedRowCount \ Constants.DEFAULT_COMMIT_COUNT
-
-                        If modCommits > 0 Then
-                            EstimatedCommitCount = quotCommits + 1
-                        Else
-                            EstimatedCommitCount = quotCommits
-                        End If
-
-                        EstimatedNumberOfSeconds =
-                            (EstimatedCommitCount * AmountOfSecondsPerCommit)
-                    End If
+                If modCommits > 0 Then
+                    EstimatedCommitCount = quotCommits + 1
+                Else
+                    EstimatedCommitCount = quotCommits
                 End If
+
+                EstimatedNumberOfSeconds =
+                    (EstimatedCommitCount * AmountOfSecondsPerCommit)
             End If
         End Set
     End Property
 
-    ''' <summary>
-    ''' This is the current number of counted rows for the current file
-    ''' </summary>
-    Private _CountedRowCount As Long = 0
-    ''' <summary>
-    ''' This is the current number of counted rows for the current file
-    ''' </summary>
-    ''' <returns></returns>
-    Public Property CountedRowCount As Long
+    Private _RemainingRowCount As Long = 0
+    Public Property RemainingRowCount As Long
         Get
-            Return _CountedRowCount
+            Return _RemainingRowCount
         End Get
-        Set(value As Long)
-            _CountedRowCount = value
-
-            If Not Initializing Then
-                ' once we have the current row count, we can estimate the 
-                ' number of commits and the estimated time remaining to complete
-                ' this will be updated each time a commit is performed, 
-                ' so that the estimated time remaining is updated as well
-                If Not CompletedProcessing Then
-                    If _CountedRowCount > 0 Then
-                        Dim modCommits As Integer = _CountedRowCount Mod Constants.DEFAULT_COMMIT_COUNT
-                        Dim quotCommits As Integer = _CountedRowCount \ Constants.DEFAULT_COMMIT_COUNT
-
-                        If modCommits > 0 Then
-                            EstimatedCommitCount = quotCommits + 1
-                        Else
-                            EstimatedCommitCount = quotCommits
-                        End If
-
-                        EstimatedNumberOfSeconds =
-                            (EstimatedCommitCount * AmountOfSecondsPerCommit)
-                    End If
-                End If
-            End If
+        Private Set(value As Long)
+            _RemainingRowCount = value
         End Set
     End Property
 
+    Public ReadOnly Property ProgressCompleted As Integer
+        Get
+            Return CInt(Math.Round((CurrentRowNumber / CountedRows) * 100))
+        End Get
+    End Property
 
     ''' <summary>
     ''' This is the current number of committed rows for the current file
     ''' </summary>
-    Private _CurrentRowCount As Long = 0
+    Private _CurrentRowNumber As Long = 0
+
     ''' <summary>
     ''' This is the current number of committed rows for the current file
     ''' </summary>
     ''' <returns></returns>
-    Public Property CurrentRowCount As Long
+    Public Property CurrentRowNumber As Long
         Get
-            Return _CurrentRowCount
+            Return _CurrentRowNumber
         End Get
         Set(value As Long)
-            _CurrentRowCount = value
+            _CurrentRowNumber = value
 
-            If Not Initializing Then
-                ' once we have the current row count, we can estimate the 
-                ' number of commits and the estimated time remaining to complete
-                ' this will be updated each time a commit is performed, 
-                ' so that the estimated time remaining is updated as well
-                If Not CompletedProcessing Then
-                    If _CurrentRowCount > 0 Then
-                        Dim modCommits As Integer =
-                            ((LastRowCount - _CurrentRowCount) Mod Constants.DEFAULT_COMMIT_COUNT)
+            ' once we have the current row count, we can estimate the 
+            ' number of commits and the estimated time remaining to complete
+            ' this will be updated each time a commit is performed, 
+            ' so that the estimated time remaining is updated as well
 
-                        Dim quotCommits As Integer =
-                            ((LastRowCount - _CurrentRowCount) \ Constants.DEFAULT_COMMIT_COUNT)
+            If ((Not Initializing) AndAlso
+                (Not CompletedProcessing) AndAlso
+                (value > 0)) Then
 
-                        If modCommits > 0 Then
-                            EstimatedRemainingCommitCount = quotCommits + 1
-                        Else
-                            EstimatedRemainingCommitCount = quotCommits
-                        End If
+                Dim modCommits As Integer = 0
+                Dim quotCommits As Integer = 0
 
-                        EstimatedRemainingSeconds =
-                            (EstimatedRemainingCommitCount *
-                             AmountOfSecondsPerCommit)
+                If RowsWereCounted Then
+                    ' if the rows were actually counted, then go with that value
+                    modCommits = ((CountedRows - value) Mod Constants.DEFAULT_COMMIT_COUNT)
+                    quotCommits = ((CountedRows - value) \ Constants.DEFAULT_COMMIT_COUNT)
+
+                Else
+                    ' otherwise, use the previously saved RowCount for the given file (if there is one)
+                    If LastRowCount > 0 Then
+                        modCommits = ((LastRowCount - value) Mod Constants.DEFAULT_COMMIT_COUNT)
+                        quotCommits = ((LastRowCount - value) \ Constants.DEFAULT_COMMIT_COUNT)
                     End If
+
                 End If
+
+                EstimatedRemainingCommitCount = quotCommits
+
+                If modCommits > 0 Then
+                    EstimatedRemainingCommitCount += 1
+                End If
+
+                EstimatedRemainingSeconds =
+                    (EstimatedRemainingCommitCount * AmountOfSecondsPerCommit)
+
+                RemainingRowCount = (CountedRows - CurrentRowNumber)
             End If
         End Set
     End Property

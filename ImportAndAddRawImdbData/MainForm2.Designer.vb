@@ -103,6 +103,7 @@ Partial Class MainForm2
         Label10 = New Label()
         FileEstimatedProcessingTimeTextBox = New TextBox()
         OverallEstimatedProcessingTimeTextBox = New TextBox()
+        ImportArchiveFileProgressBar = New ProgressBar()
         FileCountsPanel.SuspendLayout()
         SuspendLayout()
         ' 
@@ -193,12 +194,12 @@ Partial Class MainForm2
         ' 
         ProgressLogTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         ProgressLogTextBox.Font = New Font("Courier New", 8.25F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        ProgressLogTextBox.Location = New Point(12, 380)
+        ProgressLogTextBox.Location = New Point(12, 423)
         ProgressLogTextBox.Multiline = True
         ProgressLogTextBox.Name = "ProgressLogTextBox"
         ProgressLogTextBox.ReadOnly = True
         ProgressLogTextBox.ScrollBars = ScrollBars.Vertical
-        ProgressLogTextBox.Size = New Size(1018, 410)
+        ProgressLogTextBox.Size = New Size(1018, 367)
         ProgressLogTextBox.TabIndex = 18
         ' 
         ' CurrentImportFileLabel
@@ -705,7 +706,7 @@ Partial Class MainForm2
         ' 
         Label2.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label2.AutoSize = True
-        Label2.Location = New Point(684, 313)
+        Label2.Location = New Point(684, 340)
         Label2.Name = "Label2"
         Label2.Size = New Size(191, 15)
         Label2.TabIndex = 28
@@ -714,7 +715,7 @@ Partial Class MainForm2
         ' FileEstimatedTimeRemainingTextBox
         ' 
         FileEstimatedTimeRemainingTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        FileEstimatedTimeRemainingTextBox.Location = New Point(881, 310)
+        FileEstimatedTimeRemainingTextBox.Location = New Point(881, 337)
         FileEstimatedTimeRemainingTextBox.Name = "FileEstimatedTimeRemainingTextBox"
         FileEstimatedTimeRemainingTextBox.ReadOnly = True
         FileEstimatedTimeRemainingTextBox.Size = New Size(149, 23)
@@ -723,7 +724,7 @@ Partial Class MainForm2
         ' OverallEstimatedTimeRemainingTextBox
         ' 
         OverallEstimatedTimeRemainingTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        OverallEstimatedTimeRemainingTextBox.Location = New Point(881, 339)
+        OverallEstimatedTimeRemainingTextBox.Location = New Point(881, 366)
         OverallEstimatedTimeRemainingTextBox.Name = "OverallEstimatedTimeRemainingTextBox"
         OverallEstimatedTimeRemainingTextBox.ReadOnly = True
         OverallEstimatedTimeRemainingTextBox.Size = New Size(149, 23)
@@ -733,7 +734,7 @@ Partial Class MainForm2
         ' 
         Label3.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label3.AutoSize = True
-        Label3.Location = New Point(683, 342)
+        Label3.Location = New Point(683, 369)
         Label3.Name = "Label3"
         Label3.Size = New Size(192, 15)
         Label3.TabIndex = 30
@@ -743,7 +744,7 @@ Partial Class MainForm2
         ' 
         Label4.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label4.AutoSize = True
-        Label4.Location = New Point(12, 362)
+        Label4.Location = New Point(12, 405)
         Label4.Name = "Label4"
         Label4.Size = New Size(75, 15)
         Label4.TabIndex = 32
@@ -753,7 +754,7 @@ Partial Class MainForm2
         ' 
         Label7.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label7.AutoSize = True
-        Label7.Location = New Point(403, 313)
+        Label7.Location = New Point(403, 340)
         Label7.Name = "Label7"
         Label7.Size = New Size(119, 15)
         Label7.TabIndex = 33
@@ -763,7 +764,7 @@ Partial Class MainForm2
         ' 
         Label8.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label8.AutoSize = True
-        Label8.Location = New Point(403, 342)
+        Label8.Location = New Point(403, 369)
         Label8.Name = "Label8"
         Label8.Size = New Size(120, 15)
         Label8.TabIndex = 34
@@ -772,7 +773,7 @@ Partial Class MainForm2
         ' ElapsedTimeForFileTextBox
         ' 
         ElapsedTimeForFileTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        ElapsedTimeForFileTextBox.Location = New Point(528, 310)
+        ElapsedTimeForFileTextBox.Location = New Point(528, 337)
         ElapsedTimeForFileTextBox.Name = "ElapsedTimeForFileTextBox"
         ElapsedTimeForFileTextBox.ReadOnly = True
         ElapsedTimeForFileTextBox.Size = New Size(149, 23)
@@ -781,7 +782,7 @@ Partial Class MainForm2
         ' OverallElapsedTimeTextBox
         ' 
         OverallElapsedTimeTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        OverallElapsedTimeTextBox.Location = New Point(528, 339)
+        OverallElapsedTimeTextBox.Location = New Point(528, 366)
         OverallElapsedTimeTextBox.Name = "OverallElapsedTimeTextBox"
         OverallElapsedTimeTextBox.ReadOnly = True
         OverallElapsedTimeTextBox.Size = New Size(149, 23)
@@ -791,7 +792,7 @@ Partial Class MainForm2
         ' 
         Label9.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label9.AutoSize = True
-        Label9.Location = New Point(15, 313)
+        Label9.Location = New Point(12, 340)
         Label9.Name = "Label9"
         Label9.Size = New Size(191, 15)
         Label9.TabIndex = 37
@@ -801,7 +802,7 @@ Partial Class MainForm2
         ' 
         Label10.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label10.AutoSize = True
-        Label10.Location = New Point(12, 342)
+        Label10.Location = New Point(12, 369)
         Label10.Name = "Label10"
         Label10.Size = New Size(239, 15)
         Label10.TabIndex = 38
@@ -809,7 +810,7 @@ Partial Class MainForm2
         ' 
         ' FileEstimatedProcessingTimeTextBox
         ' 
-        FileEstimatedProcessingTimeTextBox.Location = New Point(257, 310)
+        FileEstimatedProcessingTimeTextBox.Location = New Point(257, 337)
         FileEstimatedProcessingTimeTextBox.Name = "FileEstimatedProcessingTimeTextBox"
         FileEstimatedProcessingTimeTextBox.ReadOnly = True
         FileEstimatedProcessingTimeTextBox.Size = New Size(123, 23)
@@ -817,11 +818,19 @@ Partial Class MainForm2
         ' 
         ' OverallEstimatedProcessingTimeTextBox
         ' 
-        OverallEstimatedProcessingTimeTextBox.Location = New Point(257, 339)
+        OverallEstimatedProcessingTimeTextBox.Location = New Point(257, 366)
         OverallEstimatedProcessingTimeTextBox.Name = "OverallEstimatedProcessingTimeTextBox"
         OverallEstimatedProcessingTimeTextBox.ReadOnly = True
         OverallEstimatedProcessingTimeTextBox.Size = New Size(123, 23)
         OverallEstimatedProcessingTimeTextBox.TabIndex = 40
+        ' 
+        ' ImportArchiveFileProgressBar
+        ' 
+        ImportArchiveFileProgressBar.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        ImportArchiveFileProgressBar.Location = New Point(12, 310)
+        ImportArchiveFileProgressBar.Name = "ImportArchiveFileProgressBar"
+        ImportArchiveFileProgressBar.Size = New Size(1018, 23)
+        ImportArchiveFileProgressBar.TabIndex = 41
         ' 
         ' MainForm2
         ' 
@@ -830,6 +839,7 @@ Partial Class MainForm2
         AutoScaleMode = AutoScaleMode.Font
         CancelButton = EndThingsButton
         ClientSize = New Size(1042, 831)
+        Controls.Add(ImportArchiveFileProgressBar)
         Controls.Add(OverallEstimatedProcessingTimeTextBox)
         Controls.Add(FileEstimatedProcessingTimeTextBox)
         Controls.Add(Label10)
@@ -952,4 +962,5 @@ Partial Class MainForm2
     Friend WithEvents Label10 As Label
     Friend WithEvents FileEstimatedProcessingTimeTextBox As TextBox
     Friend WithEvents OverallEstimatedProcessingTimeTextBox As TextBox
+    Friend WithEvents ImportArchiveFileProgressBar As ProgressBar
 End Class
