@@ -104,13 +104,17 @@ Partial Class MainForm2
         FileEstimatedProcessingTimeTextBox = New TextBox()
         OverallEstimatedProcessingTimeTextBox = New TextBox()
         ImportArchiveFileProgressBar = New ProgressBar()
+        DownloadPanel = New Panel()
+        LoadAllDataFilesPanel = New Panel()
         FileCountsPanel.SuspendLayout()
+        DownloadPanel.SuspendLayout()
+        LoadAllDataFilesPanel.SuspendLayout()
         SuspendLayout()
         ' 
         ' ChooseFolderButton
         ' 
         ChooseFolderButton.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        ChooseFolderButton.Location = New Point(801, 252)
+        ChooseFolderButton.Location = New Point(859, 26)
         ChooseFolderButton.Name = "ChooseFolderButton"
         ChooseFolderButton.Size = New Size(25, 23)
         ChooseFolderButton.TabIndex = 11
@@ -120,7 +124,7 @@ Partial Class MainForm2
         ' Label1
         ' 
         Label1.AutoSize = True
-        Label1.Location = New Point(12, 234)
+        Label1.Location = New Point(12, 9)
         Label1.Name = "Label1"
         Label1.Size = New Size(138, 15)
         Label1.TabIndex = 10
@@ -129,15 +133,15 @@ Partial Class MainForm2
         ' FolderLocationTextBox
         ' 
         FolderLocationTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        FolderLocationTextBox.Location = New Point(12, 252)
+        FolderLocationTextBox.Location = New Point(12, 27)
         FolderLocationTextBox.Name = "FolderLocationTextBox"
-        FolderLocationTextBox.Size = New Size(783, 23)
+        FolderLocationTextBox.Size = New Size(841, 23)
         FolderLocationTextBox.TabIndex = 9
         ' 
         ' DownloadFileNumberTextBox
         ' 
         DownloadFileNumberTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        DownloadFileNumberTextBox.Location = New Point(752, 7)
+        DownloadFileNumberTextBox.Location = New Point(939, 7)
         DownloadFileNumberTextBox.Name = "DownloadFileNumberTextBox"
         DownloadFileNumberTextBox.ReadOnly = True
         DownloadFileNumberTextBox.Size = New Size(74, 23)
@@ -148,7 +152,7 @@ Partial Class MainForm2
         ' CurrentFileLabel
         ' 
         CurrentFileLabel.AutoSize = True
-        CurrentFileLabel.Location = New Point(12, 10)
+        CurrentFileLabel.Location = New Point(263, 10)
         CurrentFileLabel.Name = "CurrentFileLabel"
         CurrentFileLabel.Size = New Size(197, 15)
         CurrentFileLabel.TabIndex = 16
@@ -156,56 +160,57 @@ Partial Class MainForm2
         ' 
         ' CurrentFileTextBox
         ' 
-        CurrentFileTextBox.Location = New Point(215, 7)
+        CurrentFileTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        CurrentFileTextBox.Location = New Point(466, 7)
         CurrentFileTextBox.Name = "CurrentFileTextBox"
         CurrentFileTextBox.ReadOnly = True
-        CurrentFileTextBox.Size = New Size(289, 23)
+        CurrentFileTextBox.Size = New Size(467, 23)
         CurrentFileTextBox.TabIndex = 15
         ' 
         ' ArchiveDownloadProgressBar
         ' 
         ArchiveDownloadProgressBar.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        ArchiveDownloadProgressBar.Location = New Point(12, 36)
+        ArchiveDownloadProgressBar.Location = New Point(263, 36)
         ArchiveDownloadProgressBar.Name = "ArchiveDownloadProgressBar"
-        ArchiveDownloadProgressBar.Size = New Size(814, 23)
+        ArchiveDownloadProgressBar.Size = New Size(750, 23)
         ArchiveDownloadProgressBar.TabIndex = 14
         ' 
         ' DownloadUpdatedArchivesButton
         ' 
-        DownloadUpdatedArchivesButton.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        DownloadUpdatedArchivesButton.Location = New Point(832, 36)
+        DownloadUpdatedArchivesButton.Location = New Point(3, 6)
         DownloadUpdatedArchivesButton.Name = "DownloadUpdatedArchivesButton"
-        DownloadUpdatedArchivesButton.Size = New Size(198, 23)
+        DownloadUpdatedArchivesButton.Size = New Size(254, 23)
         DownloadUpdatedArchivesButton.TabIndex = 13
-        DownloadUpdatedArchivesButton.Text = "&Download Updated Archive Files"
+        DownloadUpdatedArchivesButton.Text = "#1 &Download Updated Archive Files"
         DownloadUpdatedArchivesButton.UseVisualStyleBackColor = True
         ' 
         ' LoadAllDataFilesButton
         ' 
         LoadAllDataFilesButton.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        LoadAllDataFilesButton.Location = New Point(832, 252)
+        LoadAllDataFilesButton.Location = New Point(3, 3)
         LoadAllDataFilesButton.Name = "LoadAllDataFilesButton"
-        LoadAllDataFilesButton.Size = New Size(198, 23)
+        LoadAllDataFilesButton.Size = New Size(254, 23)
         LoadAllDataFilesButton.TabIndex = 12
-        LoadAllDataFilesButton.Text = "&Load All Data to IMDB Raw Tables"
+        LoadAllDataFilesButton.Text = "#2 &Import Archive files into IMDB Raw Tables"
         LoadAllDataFilesButton.UseVisualStyleBackColor = True
         ' 
         ' ProgressLogTextBox
         ' 
         ProgressLogTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
+        ProgressLogTextBox.BorderStyle = BorderStyle.FixedSingle
         ProgressLogTextBox.Font = New Font("Courier New", 8.25F, FontStyle.Regular, GraphicsUnit.Point, CByte(0))
-        ProgressLogTextBox.Location = New Point(12, 423)
+        ProgressLogTextBox.Location = New Point(12, 489)
         ProgressLogTextBox.Multiline = True
         ProgressLogTextBox.Name = "ProgressLogTextBox"
         ProgressLogTextBox.ReadOnly = True
         ProgressLogTextBox.ScrollBars = ScrollBars.Vertical
-        ProgressLogTextBox.Size = New Size(1018, 367)
+        ProgressLogTextBox.Size = New Size(1018, 330)
         ProgressLogTextBox.TabIndex = 18
         ' 
         ' CurrentImportFileLabel
         ' 
         CurrentImportFileLabel.AutoSize = True
-        CurrentImportFileLabel.Location = New Point(12, 284)
+        CurrentImportFileLabel.Location = New Point(3, 29)
         CurrentImportFileLabel.Name = "CurrentImportFileLabel"
         CurrentImportFileLabel.Size = New Size(179, 15)
         CurrentImportFileLabel.TabIndex = 19
@@ -213,7 +218,7 @@ Partial Class MainForm2
         ' 
         ' CurrentImportFileTextBox
         ' 
-        CurrentImportFileTextBox.Location = New Point(197, 281)
+        CurrentImportFileTextBox.Location = New Point(188, 26)
         CurrentImportFileTextBox.Name = "CurrentImportFileTextBox"
         CurrentImportFileTextBox.ReadOnly = True
         CurrentImportFileTextBox.Size = New Size(240, 23)
@@ -222,7 +227,7 @@ Partial Class MainForm2
         ' CurrentImportFileNumberTextBox
         ' 
         CurrentImportFileNumberTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        CurrentImportFileNumberTextBox.Location = New Point(752, 281)
+        CurrentImportFileNumberTextBox.Location = New Point(735, 26)
         CurrentImportFileNumberTextBox.Name = "CurrentImportFileNumberTextBox"
         CurrentImportFileNumberTextBox.ReadOnly = True
         CurrentImportFileNumberTextBox.Size = New Size(74, 23)
@@ -233,7 +238,7 @@ Partial Class MainForm2
         ' 
         CurrentRowNumberLabel.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         CurrentRowNumberLabel.AutoSize = True
-        CurrentRowNumberLabel.Location = New Point(832, 284)
+        CurrentRowNumberLabel.Location = New Point(815, 29)
         CurrentRowNumberLabel.Name = "CurrentRowNumberLabel"
         CurrentRowNumberLabel.Size = New Size(43, 15)
         CurrentRowNumberLabel.TabIndex = 22
@@ -242,7 +247,7 @@ Partial Class MainForm2
         ' CurrentRowNumberTextBox
         ' 
         CurrentRowNumberTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        CurrentRowNumberTextBox.Location = New Point(881, 281)
+        CurrentRowNumberTextBox.Location = New Point(864, 26)
         CurrentRowNumberTextBox.Name = "CurrentRowNumberTextBox"
         CurrentRowNumberTextBox.ReadOnly = True
         CurrentRowNumberTextBox.Size = New Size(149, 23)
@@ -257,9 +262,9 @@ Partial Class MainForm2
         ' EndThingsButton
         ' 
         EndThingsButton.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        EndThingsButton.Location = New Point(955, 10)
+        EndThingsButton.Location = New Point(919, 26)
         EndThingsButton.Name = "EndThingsButton"
-        EndThingsButton.Size = New Size(75, 23)
+        EndThingsButton.Size = New Size(111, 23)
         EndThingsButton.TabIndex = 24
         EndThingsButton.Text = "E&xit"
         EndThingsButton.UseVisualStyleBackColor = True
@@ -306,9 +311,9 @@ Partial Class MainForm2
         FileCountsPanel.Controls.Add(TitleAkasCountTextBox)
         FileCountsPanel.Controls.Add(NameBasicsFilenameLabel)
         FileCountsPanel.Controls.Add(NameBasicsCountTextBox)
-        FileCountsPanel.Location = New Point(12, 90)
+        FileCountsPanel.Location = New Point(12, 139)
         FileCountsPanel.Name = "FileCountsPanel"
-        FileCountsPanel.Size = New Size(1018, 137)
+        FileCountsPanel.Size = New Size(1018, 140)
         FileCountsPanel.TabIndex = 25
         ' 
         ' TitleRatingsPreviousRowCountTextBox
@@ -394,7 +399,7 @@ Partial Class MainForm2
         CountTsvRowsButton.Name = "CountTsvRowsButton"
         CountTsvRowsButton.Size = New Size(177, 27)
         CountTsvRowsButton.TabIndex = 31
-        CountTsvRowsButton.Text = "Count .&tsv Rows"
+        CountTsvRowsButton.Text = "Count .ts&v Rows"
         CountTsvRowsButton.UseVisualStyleBackColor = True
         ' 
         ' CountArchiveRowsButton
@@ -447,9 +452,9 @@ Partial Class MainForm2
         CompressedFilenamesHeader2Label.Font = New Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, CByte(0))
         CompressedFilenamesHeader2Label.Location = New Point(421, 9)
         CompressedFilenamesHeader2Label.Name = "CompressedFilenamesHeader2Label"
-        CompressedFilenamesHeader2Label.Size = New Size(129, 15)
+        CompressedFilenamesHeader2Label.Size = New Size(88, 15)
         CompressedFilenamesHeader2Label.TabIndex = 24
-        CompressedFilenamesHeader2Label.Text = "Compressed Filenames"
+        CompressedFilenamesHeader2Label.Text = "GZip Filenames"
         ' 
         ' RowCountsHeader2Label
         ' 
@@ -560,9 +565,9 @@ Partial Class MainForm2
         CompressedFilenamesHeader1Label.Font = New Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, CByte(0))
         CompressedFilenamesHeader1Label.Location = New Point(2, 9)
         CompressedFilenamesHeader1Label.Name = "CompressedFilenamesHeader1Label"
-        CompressedFilenamesHeader1Label.Size = New Size(129, 15)
+        CompressedFilenamesHeader1Label.Size = New Size(88, 15)
         CompressedFilenamesHeader1Label.TabIndex = 9
-        CompressedFilenamesHeader1Label.Text = "Compressed Filenames"
+        CompressedFilenamesHeader1Label.Text = "GZip Filenames"
         ' 
         ' RowCountsHeader1Label
         ' 
@@ -672,11 +677,10 @@ Partial Class MainForm2
         ' 
         ' DecompressAfterDownloadCheckBox
         ' 
-        DecompressAfterDownloadCheckBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         DecompressAfterDownloadCheckBox.AutoSize = True
         DecompressAfterDownloadCheckBox.Checked = True
         DecompressAfterDownloadCheckBox.CheckState = CheckState.Checked
-        DecompressAfterDownloadCheckBox.Location = New Point(794, 65)
+        DecompressAfterDownloadCheckBox.Location = New Point(3, 35)
         DecompressAfterDownloadCheckBox.Name = "DecompressAfterDownloadCheckBox"
         DecompressAfterDownloadCheckBox.Size = New Size(236, 19)
         DecompressAfterDownloadCheckBox.TabIndex = 26
@@ -690,11 +694,11 @@ Partial Class MainForm2
         ' ImportDataButton
         ' 
         ImportDataButton.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
-        ImportDataButton.Location = New Point(12, 796)
+        ImportDataButton.Location = New Point(12, 443)
         ImportDataButton.Name = "ImportDataButton"
-        ImportDataButton.Size = New Size(314, 23)
+        ImportDataButton.Size = New Size(338, 25)
         ImportDataButton.TabIndex = 27
-        ImportDataButton.Text = "&Import Data into IMDB Db Tables from [Raw] Tables"
+        ImportDataButton.Text = "#3 &Transform [IMDB].[Raw] data into [IMDB].[dbo] Tables "
         ImportDataButton.UseVisualStyleBackColor = True
         ' 
         ' SqlImportBackgroundWorker
@@ -706,7 +710,7 @@ Partial Class MainForm2
         ' 
         Label2.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label2.AutoSize = True
-        Label2.Location = New Point(684, 340)
+        Label2.Location = New Point(667, 87)
         Label2.Name = "Label2"
         Label2.Size = New Size(191, 15)
         Label2.TabIndex = 28
@@ -715,7 +719,7 @@ Partial Class MainForm2
         ' FileEstimatedTimeRemainingTextBox
         ' 
         FileEstimatedTimeRemainingTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        FileEstimatedTimeRemainingTextBox.Location = New Point(881, 337)
+        FileEstimatedTimeRemainingTextBox.Location = New Point(864, 84)
         FileEstimatedTimeRemainingTextBox.Name = "FileEstimatedTimeRemainingTextBox"
         FileEstimatedTimeRemainingTextBox.ReadOnly = True
         FileEstimatedTimeRemainingTextBox.Size = New Size(149, 23)
@@ -724,7 +728,7 @@ Partial Class MainForm2
         ' OverallEstimatedTimeRemainingTextBox
         ' 
         OverallEstimatedTimeRemainingTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        OverallEstimatedTimeRemainingTextBox.Location = New Point(881, 366)
+        OverallEstimatedTimeRemainingTextBox.Location = New Point(864, 113)
         OverallEstimatedTimeRemainingTextBox.Name = "OverallEstimatedTimeRemainingTextBox"
         OverallEstimatedTimeRemainingTextBox.ReadOnly = True
         OverallEstimatedTimeRemainingTextBox.Size = New Size(149, 23)
@@ -734,7 +738,7 @@ Partial Class MainForm2
         ' 
         Label3.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label3.AutoSize = True
-        Label3.Location = New Point(683, 369)
+        Label3.Location = New Point(668, 116)
         Label3.Name = "Label3"
         Label3.Size = New Size(192, 15)
         Label3.TabIndex = 30
@@ -744,7 +748,7 @@ Partial Class MainForm2
         ' 
         Label4.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label4.AutoSize = True
-        Label4.Location = New Point(12, 405)
+        Label4.Location = New Point(12, 471)
         Label4.Name = "Label4"
         Label4.Size = New Size(75, 15)
         Label4.TabIndex = 32
@@ -754,7 +758,7 @@ Partial Class MainForm2
         ' 
         Label7.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label7.AutoSize = True
-        Label7.Location = New Point(403, 340)
+        Label7.Location = New Point(387, 87)
         Label7.Name = "Label7"
         Label7.Size = New Size(119, 15)
         Label7.TabIndex = 33
@@ -764,7 +768,7 @@ Partial Class MainForm2
         ' 
         Label8.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label8.AutoSize = True
-        Label8.Location = New Point(403, 369)
+        Label8.Location = New Point(387, 116)
         Label8.Name = "Label8"
         Label8.Size = New Size(120, 15)
         Label8.TabIndex = 34
@@ -773,7 +777,7 @@ Partial Class MainForm2
         ' ElapsedTimeForFileTextBox
         ' 
         ElapsedTimeForFileTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        ElapsedTimeForFileTextBox.Location = New Point(528, 337)
+        ElapsedTimeForFileTextBox.Location = New Point(512, 84)
         ElapsedTimeForFileTextBox.Name = "ElapsedTimeForFileTextBox"
         ElapsedTimeForFileTextBox.ReadOnly = True
         ElapsedTimeForFileTextBox.Size = New Size(149, 23)
@@ -782,7 +786,7 @@ Partial Class MainForm2
         ' OverallElapsedTimeTextBox
         ' 
         OverallElapsedTimeTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        OverallElapsedTimeTextBox.Location = New Point(528, 366)
+        OverallElapsedTimeTextBox.Location = New Point(513, 113)
         OverallElapsedTimeTextBox.Name = "OverallElapsedTimeTextBox"
         OverallElapsedTimeTextBox.ReadOnly = True
         OverallElapsedTimeTextBox.Size = New Size(149, 23)
@@ -792,7 +796,7 @@ Partial Class MainForm2
         ' 
         Label9.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label9.AutoSize = True
-        Label9.Location = New Point(12, 340)
+        Label9.Location = New Point(3, 87)
         Label9.Name = "Label9"
         Label9.Size = New Size(191, 15)
         Label9.TabIndex = 37
@@ -802,7 +806,7 @@ Partial Class MainForm2
         ' 
         Label10.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label10.AutoSize = True
-        Label10.Location = New Point(12, 369)
+        Label10.Location = New Point(3, 116)
         Label10.Name = "Label10"
         Label10.Size = New Size(239, 15)
         Label10.TabIndex = 38
@@ -810,7 +814,7 @@ Partial Class MainForm2
         ' 
         ' FileEstimatedProcessingTimeTextBox
         ' 
-        FileEstimatedProcessingTimeTextBox.Location = New Point(257, 337)
+        FileEstimatedProcessingTimeTextBox.Location = New Point(248, 84)
         FileEstimatedProcessingTimeTextBox.Name = "FileEstimatedProcessingTimeTextBox"
         FileEstimatedProcessingTimeTextBox.ReadOnly = True
         FileEstimatedProcessingTimeTextBox.Size = New Size(123, 23)
@@ -818,7 +822,7 @@ Partial Class MainForm2
         ' 
         ' OverallEstimatedProcessingTimeTextBox
         ' 
-        OverallEstimatedProcessingTimeTextBox.Location = New Point(257, 366)
+        OverallEstimatedProcessingTimeTextBox.Location = New Point(248, 113)
         OverallEstimatedProcessingTimeTextBox.Name = "OverallEstimatedProcessingTimeTextBox"
         OverallEstimatedProcessingTimeTextBox.ReadOnly = True
         OverallEstimatedProcessingTimeTextBox.Size = New Size(123, 23)
@@ -827,10 +831,52 @@ Partial Class MainForm2
         ' ImportArchiveFileProgressBar
         ' 
         ImportArchiveFileProgressBar.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        ImportArchiveFileProgressBar.Location = New Point(12, 310)
+        ImportArchiveFileProgressBar.Location = New Point(3, 55)
         ImportArchiveFileProgressBar.Name = "ImportArchiveFileProgressBar"
-        ImportArchiveFileProgressBar.Size = New Size(1018, 23)
+        ImportArchiveFileProgressBar.Size = New Size(1010, 23)
         ImportArchiveFileProgressBar.TabIndex = 41
+        ' 
+        ' DownloadPanel
+        ' 
+        DownloadPanel.BorderStyle = BorderStyle.FixedSingle
+        DownloadPanel.Controls.Add(ArchiveDownloadProgressBar)
+        DownloadPanel.Controls.Add(DownloadFileNumberTextBox)
+        DownloadPanel.Controls.Add(CurrentFileTextBox)
+        DownloadPanel.Controls.Add(CurrentFileLabel)
+        DownloadPanel.Controls.Add(DownloadUpdatedArchivesButton)
+        DownloadPanel.Controls.Add(DecompressAfterDownloadCheckBox)
+        DownloadPanel.Location = New Point(12, 56)
+        DownloadPanel.Name = "DownloadPanel"
+        DownloadPanel.Size = New Size(1018, 73)
+        DownloadPanel.TabIndex = 43
+        ' 
+        ' LoadAllDataFilesPanel
+        ' 
+        LoadAllDataFilesPanel.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        LoadAllDataFilesPanel.BorderStyle = BorderStyle.FixedSingle
+        LoadAllDataFilesPanel.Controls.Add(LoadAllDataFilesButton)
+        LoadAllDataFilesPanel.Controls.Add(CurrentImportFileLabel)
+        LoadAllDataFilesPanel.Controls.Add(OverallElapsedTimeTextBox)
+        LoadAllDataFilesPanel.Controls.Add(OverallEstimatedTimeRemainingTextBox)
+        LoadAllDataFilesPanel.Controls.Add(OverallEstimatedProcessingTimeTextBox)
+        LoadAllDataFilesPanel.Controls.Add(Label3)
+        LoadAllDataFilesPanel.Controls.Add(Label8)
+        LoadAllDataFilesPanel.Controls.Add(ImportArchiveFileProgressBar)
+        LoadAllDataFilesPanel.Controls.Add(Label10)
+        LoadAllDataFilesPanel.Controls.Add(FileEstimatedProcessingTimeTextBox)
+        LoadAllDataFilesPanel.Controls.Add(CurrentImportFileTextBox)
+        LoadAllDataFilesPanel.Controls.Add(ElapsedTimeForFileTextBox)
+        LoadAllDataFilesPanel.Controls.Add(CurrentImportFileNumberTextBox)
+        LoadAllDataFilesPanel.Controls.Add(Label9)
+        LoadAllDataFilesPanel.Controls.Add(Label7)
+        LoadAllDataFilesPanel.Controls.Add(FileEstimatedTimeRemainingTextBox)
+        LoadAllDataFilesPanel.Controls.Add(CurrentRowNumberLabel)
+        LoadAllDataFilesPanel.Controls.Add(Label2)
+        LoadAllDataFilesPanel.Controls.Add(CurrentRowNumberTextBox)
+        LoadAllDataFilesPanel.Location = New Point(12, 290)
+        LoadAllDataFilesPanel.Name = "LoadAllDataFilesPanel"
+        LoadAllDataFilesPanel.Size = New Size(1018, 147)
+        LoadAllDataFilesPanel.TabIndex = 44
         ' 
         ' MainForm2
         ' 
@@ -839,44 +885,25 @@ Partial Class MainForm2
         AutoScaleMode = AutoScaleMode.Font
         CancelButton = EndThingsButton
         ClientSize = New Size(1042, 831)
-        Controls.Add(ImportArchiveFileProgressBar)
-        Controls.Add(OverallEstimatedProcessingTimeTextBox)
-        Controls.Add(FileEstimatedProcessingTimeTextBox)
-        Controls.Add(Label10)
-        Controls.Add(Label9)
-        Controls.Add(OverallElapsedTimeTextBox)
-        Controls.Add(ElapsedTimeForFileTextBox)
-        Controls.Add(Label8)
-        Controls.Add(Label7)
+        Controls.Add(LoadAllDataFilesPanel)
+        Controls.Add(DownloadPanel)
         Controls.Add(Label4)
-        Controls.Add(OverallEstimatedTimeRemainingTextBox)
-        Controls.Add(Label3)
-        Controls.Add(FileEstimatedTimeRemainingTextBox)
-        Controls.Add(Label2)
         Controls.Add(ImportDataButton)
-        Controls.Add(DecompressAfterDownloadCheckBox)
         Controls.Add(FileCountsPanel)
         Controls.Add(EndThingsButton)
-        Controls.Add(CurrentRowNumberTextBox)
-        Controls.Add(CurrentRowNumberLabel)
-        Controls.Add(CurrentImportFileNumberTextBox)
-        Controls.Add(CurrentImportFileTextBox)
-        Controls.Add(CurrentImportFileLabel)
         Controls.Add(ProgressLogTextBox)
         Controls.Add(ChooseFolderButton)
         Controls.Add(Label1)
         Controls.Add(FolderLocationTextBox)
-        Controls.Add(DownloadFileNumberTextBox)
-        Controls.Add(CurrentFileLabel)
-        Controls.Add(CurrentFileTextBox)
-        Controls.Add(ArchiveDownloadProgressBar)
-        Controls.Add(DownloadUpdatedArchivesButton)
-        Controls.Add(LoadAllDataFilesButton)
         MinimumSize = New Size(1058, 870)
         Name = "MainForm2"
-        Text = "MainForm2"
+        Text = "Download Compressed, RAW IMDB Data Files and Upload/Transform into SQL Server DB Tables"
         FileCountsPanel.ResumeLayout(False)
         FileCountsPanel.PerformLayout()
+        DownloadPanel.ResumeLayout(False)
+        DownloadPanel.PerformLayout()
+        LoadAllDataFilesPanel.ResumeLayout(False)
+        LoadAllDataFilesPanel.PerformLayout()
         ResumeLayout(False)
         PerformLayout()
     End Sub
@@ -963,4 +990,6 @@ Partial Class MainForm2
     Friend WithEvents FileEstimatedProcessingTimeTextBox As TextBox
     Friend WithEvents OverallEstimatedProcessingTimeTextBox As TextBox
     Friend WithEvents ImportArchiveFileProgressBar As ProgressBar
+    Friend WithEvents DownloadPanel As Panel
+    Friend WithEvents LoadAllDataFilesPanel As Panel
 End Class
