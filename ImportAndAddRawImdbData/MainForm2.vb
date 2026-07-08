@@ -207,26 +207,26 @@ Public Class MainForm2
             ' download them if they already have them and they can see 
             ' how many rows are in each file
 
-            TS.SetText(NameBasicsPreviousRowCountTextBox,
-                       MyRawFileInfo(FT.NameBasics).LastRowCount.ToString(C.COMMA_MASK))
+            NameBasicsPreviousRowCountTextBox.Text =
+                MyRawFileInfo(FT.NameBasics).LastRowCount.ToString(C.COMMA_MASK)
 
-            TS.SetText(TitleAkasPreviousRowCountTextBox,
-                       MyRawFileInfo(FT.TitleAkas).LastRowCount.ToString(C.COMMA_MASK))
+            TitleAkasPreviousRowCountTextBox.Text =
+                MyRawFileInfo(FT.TitleAkas).LastRowCount.ToString(C.COMMA_MASK)
 
-            TS.SetText(TitleBasicsPreviousRowCountTextBox,
-                       MyRawFileInfo(FT.TitleBasics).LastRowCount.ToString(C.COMMA_MASK))
+            TitleBasicsPreviousRowCountTextBox.Text =
+                MyRawFileInfo(FT.TitleBasics).LastRowCount.ToString(C.COMMA_MASK)
 
-            TS.SetText(TitleCrewPreviousRowCountTextBox,
-                       MyRawFileInfo(FT.TitleCrew).LastRowCount.ToString(C.COMMA_MASK))
+            TitleCrewPreviousRowCountTextBox.Text =
+                MyRawFileInfo(FT.TitleCrew).LastRowCount.ToString(C.COMMA_MASK)
 
-            TS.SetText(TitleEpisodePreviousRowCountTextBox,
-                       MyRawFileInfo(FT.TitleEpisode).LastRowCount.ToString(C.COMMA_MASK))
+            TitleEpisodePreviousRowCountTextBox.Text =
+                MyRawFileInfo(FT.TitleEpisode).LastRowCount.ToString(C.COMMA_MASK)
 
-            TS.SetText(TitlePrincipalsPreviousRowCountTextBox,
-                       MyRawFileInfo(FT.TitlePrincipals).LastRowCount.ToString(C.COMMA_MASK))
+            TitlePrincipalsPreviousRowCountTextBox.Text =
+                MyRawFileInfo(FT.TitlePrincipals).LastRowCount.ToString(C.COMMA_MASK)
 
-            TS.SetText(TitleRatingsPreviousRowCountTextBox,
-                       MyRawFileInfo(FT.TitleRatings).LastRowCount.ToString(C.COMMA_MASK))
+            TitleRatingsPreviousRowCountTextBox.Text =
+                MyRawFileInfo(FT.TitleRatings).LastRowCount.ToString(C.COMMA_MASK)
 
             CountTsvRowsButton.Enabled = ((File.Exists(Path.Combine(FolderLocation, C.NameBasicsDecompFileName))) AndAlso
                                           (File.Exists(Path.Combine(FolderLocation, C.TitleAkasDecompFileName))) AndAlso
@@ -236,6 +236,8 @@ Public Class MainForm2
                                           (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompFileName))) AndAlso
                                           (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompFileName))))
 
+            CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
+
             CountArchiveRowsButton.Enabled = ((File.Exists(Path.Combine(FolderLocation, C.NameBasicsCompressedFileName))) AndAlso
                                               (File.Exists(Path.Combine(FolderLocation, C.TitleAkasCompressedFileName))) AndAlso
                                               (File.Exists(Path.Combine(FolderLocation, C.TitleBasicsCompressedFileName))) AndAlso
@@ -243,6 +245,8 @@ Public Class MainForm2
                                               (File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeCompressedFileName))) AndAlso
                                               (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsCompressedFileName))) AndAlso
                                               (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsCompressedFileName))))
+
+            CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
 
             If CountArchiveRowsButton.Enabled Then
                 Dim nameBasicsLength As Long =
@@ -643,8 +647,13 @@ Public Class MainForm2
             Next
 
             ImportDataButton.Enabled = False
+
+            CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
             CountArchiveRowsButton.Enabled = False
+
+            CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
             CountTsvRowsButton.Enabled = False
+
             DecompressAfterDownloadCheckBox.Enabled = False
             DownloadUpdatedArchivesButton.Enabled = False
             LoadAllDataFilesButton.Enabled = False
@@ -784,8 +793,11 @@ Public Class MainForm2
         TS.SetEnabled(FolderLocationTextBox, False)
         TS.SetEnabled(EndThingsButton, False)
         TS.SetEnabled(DecompressAfterDownloadCheckBox, False)
+
+        CountArchiveRowsButtonEnabled = TS.GetEnabled(CountArchiveRowsButton)
         TS.SetEnabled(CountArchiveRowsButton, False)
 
+        CountTsvRowsButtonEnabled = TS.GetEnabled(CountTsvRowsButton)
         TS.SetEnabled(CountTsvRowsButton, False)
 
         ' make all of the file size and row count info labels and textboxes not visible, 
@@ -1002,6 +1014,7 @@ Public Class MainForm2
                                       (File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeDecompFileName))) AndAlso
                                       (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompFileName))) AndAlso
                                       (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompFileName))))
+        CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
 
         If CountTsvRowsButton.Enabled Then
             NameBasicsFilenameLabel.Text = C.NameBasicsDecompFileName
@@ -1063,6 +1076,8 @@ Public Class MainForm2
                                               (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsCompressedFileName))) AndAlso
                                               (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsCompressedFileName))))
 
+            CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
+
             FileSizeHeader1Label.Text = "File Size .gz"
             FileSizeHeader2Label.Text = "File Size .gz"
 
@@ -1100,6 +1115,9 @@ Public Class MainForm2
         TS.SetEnabled(EndThingsButton, True)
         TS.SetEnabled(DownloadUpdatedArchivesButton, True)
         TS.SetEnabled(DecompressAfterDownloadCheckBox, True)
+
+        TS.SetEnabled(CountArchiveRowsButton, CountArchiveRowsButtonEnabled)
+        TS.SetEnabled(CountTsvRowsButton, CountTsvRowsButtonEnabled)
 
         Me.CancelButton = EndThingsButton
         Me.AcceptButton = LoadAllDataFilesButton
@@ -1613,6 +1631,11 @@ Public Class MainForm2
                 ChooseFolderButton.Enabled = False
                 FolderLocationTextBox.Enabled = False
 
+                CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
+                CountArchiveRowsButton.Enabled = False
+                CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
+                CountTsvRowsButton.Enabled = False
+
                 CancelledOperations = False
 
                 AllArchivesBackgroundWorker.RunWorkerAsync()
@@ -1761,6 +1784,11 @@ Public Class MainForm2
     ''' <returns></returns>
     Private Property InsertDataFilesList As New List(Of String)
 
+
+    Private Property CountTsvRowsButtonEnabled As Boolean = True
+    Private Property CountArchiveRowsButtonEnabled As Boolean = True
+
+
     ''' <summary>
     ''' Handles the click event for the "Count TSV Rows" button. It 
     ''' initializes the counting process for the rows in the 
@@ -1839,6 +1867,12 @@ Public Class MainForm2
 
                 CancelledOperations = False
 
+                CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
+                CountTsvRowsButton.Enabled = False
+
+                CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
+                CountArchiveRowsButton.Enabled = False
+
                 AllArchivesBackgroundWorker.RunWorkerAsync()
 
             ElseIf sequentialOrParallel = SP.Parallel Then
@@ -1848,6 +1882,12 @@ Public Class MainForm2
                 LoadAllDataFilesButton.Enabled = False
                 ChooseFolderButton.Enabled = False
                 FolderLocationTextBox.Enabled = False
+
+                CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
+                CountTsvRowsButton.Enabled = False
+
+                CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
+                CountArchiveRowsButton.Enabled = False
 
                 CancelledOperations = False
 
@@ -1960,6 +2000,9 @@ Public Class MainForm2
         ChooseFolderButton.Enabled = reEnableControls
         LoadAllDataFilesButton.Enabled = reEnableControls
         DownloadUpdatedArchivesButton.Enabled = reEnableControls
+
+        CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
+        CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
 
         If reEnableControls Then
             ' reset the EndThingsButton
@@ -3102,8 +3145,10 @@ Public Class MainForm2
         EndThingsButton.Text = "E&xit"
 
         ImportDataButton.Enabled = True
-        CountArchiveRowsButton.Enabled = True
-        CountTsvRowsButton.Enabled = True
+
+        CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
+        CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
+
         DecompressAfterDownloadCheckBox.Enabled = True
 
         DownloadUpdatedArchivesButton.Enabled = True
