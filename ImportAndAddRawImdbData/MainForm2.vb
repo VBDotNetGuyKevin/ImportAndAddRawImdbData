@@ -15,15 +15,16 @@ Imports Microsoft.Data.SqlClient
 Imports ImportAndAddRawImdbData.Constants
 Imports AH25 = ImportAndAddRawImdbData.Constants.AdHoc2_5TableNameEnum
 Imports C = ImportAndAddRawImdbData.Constants
-'Imports System.IO.Compression
 Imports Comp = System.IO.Compression
 Imports FT = ImportAndAddRawImdbData.RawFileInfo.FileTypeEnum
 Imports PFT = ImportAndAddRawImdbData.CountOrInsertData.ProcessFileTypeEnum
 Imports PT = ImportAndAddRawImdbData.CountOrInsertData.ProcessTypeEnum
+Imports CAS = ImportAndAddRawImdbData.CountOrInsertData.ChooseAllOrSelectedEnum
 Imports SCT = ImportAndAddRawImdbData.MainForm2.SqlCmdTypeEnum
 Imports SP = ImportAndAddRawImdbData.CountOrInsertData.SequentialOrParallelEnum
 Imports TS = ImportAndAddRawImdbData.ThreadSafeMethods
 Imports RFI = ImportAndAddRawImdbData.RawFileInfo
+Imports IT = ImportAndAddRawImdbData.MainForm2.ImportTypeEnum
 
 Public Class MainForm2
 
@@ -54,8 +55,7 @@ Public Class MainForm2
     ''' determine how to process the files during the import operation.
     ''' </summary>
     ''' <returns></returns>
-    Private Property ImportType As ImportTypeEnum =
-                                   ImportTypeEnum.Unknown
+    Private Property ImportType As IT = IT.Unknown
 
     ''' <summary>
     ''' This event handler is triggered when the "Choose Folder" button is clicked. It opens a folder
@@ -228,13 +228,13 @@ Public Class MainForm2
             TitleRatingsPreviousRowCountTextBox.Text =
                 MyRawFileInfo(FT.TitleRatings).LastRowCount.ToString(C.COMMA_MASK)
 
-            CountTsvRowsButton.Enabled = ((File.Exists(Path.Combine(FolderLocation, C.NameBasicsDecompFileName))) AndAlso
-                                          (File.Exists(Path.Combine(FolderLocation, C.TitleAkasDecompFileName))) AndAlso
-                                          (File.Exists(Path.Combine(FolderLocation, C.TitleBasicsDecompFileName))) AndAlso
-                                          (File.Exists(Path.Combine(FolderLocation, C.TitleCrewDecompFileName))) AndAlso
-                                          (File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeDecompFileName))) AndAlso
-                                          (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompFileName))) AndAlso
-                                          (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompFileName))))
+            CountTsvRowsButton.Enabled = ((File.Exists(Path.Combine(FolderLocation, C.NameBasicsDecompressedFileName))) AndAlso
+                                          (File.Exists(Path.Combine(FolderLocation, C.TitleAkasDecompressedFileName))) AndAlso
+                                          (File.Exists(Path.Combine(FolderLocation, C.TitleBasicsDecompressedFileName))) AndAlso
+                                          (File.Exists(Path.Combine(FolderLocation, C.TitleCrewDecompressedFileName))) AndAlso
+                                          (File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeDecompressedFileName))) AndAlso
+                                          (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompressedFileName))) AndAlso
+                                          (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompressedFileName))))
 
             CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
 
@@ -317,41 +317,41 @@ Public Class MainForm2
                 FileSizeHeader2Label.Text = "File Size .gz"
 
             ElseIf CountTsvRowsButton.Enabled Then
-                NameBasicsFilenameLabel.Text = C.NameBasicsDecompFileName
-                TitleAkasFilenameLabel.Text = C.TitleAkasDecompFileName
-                TitleBasicsFilenameLabel.Text = C.TitleBasicsDecompFileName
-                TitleCrewFilenameLabel.Text = C.TitleCrewDecompFileName
-                TitleEpisodeFilenameLabel.Text = C.TitleEpisodeDecompFileName
-                TitlePrincipalsFilenameLabel.Text = C.TitlePrincipalsDecompFileName
-                TitleRatingsFilenameLabel.Text = C.TitleRatingsDecompFileName
+                NameBasicsFilenameLabel.Text = C.NameBasicsDecompressedFileName
+                TitleAkasFilenameLabel.Text = C.TitleAkasDecompressedFileName
+                TitleBasicsFilenameLabel.Text = C.TitleBasicsDecompressedFileName
+                TitleCrewFilenameLabel.Text = C.TitleCrewDecompressedFileName
+                TitleEpisodeFilenameLabel.Text = C.TitleEpisodeDecompressedFileName
+                TitlePrincipalsFilenameLabel.Text = C.TitlePrincipalsDecompressedFileName
+                TitleRatingsFilenameLabel.Text = C.TitleRatingsDecompressedFileName
 
                 Dim nameBasicsLength As Long =
                     New FileInfo(Path.Combine(FolderLocation,
-                                              C.NameBasicsDecompFileName)).Length
+                                              C.NameBasicsDecompressedFileName)).Length
 
                 Dim titleAkasLength As Long =
                     New FileInfo(Path.Combine(FolderLocation,
-                                              C.TitleAkasDecompFileName)).Length
+                                              C.TitleAkasDecompressedFileName)).Length
 
                 Dim titleBasicsLength As Long =
                     New FileInfo(Path.Combine(FolderLocation,
-                                              C.TitleBasicsDecompFileName)).Length
+                                              C.TitleBasicsDecompressedFileName)).Length
 
                 Dim titleCrewLength As Long =
                     New FileInfo(Path.Combine(FolderLocation,
-                                              C.TitleCrewDecompFileName)).Length
+                                              C.TitleCrewDecompressedFileName)).Length
 
                 Dim titleEpisodeLength As Long =
                     New FileInfo(Path.Combine(FolderLocation,
-                                              C.TitleEpisodeDecompFileName)).Length
+                                              C.TitleEpisodeDecompressedFileName)).Length
 
                 Dim titlePrincipalsLength As Long =
                     New FileInfo(Path.Combine(FolderLocation,
-                                              C.TitlePrincipalsDecompFileName)).Length
+                                              C.TitlePrincipalsDecompressedFileName)).Length
 
                 Dim titleRatingsLength As Long =
                     New FileInfo(Path.Combine(FolderLocation,
-                                              C.TitleRatingsDecompFileName)).Length
+                                              C.TitleRatingsDecompressedFileName)).Length
 
                 NameBasicsSizeTextBox.Text =
                     GetFileDisplayLength(nameBasicsLength) & " " &
@@ -603,13 +603,13 @@ Public Class MainForm2
         ProcessFileType = PFT.Compressed    ' default to Compressed Files as they're the ones downloaded
 
         ' check if all files exist for compressed, decompressed, or both
-        If File.Exists(Path.Combine(FolderLocation, C.NameBasicsDecompFileName)) AndAlso
-           File.Exists(Path.Combine(FolderLocation, C.TitleAkasDecompFileName)) AndAlso
-           File.Exists(Path.Combine(FolderLocation, C.TitleBasicsDecompFileName)) AndAlso
-           File.Exists(Path.Combine(FolderLocation, C.TitleCrewDecompFileName)) AndAlso
-           File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeDecompFileName)) AndAlso
-           File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompFileName)) AndAlso
-           File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompFileName)) Then
+        If File.Exists(Path.Combine(FolderLocation, C.NameBasicsDecompressedFileName)) AndAlso
+           File.Exists(Path.Combine(FolderLocation, C.TitleAkasDecompressedFileName)) AndAlso
+           File.Exists(Path.Combine(FolderLocation, C.TitleBasicsDecompressedFileName)) AndAlso
+           File.Exists(Path.Combine(FolderLocation, C.TitleCrewDecompressedFileName)) AndAlso
+           File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeDecompressedFileName)) AndAlso
+           File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompressedFileName)) AndAlso
+           File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompressedFileName)) Then
 
             ProcessFileType = PFT.Decompressed
 
@@ -627,7 +627,8 @@ Public Class MainForm2
 
         Using countOrInsertDataForm As New CountOrInsertData(PT.InsertData,
                                                              SP.Sequential,
-                                                             ProcessFileType)
+                                                             ProcessFileType,
+                                                             FolderLocation)
 
             If countOrInsertDataForm.ShowDialog <> DialogResult.OK Then
                 EndThingsButton.Text = "E&xit"
@@ -640,6 +641,7 @@ Public Class MainForm2
 
             InsertDataFilesList.Clear()
 
+            ' Retrieve the list of files to process from the dialog
             Dim filesToProcess = countOrInsertDataForm.ProcessFilesList
 
             For Each fileToProcess In filesToProcess
@@ -847,9 +849,7 @@ Public Class MainForm2
 
             Dim fileName As String = Path.GetFileName(New Uri(archiveUrl).LocalPath)
 
-            Dim destinationPath As String = Path.Combine(FolderLocation, fileName)
-
-            Select Case GetFileTypeBasedOnFileName(Path.GetFileName(destinationPath))
+            Select Case GetFileTypeBasedOnFileName(fileName)
                 Case FT.NameBasics
                     TS.SetVisible(NameBasicsFilenameLabel, True)
                     TS.SetVisible(NameBasicsCountTextBox, True)
@@ -918,7 +918,7 @@ Public Class MainForm2
             TS.SetMaximum(ArchiveDownloadProgressBar, 100)
             TS.SetValue(ArchiveDownloadProgressBar, 0)
 
-            Await DownloadFileWithProgress(archiveUrl, destinationPath)
+            Await DownloadFileWithProgress(archiveUrl, Path.Combine(FolderLocation, fileName))
 
             currentFileNumber += 1
         Next
@@ -1007,60 +1007,72 @@ Public Class MainForm2
             Next
         End If
 
-        CountTsvRowsButton.Enabled = ((File.Exists(Path.Combine(FolderLocation, C.NameBasicsDecompFileName))) AndAlso
-                                      (File.Exists(Path.Combine(FolderLocation, C.TitleAkasDecompFileName))) AndAlso
-                                      (File.Exists(Path.Combine(FolderLocation, C.TitleBasicsDecompFileName))) AndAlso
-                                      (File.Exists(Path.Combine(FolderLocation, C.TitleCrewDecompFileName))) AndAlso
-                                      (File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeDecompFileName))) AndAlso
-                                      (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompFileName))) AndAlso
-                                      (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompFileName))))
+        CountTsvRowsButton.Enabled = ((File.Exists(Path.Combine(FolderLocation, C.NameBasicsDecompressedFileName))) AndAlso
+                                      (File.Exists(Path.Combine(FolderLocation, C.TitleAkasDecompressedFileName))) AndAlso
+                                      (File.Exists(Path.Combine(FolderLocation, C.TitleBasicsDecompressedFileName))) AndAlso
+                                      (File.Exists(Path.Combine(FolderLocation, C.TitleCrewDecompressedFileName))) AndAlso
+                                      (File.Exists(Path.Combine(FolderLocation, C.TitleEpisodeDecompressedFileName))) AndAlso
+                                      (File.Exists(Path.Combine(FolderLocation, C.TitlePrincipalsDecompressedFileName))) AndAlso
+                                      (File.Exists(Path.Combine(FolderLocation, C.TitleRatingsDecompressedFileName))))
         CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
 
         If CountTsvRowsButton.Enabled Then
-            NameBasicsFilenameLabel.Text = C.NameBasicsDecompFileName
-            TitleAkasFilenameLabel.Text = C.TitleAkasDecompFileName
-            TitleBasicsFilenameLabel.Text = C.TitleBasicsDecompFileName
-            TitleCrewFilenameLabel.Text = C.TitleCrewDecompFileName
-            TitleEpisodeFilenameLabel.Text = C.TitleEpisodeDecompFileName
-            TitlePrincipalsFilenameLabel.Text = C.TitlePrincipalsDecompFileName
-            TitleRatingsFilenameLabel.Text = C.TitleRatingsDecompFileName
-
+            NameBasicsFilenameLabel.Text = C.NameBasicsDecompressedFileName
+            TitleAkasFilenameLabel.Text = C.TitleAkasDecompressedFileName
+            TitleBasicsFilenameLabel.Text = C.TitleBasicsDecompressedFileName
+            TitleCrewFilenameLabel.Text = C.TitleCrewDecompressedFileName
+            TitleEpisodeFilenameLabel.Text = C.TitleEpisodeDecompressedFileName
+            TitlePrincipalsFilenameLabel.Text = C.TitlePrincipalsDecompressedFileName
+            TitleRatingsFilenameLabel.Text = C.TitleRatingsDecompressedFileName
 
             Dim nameBasicsLength As Long =
-                (New FileInfo(Path.Combine(FolderLocation, C.NameBasicsDecompFileName))).Length
+                (New FileInfo(Path.Combine(FolderLocation, C.NameBasicsDecompressedFileName))).Length
 
             Dim titleAkasLength As Long =
-                (New FileInfo(Path.Combine(FolderLocation, C.TitleAkasDecompFileName))).Length
+                (New FileInfo(Path.Combine(FolderLocation, C.TitleAkasDecompressedFileName))).Length
 
             Dim titleBasicsLength As Long =
-                (New FileInfo(Path.Combine(FolderLocation, C.TitleBasicsDecompFileName))).Length
+                (New FileInfo(Path.Combine(FolderLocation, C.TitleBasicsDecompressedFileName))).Length
 
             Dim titleCrewLength As Long =
-                (New FileInfo(Path.Combine(FolderLocation, C.TitleCrewDecompFileName))).Length
+                (New FileInfo(Path.Combine(FolderLocation, C.TitleCrewDecompressedFileName))).Length
 
             Dim titleEpisodeLength As Long =
-                (New FileInfo(Path.Combine(FolderLocation, C.TitleEpisodeDecompFileName))).Length
+                (New FileInfo(Path.Combine(FolderLocation, C.TitleEpisodeDecompressedFileName))).Length
 
             Dim titlePrincipalsLength As Long =
-                (New FileInfo(Path.Combine(FolderLocation, C.TitlePrincipalsDecompFileName))).Length
+                (New FileInfo(Path.Combine(FolderLocation, C.TitlePrincipalsDecompressedFileName))).Length
 
             Dim titleRatingsLength As Long =
-                (New FileInfo(Path.Combine(FolderLocation, C.TitleRatingsDecompFileName))).Length
+                (New FileInfo(Path.Combine(FolderLocation, C.TitleRatingsDecompressedFileName))).Length
 
             TS.SetText(NameBasicsSizeTextBox,
-                       GetFileDisplayLength(nameBasicsLength) & " " & GetFileDisplayLengthString(nameBasicsLength))
+                       GetFileDisplayLength(nameBasicsLength) & " " &
+                       GetFileDisplayLengthString(nameBasicsLength))
+
             TS.SetText(TitleAkasSizeTextBox,
-                       GetFileDisplayLength(titleAkasLength) & " " & GetFileDisplayLengthString(titleAkasLength))
+                       GetFileDisplayLength(titleAkasLength) & " " &
+                       GetFileDisplayLengthString(titleAkasLength))
+
             TS.SetText(TitleBasicsSizeTextBox,
-                       GetFileDisplayLength(titleBasicsLength) & " " & GetFileDisplayLengthString(titleBasicsLength))
+                       GetFileDisplayLength(titleBasicsLength) & " " &
+                       GetFileDisplayLengthString(titleBasicsLength))
+
             TS.SetText(TitleCrewSizeTextBox,
-                       GetFileDisplayLength(titleCrewLength) & " " & GetFileDisplayLengthString(titleCrewLength))
+                       GetFileDisplayLength(titleCrewLength) & " " &
+                       GetFileDisplayLengthString(titleCrewLength))
+
             TS.SetText(TitleEpisodeSizeTextBox,
-                       GetFileDisplayLength(titleEpisodeLength) & " " & GetFileDisplayLengthString(titleEpisodeLength))
+                       GetFileDisplayLength(titleEpisodeLength) & " " &
+                       GetFileDisplayLengthString(titleEpisodeLength))
+
             TS.SetText(TitlePrincipalsSizeTextBox,
-                       GetFileDisplayLength(titlePrincipalsLength) & " " & GetFileDisplayLengthString(titlePrincipalsLength))
+                       GetFileDisplayLength(titlePrincipalsLength) & " " &
+                       GetFileDisplayLengthString(titlePrincipalsLength))
+
             TS.SetText(TitleRatingsSizeTextBox,
-                       GetFileDisplayLength(titleRatingsLength) & " " & GetFileDisplayLengthString(titleRatingsLength))
+                       GetFileDisplayLength(titleRatingsLength) & " " &
+                       GetFileDisplayLengthString(titleRatingsLength))
 
             FileSizeHeader1Label.Text = "File Size .tsv"
             FileSizeHeader2Label.Text = "File Size .tsv"
@@ -1084,13 +1096,13 @@ Public Class MainForm2
         End If
 
         If CountArchiveRowsButton.Enabled Then
-            ImportType = ImportTypeEnum.Compressed
+            ImportType = IT.Compressed
 
         ElseIf CountTsvRowsButton.Enabled Then
-            ImportType = ImportTypeEnum.Decompressed
+            ImportType = IT.Decompressed
 
         Else
-            ImportType = ImportTypeEnum.Unknown
+            ImportType = IT.Unknown
 
         End If
 
@@ -1249,22 +1261,6 @@ Public Class MainForm2
 
     End Sub
 
-    Private Property NameBasicsRowCount As Long = 0
-    Private Property TitleAkasRowCount As Long = 0
-    Private Property TitleBasicsRowCount As Long = 0
-    Private Property TitleCrewRowCount As Long = 0
-    Private Property TitleEpisodeRowCount As Long = 0
-    Private Property TitlePrincipalsRowCount As Long = 0
-    Private Property TitleRatingsRowCount As Long = 0
-
-    Private Property NameBasicsCounted As Boolean = False
-    Private Property TitleAkasCounted As Boolean = False
-    Private Property TitleBasicsCounted As Boolean = False
-    Private Property TitleCrewCounted As Boolean = False
-    Private Property TitleEpisodeCounted As Boolean = False
-    Private Property TitlePrincipalsCounted As Boolean = False
-    Private Property TitleRatingsCounted As Boolean = False
-
     ''' <summary>
     ''' Handles the click event for the "End Things" button. Depending 
     ''' on the button's text, it either cancels any ongoing background 
@@ -1287,8 +1283,8 @@ Public Class MainForm2
             ElseIf SqlImportBackgroundWorker.IsBusy Then
                 SqlImportBackgroundWorker.CancelAsync()
 
-            ElseIf AllArchivesBackgroundWorker.IsBusy Then
-                AllArchivesBackgroundWorker.CancelAsync()
+            ElseIf AllArchivesSequentialBackgroundWorker.IsBusy Then
+                AllArchivesSequentialBackgroundWorker.CancelAsync()
 
             ElseIf NameBasicsBackgroundWorker.IsBusy Then
                 NameBasicsBackgroundWorker.CancelAsync()
@@ -1324,16 +1320,17 @@ Public Class MainForm2
     ''' <summary>
     ''' Counts the number of rows in a specified file and updates the corresponding text box.
     ''' </summary>
-    ''' <param name="fileName">The name of the file to count rows for.</param>
+    ''' <param name="localFileName">The name of the file to count rows for.</param>
     ''' <returns>The number of rows in the file.</returns>
-    Private Function CountFileRows(ByVal fileName As String) As Long
+    Private Function CountFileRows(localFolderLocation As String,
+                                   localFileName As String) As Long
 
-        Dim rowCount As Long = IO.File.ReadLines(Path.Combine(FolderLocation, fileName)).Count - 1
+        Dim rowCount As Long = IO.File.ReadLines(Path.Combine(localFolderLocation, localFileName)).Count - 1
 
-        Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
-        Dim localFileType As FT = GetFileTypeBasedOnFileName(fileName, localImportType)
+        Dim localImportType As IT = IT.Unknown
+        Dim localFileType As FT = GetFileTypeBasedOnFileName(localFileName, localImportType)
 
-        If localImportType = ImportTypeEnum.Decompressed Then
+        If localImportType = IT.Decompressed Then
             Select Case localFileType
                 Case FT.NameBasics : TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
                 Case FT.TitleAkas : TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
@@ -1354,12 +1351,13 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="fileName">The name of the compressed file to count rows for.</param>
     ''' <returns>The number of rows in the compressed file.</returns>
-    Private Function CountCompressedFileRows(ByVal fileName As String) As Long
+    Private Function CountCompressedFileRows(ByVal folderLocation As String,
+                                             ByVal fileName As String) As Long
 
         Dim rowCount As Long = 0
         Dim actualRowCount As Long = 0
 
-        Dim fileInfoObj As New FileInfo(Path.Combine(FolderLocation, fileName))
+        Dim fileInfoObj As New FileInfo(Path.Combine(folderLocation, fileName))
         Dim gzipFileStream As FileStream = IO.File.OpenRead(fileInfoObj.FullName)
 
         Using decompressionStream As New Comp.GZipStream(gzipFileStream,
@@ -1380,8 +1378,8 @@ Public Class MainForm2
 
                         Dim weShouldExitNow As Boolean = False
 
-                        If AllArchivesBackgroundWorker.IsBusy Then
-                            If AllArchivesBackgroundWorker.CancellationPending Then
+                        If AllArchivesSequentialBackgroundWorker.IsBusy Then
+                            If AllArchivesSequentialBackgroundWorker.CancellationPending Then
                                 weShouldExitNow = True
                             End If
 
@@ -1490,45 +1488,31 @@ Public Class MainForm2
                             ' is fully counted and then updating the UI with that info
 
                             'Debug.Print(rowCount.ToString())
-                            Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
+                            Dim localImportType As IT = IT.Unknown
                             Dim localFileType As FT = GetFileTypeBasedOnFileName(fileName, localImportType)
 
-                            If localImportType = ImportTypeEnum.Compressed Then
+                            If localImportType = IT.Compressed Then
                                 Select Case localFileType
                                     Case FT.NameBasics
-                                        TS.SetText(NameBasicsCountTextBox,
-                                                   rowCount.ToString(C.COMMA_MASK))
-                                        'Debug.Print(C.NameBasicsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleAkas
-                                        TS.SetText(TitleAkasCountTextBox,
-                                                   rowCount.ToString(C.COMMA_MASK))
-                                        'Debug.Print(C.TitleAkasCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleBasics
-                                        TS.SetText(TitleBasicsCountTextBox,
-                                                   rowCount.ToString(C.COMMA_MASK))
-                                        'Debug.Print(C.TitleBasicsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleCrew
-                                        TS.SetText(TitleCrewCountTextBox,
-                                                   rowCount.ToString(C.COMMA_MASK))
-                                        'Debug.Print(C.TitleCrewCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleEpisode
-                                        TS.SetText(TitleEpisodeCountTextBox,
-                                                   rowCount.ToString(C.COMMA_MASK))
-                                        'Debug.Print(C.TitleEpisodeCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitlePrincipals
-                                        TS.SetText(TitlePrincipalsCountTextBox,
-                                                   rowCount.ToString(C.COMMA_MASK))
-                                        'Debug.Print(C.TitlePrincipalsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleRatings
-                                        TS.SetText(TitleRatingsCountTextBox,
-                                                   rowCount.ToString(C.COMMA_MASK))
-                                        'Debug.Print(C.TitleRatingsCompressedFileName & " row count: " & rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
 
                                 End Select
                             End If
@@ -1555,6 +1539,36 @@ Public Class MainForm2
 
     End Function
 
+    Private Property _SequentialOrParallel As SP = SP.Sequential
+    Public Property SequentialOrParallel As SP
+        Get
+            Return _SequentialOrParallel
+        End Get
+        Private Set(value As SP)
+            _SequentialOrParallel = value
+        End Set
+    End Property
+
+    Private Property _ChooseAllOrSelected As CAS = CAS.Unknown
+    Public Property ChooseAllOrSelected As CAS
+        Get
+            Return _ChooseAllOrSelected
+        End Get
+        Private Set(value As CAS)
+            _ChooseAllOrSelected = value
+        End Set
+    End Property
+
+    Private _ProcessType As PT = PT.CountData
+    Public Property ProcessType As PT
+        Get
+            Return _ProcessType
+        End Get
+        Private Set(value As PT)
+            _ProcessType = value
+        End Set
+    End Property
+
     ''' <summary>
     ''' Handles the click event for the "Count Archive Rows" button. It 
     ''' initializes the counting process for the rows in the compressed 
@@ -1575,27 +1589,23 @@ Public Class MainForm2
         Me.AcceptButton = EndThingsButton
         Me.CancelButton = EndThingsButton
 
-        Me.ImportType = ImportTypeEnum.Compressed
+        Me.ImportType = IT.Compressed
 
-        NameBasicsRowCount = 0
-        TitleAkasRowCount = 0
-        TitleBasicsRowCount = 0
-        TitleCrewRowCount = 0
-        TitleEpisodeRowCount = 0
-        TitlePrincipalsRowCount = 0
-        TitleRatingsRowCount = 0
+        For Each localFT As FT In [Enum].GetValues(Of FT)()
+            If ((localFT = FT.OVERALL) OrElse
+                (localFT = FT.Unknown)) Then
+                Continue For
+            End If
 
-        NameBasicsCounted = False
-        TitleAkasCounted = False
-        TitleBasicsCounted = False
-        TitleCrewCounted = False
-        TitleEpisodeCounted = False
-        TitlePrincipalsCounted = False
-        TitleRatingsCounted = False
+            FilesToCountList(localFT) = False
+            FilesCountedList(localFT) = False
+            CountingFilesList(localFT) = False
+        Next
 
         Using countOrInsertDataForm As New CountOrInsertData(PT.CountData,
                                                              SP.Sequential,
-                                                             PFT.Compressed)
+                                                             PFT.Compressed,
+                                                             FolderLocation)
 
             If countOrInsertDataForm.ShowDialog() <> DialogResult.OK Then
                 EndThingsButton.Text = "E&xit"
@@ -1616,8 +1626,21 @@ Public Class MainForm2
             Dim filesToProcess As List(Of String) = countOrInsertDataForm.ProcessFilesList
             Dim gzFilesToProcess As String() = countOrInsertDataForm.ProcessFilesList.ToArray
 
-            Dim processType As PT = countOrInsertDataForm.ProcessType
-            Dim sequentialOrParallel As SP = countOrInsertDataForm.SequentialOrParallel
+            Dim localFileType As FT
+
+            For Each gzFile As String In gzFilesToProcess
+                localFileType = GetFileTypeBasedOnFileName(Path.GetFileName(gzFile))
+
+                ' This check shouldn't be needed, but I'm simply being careful to be robust
+                If CountingFilesList.ContainsKey(localFileType) Then
+                    FilesToCountList(localFileType) = True
+                    CountingFilesList(localFileType) = True
+                End If
+            Next
+
+            Me.ProcessType = countOrInsertDataForm.ProcessType
+            Me.SequentialOrParallel = countOrInsertDataForm.SequentialOrParallel
+            Me.ChooseAllOrSelected = countOrInsertDataForm.ChooseAllOrSelected
 
             CountFilesList.Clear()
 
@@ -1625,143 +1648,125 @@ Public Class MainForm2
                 CountFilesList.Add(fileToProcess)
             Next
 
-            If sequentialOrParallel = SP.Sequential Then
-                DownloadUpdatedArchivesButton.Enabled = False
-                LoadAllDataFilesButton.Enabled = False
-                ChooseFolderButton.Enabled = False
-                FolderLocationTextBox.Enabled = False
+            Select Case Me.SequentialOrParallel
+                Case SP.Sequential
+                    DownloadUpdatedArchivesButton.Enabled = False
+                    LoadAllDataFilesButton.Enabled = False
+                    ChooseFolderButton.Enabled = False
+                    FolderLocationTextBox.Enabled = False
 
-                CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
-                CountArchiveRowsButton.Enabled = False
-                CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
-                CountTsvRowsButton.Enabled = False
+                    CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
+                    CountArchiveRowsButton.Enabled = False
+                    CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
+                    CountTsvRowsButton.Enabled = False
 
-                CancelledOperations = False
+                    CancelledOperations = False
 
-                AllArchivesBackgroundWorker.RunWorkerAsync()
+                    AllArchivesSequentialBackgroundWorker.RunWorkerAsync()
 
-            ElseIf sequentialOrParallel = SP.Parallel Then
+                Case SP.Parallel
 
-                Dim fileLineCounts As New ConcurrentDictionary(Of String, Long)()
+                    Dim fileLineCounts As New ConcurrentDictionary(Of String, Long)()
 
-                Dim watch As Stopwatch = Stopwatch.StartNew()
+                    Dim watch As Stopwatch = Stopwatch.StartNew()
 
-                Parallel.ForEach(gzFilesToProcess,
+                    Parallel.ForEach(gzFilesToProcess,
                                  Sub(currentFile)
                                      Dim lines As Long = CountGZipLinesFast(currentFile)
 
                                      fileLineCounts.TryAdd(currentFile, lines)
                                  End Sub)
 
-                watch.Stop()
+                    watch.Stop()
 
-                Dim elapsedMs As Long = watch.ElapsedMilliseconds
+                    Dim elapsedMs As Long = watch.ElapsedMilliseconds
 
-                Debug.WriteLine($"Elapsed time: {elapsedMs} ms")
+                    Debug.WriteLine($"Elapsed time: {elapsedMs} ms")
 
-                ' save the counted line amounts to the appropriate variables 
-                ' for each file, so that they can be used later in the program, 
-                ' and also update the UI with that info as it becomes available, 
-                ' so the user has a sense of how many rows are in each file, and 
-                ' can see the progress of that counting as it happens, rather 
-                ' than waiting until all the counting is done and then updating 
-                ' the UI with that info
+                    ' save the counted line amounts to the appropriate variables 
+                    ' for each file, so that they can be used later in the program, 
+                    ' and also update the UI with that info as it becomes available, 
+                    ' so the user has a sense of how many rows are in each file, and 
+                    ' can see the progress of that counting as it happens, rather 
+                    ' than waiting until all the counting is done and then updating 
+                    ' the UI with that info
 
-                For Each kvp As KeyValuePair(Of String, Long) In fileLineCounts
-                    Dim fileName As String = kvp.Key
-                    Dim lineCount As Long = kvp.Value
+                    For Each kvp As KeyValuePair(Of String, Long) In fileLineCounts
+                        Dim fileName As String = kvp.Key
+                        Dim lineCount As Long = kvp.Value
 
-                    Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
-                    Dim localFileType As FT = GetFileTypeBasedOnFileName(Path.GetFileName(fileName), localImportType)
+                        Dim localImportType As IT = IT.Unknown
 
-                    If localImportType = ImportTypeEnum.Compressed Then
-                        Select Case localFileType
-                            Case FT.NameBasics
-                                MyRawFileInfo(localFileType).CountedRows = lineCount
+                        localFileType = GetFileTypeBasedOnFileName(Path.GetFileName(fileName), localImportType)
 
-                                NameBasicsRowCount = lineCount
-                                NameBasicsCounted = True
+                        If localImportType = IT.Compressed Then
+                            MyRawFileInfo(localFileType).CountedRows = lineCount
 
-                                TS.SetText(NameBasicsCountTextBox,
-                                           lineCount.ToString(C.COMMA_MASK))
+                            FilesRowCount(localFileType) = lineCount
+                            FilesCountedList(localFileType) = True
 
-                            Case FT.TitleAkas
-                                MyRawFileInfo(localFileType).CountedRows = lineCount
+                            Select Case localFileType
+                                Case FT.NameBasics
+                                    TS.SetText(NameBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                                TitleAkasRowCount = lineCount
-                                TitleAkasCounted = True
+                                Case FT.TitleAkas
+                                    TS.SetText(TitleAkasCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                                TS.SetText(TitleAkasCountTextBox,
-                                           lineCount.ToString(C.COMMA_MASK))
+                                Case FT.TitleBasics
+                                    TS.SetText(TitleBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            Case FT.TitleBasics
-                                MyRawFileInfo(localFileType).CountedRows = lineCount
+                                Case FT.TitleCrew
+                                    TS.SetText(TitleCrewCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                                TitleBasicsRowCount = lineCount
-                                TitleBasicsCounted = True
+                                Case FT.TitleEpisode
+                                    TS.SetText(TitleEpisodeCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                                TS.SetText(TitleBasicsCountTextBox,
-                                           lineCount.ToString(C.COMMA_MASK))
+                                Case FT.TitlePrincipals
+                                    TS.SetText(TitlePrincipalsCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                            Case FT.TitleCrew
-                                MyRawFileInfo(localFileType).CountedRows = lineCount
+                                Case FT.TitleRatings
+                                    TS.SetText(TitleRatingsCountTextBox, lineCount.ToString(C.COMMA_MASK))
 
-                                TitleCrewRowCount = lineCount
-                                TitleCrewCounted = True
+                            End Select
+                        End If
 
-                                TS.SetText(TitleCrewCountTextBox,
-                                           lineCount.ToString(C.COMMA_MASK))
+                    Next
 
-                            Case FT.TitleEpisode
-                                MyRawFileInfo(localFileType).CountedRows = lineCount
+                    Dim countedFiles As Integer = 0
+                    Dim filesToCount As Integer = 0
 
-                                TitleEpisodeRowCount = lineCount
-                                TitleEpisodeCounted = True
+                    For Each localFT As FT In [Enum].GetValues(Of FT)()
+                        If ((localFT = FT.OVERALL) OrElse
+                            (localFT = FT.Unknown)) Then
+                            Continue For
+                        End If
 
-                                TS.SetText(TitleEpisodeCountTextBox,
-                                           lineCount.ToString(C.COMMA_MASK))
+                        If FilesToCountList(localFT) Then
+                            filesToCount += 1
+                        End If
 
-                            Case FT.TitlePrincipals
-                                MyRawFileInfo(localFileType).CountedRows = lineCount
+                        If FilesCountedList(localFT) Then
+                            countedFiles += 1
+                        End If
+                    Next
 
-                                TitlePrincipalsRowCount = lineCount
-                                TitlePrincipalsCounted = True
+                    If countedFiles = filesToCount Then
+                        ' we have counted all of the files that were selected
+                        MyRawFileInfo(FT.OVERALL).CountedRows = 0
 
-                                TS.SetText(TitlePrincipalsCountTextBox,
-                                           lineCount.ToString(C.COMMA_MASK))
+                        For Each localFT In [Enum].GetValues(Of FT)()
+                            If ((localFT = FT.OVERALL) OrElse
+                                (localFT = FT.Unknown)) Then
+                                Continue For
+                            End If
 
-                            Case FT.TitleRatings
-                                MyRawFileInfo(localFileType).CountedRows = lineCount
-
-                                TitleRatingsRowCount = lineCount
-                                TitleRatingsCounted = True
-
-                                TS.SetText(TitleRatingsCountTextBox,
-                                           lineCount.ToString(C.COMMA_MASK))
-
-                        End Select
+                            If FilesCountedList(localFT) Then
+                                MyRawFileInfo(FT.OVERALL).CountedRows += MyRawFileInfo(localFT).CountedRows
+                            End If
+                        Next
                     End If
 
-                Next
-
-                If (NameBasicsCounted AndAlso
-                    TitleAkasCounted AndAlso
-                    TitleBasicsCounted AndAlso
-                    TitleCrewCounted AndAlso
-                    TitleEpisodeCounted AndAlso
-                    TitlePrincipalsCounted AndAlso
-                    TitleRatingsCounted) Then
-
-                    MyRawFileInfo(FT.OVERALL).CountedRows = (MyRawFileInfo(FT.NameBasics).CountedRows +
-                                                             MyRawFileInfo(FT.TitleAkas).CountedRows +
-                                                             MyRawFileInfo(FT.TitleBasics).CountedRows +
-                                                             MyRawFileInfo(FT.TitleCrew).CountedRows +
-                                                             MyRawFileInfo(FT.TitleEpisode).CountedRows +
-                                                             MyRawFileInfo(FT.TitlePrincipals).CountedRows +
-                                                             MyRawFileInfo(FT.TitleRatings).CountedRows)
-
-                End If
-            End If
+            End Select
         End Using
 
         ' kick off separate tasks to count the rows in each file using BackgroundWorker, 
@@ -1778,16 +1783,58 @@ Public Class MainForm2
     ''' <returns></returns>
     Private Property CountFilesList As New List(Of String)
 
+    Private Property FilesToCountList As New SortedList(Of FT, Boolean) From
+        {
+            {FT.NameBasics, False},
+            {FT.TitleAkas, False},
+            {FT.TitleBasics, False},
+            {FT.TitleCrew, False},
+            {FT.TitleEpisode, False},
+            {FT.TitlePrincipals, False},
+            {FT.TitleRatings, False}
+        }
+
+    Private Property FilesCountedList As New SortedList(Of FT, Boolean) From
+        {
+            {FT.NameBasics, False},
+            {FT.TitleAkas, False},
+            {FT.TitleBasics, False},
+            {FT.TitleCrew, False},
+            {FT.TitleEpisode, False},
+            {FT.TitlePrincipals, False},
+            {FT.TitleRatings, False}
+        }
+
+    Private Property CountingFilesList As New SortedList(Of FT, Boolean) From
+        {
+            {FT.NameBasics, False},
+            {FT.TitleAkas, False},
+            {FT.TitleBasics, False},
+            {FT.TitleCrew, False},
+            {FT.TitleEpisode, False},
+            {FT.TitlePrincipals, False},
+            {FT.TitleRatings, False}
+        }
+
+    Private Property FilesRowCount As New SortedList(Of FT, Long) From
+        {
+            {FT.NameBasics, 0},
+            {FT.TitleAkas, 0},
+            {FT.TitleBasics, 0},
+            {FT.TitleCrew, 0},
+            {FT.TitleEpisode, 0},
+            {FT.TitlePrincipals, 0},
+            {FT.TitleRatings, 0}
+        }
+
     ''' <summary>
     ''' Gets or sets the list of files to be inserted into the database.
     ''' </summary>
     ''' <returns></returns>
     Private Property InsertDataFilesList As New List(Of String)
 
-
     Private Property CountTsvRowsButtonEnabled As Boolean = True
     Private Property CountArchiveRowsButtonEnabled As Boolean = True
-
 
     ''' <summary>
     ''' Handles the click event for the "Count TSV Rows" button. It 
@@ -1808,23 +1855,19 @@ Public Class MainForm2
         Me.AcceptButton = EndThingsButton
         Me.CancelButton = EndThingsButton
 
-        Me.ImportType = ImportTypeEnum.Decompressed
+        Me.ImportType = IT.Decompressed
 
-        NameBasicsRowCount = 0
-        TitleAkasRowCount = 0
-        TitleBasicsRowCount = 0
-        TitleCrewRowCount = 0
-        TitleEpisodeRowCount = 0
-        TitlePrincipalsRowCount = 0
-        TitleRatingsRowCount = 0
+        For Each localFT As FT In [Enum].GetValues(Of FT)()
+            If ((localFT = FT.OVERALL) OrElse
+                (localFT = FT.Unknown)) Then
+                Continue For
+            End If
 
-        NameBasicsCounted = False
-        TitleAkasCounted = False
-        TitleBasicsCounted = False
-        TitleCrewCounted = False
-        TitleEpisodeCounted = False
-        TitlePrincipalsCounted = False
-        TitleRatingsCounted = False
+            FilesToCountList(localFT) = False
+            FilesCountedList(localFT) = False
+            CountingFilesList(localFT) = False
+            FilesRowCount(localFT) = 0
+        Next
 
         ' kick off separate tasks to count the rows in each file using BackgroundWorker, 
         ' and then update the UI with that info as it becomes available, so the user has 
@@ -1834,7 +1877,8 @@ Public Class MainForm2
 
         Using countOrInsertDataForm As New CountOrInsertData(PT.CountData,
                                                              SP.Sequential,
-                                                             PFT.Decompressed)
+                                                             PFT.Decompressed,
+                                                             FolderLocation)
 
             If countOrInsertDataForm.ShowDialog() <> DialogResult.OK Then
                 EndThingsButton.Text = "E&xit"
@@ -1850,75 +1894,98 @@ Public Class MainForm2
             Dim filesToProcess As List(Of String) = countOrInsertDataForm.ProcessFilesList
 
             Dim processType As PT = countOrInsertDataForm.ProcessType
-            Dim sequentialOrParallel As SP = countOrInsertDataForm.SequentialOrParallel
+
+            Me.SequentialOrParallel = countOrInsertDataForm.SequentialOrParallel
+            Me.ChooseAllOrSelected = countOrInsertDataForm.ChooseAllOrSelected
 
             CountFilesList.Clear()
 
             For Each fileToProcess As String In filesToProcess
+                FilesToCountList(GetFileTypeBasedOnFileName(Path.GetFileName(fileToProcess))) = True
+
                 CountFilesList.Add(fileToProcess)
             Next
 
-            If sequentialOrParallel = SP.Sequential Then
+            Select Case Me.SequentialOrParallel
+                Case SP.Sequential
+                    DownloadUpdatedArchivesButton.Enabled = False
+                    LoadAllDataFilesButton.Enabled = False
+                    ChooseFolderButton.Enabled = False
+                    FolderLocationTextBox.Enabled = False
 
-                DownloadUpdatedArchivesButton.Enabled = False
-                LoadAllDataFilesButton.Enabled = False
-                ChooseFolderButton.Enabled = False
-                FolderLocationTextBox.Enabled = False
+                    CancelledOperations = False
 
-                CancelledOperations = False
+                    CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
+                    CountTsvRowsButton.Enabled = False
 
-                CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
-                CountTsvRowsButton.Enabled = False
+                    CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
+                    CountArchiveRowsButton.Enabled = False
 
-                CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
-                CountArchiveRowsButton.Enabled = False
+                    AllArchivesSequentialBackgroundWorker.RunWorkerAsync()
 
-                AllArchivesBackgroundWorker.RunWorkerAsync()
+                Case SP.Parallel
+                    ' kick off the backgroundworker for each file to process
 
-            ElseIf sequentialOrParallel = SP.Parallel Then
-                ' kick off the backgroundworker for each file to process
+                    DownloadUpdatedArchivesButton.Enabled = False
+                    LoadAllDataFilesButton.Enabled = False
+                    ChooseFolderButton.Enabled = False
+                    FolderLocationTextBox.Enabled = False
 
-                DownloadUpdatedArchivesButton.Enabled = False
-                LoadAllDataFilesButton.Enabled = False
-                ChooseFolderButton.Enabled = False
-                FolderLocationTextBox.Enabled = False
+                    CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
+                    CountTsvRowsButton.Enabled = False
 
-                CountTsvRowsButtonEnabled = CountTsvRowsButton.Enabled
-                CountTsvRowsButton.Enabled = False
+                    CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
+                    CountArchiveRowsButton.Enabled = False
 
-                CountArchiveRowsButtonEnabled = CountArchiveRowsButton.Enabled
-                CountArchiveRowsButton.Enabled = False
+                    CancelledOperations = False
 
-                CancelledOperations = False
+                    ' kick off the backgroundworker for each selected file to process, 
+                    ' and then update the UI with that info as it becomes available, so 
+                    ' the user has a sense of how many rows are in each file, and can 
+                    ' see the progress of that counting as it happens, rather than waiting 
+                    ' until all the counting is done and then updating the UI with that info
 
-                For Each fileToProcess As String In CountFilesList
-                    If fileToProcess.StartsWith(FolderLocation) Then
-                        fileToProcess = Path.GetFileName(fileToProcess)
-                    End If
+                    For Each fileToProcess As String In CountFilesList
+                        If fileToProcess.StartsWith(FolderLocation) Then
+                            fileToProcess = Path.GetFileName(fileToProcess)
+                        End If
 
-                    Dim localImportType As ImportTypeEnum = ImportTypeEnum.Unknown
-                    Dim localFileType As FT = GetFileTypeBasedOnFileName(fileToProcess, localImportType)
+                        Dim localImportType As IT = IT.Unknown
+                        Dim localFileType As FT = GetFileTypeBasedOnFileName(fileToProcess, localImportType)
 
-                    If localImportType = ImportTypeEnum.Decompressed AndAlso
-                       File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
+                        If localImportType = IT.Decompressed AndAlso
+                           File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
 
-                        Select Case localFileType
-                            Case FT.NameBasics : NameBasicsBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case FT.TitleAkas : TitleAkasBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case FT.TitleBasics : TitleBasicsBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case FT.TitleCrew : TitleCrewBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case FT.TitleEpisode : TitleEpisodeBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case FT.TitlePrincipals : TitlePrincipalsBackgroundWorker.RunWorkerAsync(fileToProcess)
-                            Case FT.TitleRatings : TitleRatingsBackgroundWorker.RunWorkerAsync(fileToProcess)
-                        End Select
+                            FilesToCountList(localFileType) = True
 
-                    End If
-                Next
-            End If
+                            Select Case localFileType
+                                Case FT.NameBasics
+                                    NameBasicsBackgroundWorker.RunWorkerAsync()
+
+                                Case FT.TitleAkas
+                                    TitleAkasBackgroundWorker.RunWorkerAsync()
+
+                                Case FT.TitleBasics
+                                    TitleBasicsBackgroundWorker.RunWorkerAsync()
+
+                                Case FT.TitleCrew
+                                    TitleCrewBackgroundWorker.RunWorkerAsync()
+
+                                Case FT.TitleEpisode
+                                    TitleEpisodeBackgroundWorker.RunWorkerAsync()
+
+                                Case FT.TitlePrincipals
+                                    TitlePrincipalsBackgroundWorker.RunWorkerAsync()
+
+                                Case FT.TitleRatings
+                                    TitleRatingsBackgroundWorker.RunWorkerAsync()
+                            End Select
+
+                        End If
+                    Next
+            End Select
 
         End Using
-
-        'CheckAllCounted()
 
     End Sub
 
@@ -1985,13 +2052,13 @@ Public Class MainForm2
     ''' </summary>
     Private Sub CheckAllCounted()
 
-        Dim allCounted As Boolean = (NameBasicsCounted AndAlso
-                                     TitleAkasCounted AndAlso
-                                     TitleBasicsCounted AndAlso
-                                     TitleCrewCounted AndAlso
-                                     TitleEpisodeCounted AndAlso
-                                     TitlePrincipalsCounted AndAlso
-                                     TitleRatingsCounted)
+        Dim allCounted As Boolean = (FilesCountedList(FT.NameBasics) AndAlso
+                                     FilesCountedList(FT.TitleAkas) AndAlso
+                                     FilesCountedList(FT.TitleBasics) AndAlso
+                                     FilesCountedList(FT.TitleCrew) AndAlso
+                                     FilesCountedList(FT.TitleEpisode) AndAlso
+                                     FilesCountedList(FT.TitlePrincipals) AndAlso
+                                     FilesCountedList(FT.TitleRatings))
 
         Dim reEnableControls As Boolean = (allCounted OrElse
                                            CancelledOperations)
@@ -2016,6 +2083,91 @@ Public Class MainForm2
 
     End Sub
 
+    ''' <summary>
+    ''' Checks if the selected files in the provided list have been counted and updates the UI controls accordingly. 
+    ''' If all selected files are counted or if any operation has been cancelled, it re-enables the relevant 
+    ''' UI controls (FolderLocationTextBox, ChooseFolderButton, LoadAllDataFilesButton, DownloadUpdatedArchivesButton). 
+    ''' It also resets the EndThingsButton text to "E&xit" if it was previously set to "&Cancel".
+    ''' </summary>
+    ''' <param name="countFilesList"></param>
+    Private Sub CheckSelectedCounted(countFilesList As List(Of String))
+
+        Dim allCounted As Boolean = False
+
+        ' keep a list of all files being counted, and check if all of them have been counted, and if so, re-enable the controls
+
+        Dim countingFiles As Integer = 0
+        Dim countedFiles As Integer = 0
+
+        'For Each fileToProcess As String In countFilesList
+        '    If fileToProcess.StartsWith(FolderLocation) Then
+        '        fileToProcess = Path.GetFileName(fileToProcess)
+        '    End If
+
+        '    Dim localImportType As IT =
+        '        IT.Unknown
+
+        '    Dim localFileType As FT =
+        '        GetFileTypeBasedOnFileName(fileToProcess, localImportType)
+
+        '    'If localImportType = IT.Decompressed Then
+        '    '    Select Case localFileType
+        '    '        Case FT.NameBasics : allCounted = allCounted And FilesCountedList(localFileType)
+        '    '        Case FT.TitleAkas : allCounted = allCounted And FilesCountedList(localFileType)
+        '    '        Case FT.TitleBasics : allCounted = allCounted And FilesCountedList(localFileType)
+        '    '        Case FT.TitleCrew : allCounted = allCounted And FilesCountedList(localFileType)
+        '    '        Case FT.TitleEpisode : allCounted = allCounted And FilesCountedList(localFileType)
+        '    '        Case FT.TitlePrincipals : allCounted = allCounted And FilesCountedList(localFileType)
+        '    '        Case FT.TitleRatings : allCounted = allCounted And FilesCountedList(localFileType)
+        '    '    End Select
+        '    'End If
+        'Next
+
+        For Each localFT As FT In [Enum].GetValues(Of FT)()
+            If ((localFT = FT.OVERALL) OrElse
+                (localFT = FT.Unknown)) Then
+                Continue For
+            End If
+
+            If FilesToCountList(localFT) Then countingFiles += 1
+            If FilesCountedList(localFT) Then countedFiles += 1
+
+        Next
+
+        allCounted = (countedFiles = countingFiles)
+
+
+        If CancelledOperations OrElse
+           allCounted Then
+
+            If FilesCountedList(FT.NameBasics) Then CountingFilesList(FT.NameBasics) = False
+            If FilesCountedList(FT.TitleAkas) Then CountingFilesList(FT.TitleAkas) = False
+            If FilesCountedList(FT.TitleBasics) Then CountingFilesList(FT.TitleBasics) = False
+            If FilesCountedList(FT.TitleCrew) Then CountingFilesList(FT.TitleCrew) = False
+            If FilesCountedList(FT.TitleEpisode) Then CountingFilesList(FT.TitleEpisode) = False
+            If FilesCountedList(FT.TitlePrincipals) Then CountingFilesList(FT.TitlePrincipals) = False
+            If FilesCountedList(FT.TitleRatings) Then CountingFilesList(FT.TitleRatings) = False
+
+            FolderLocationTextBox.Enabled = True
+            ChooseFolderButton.Enabled = True
+            LoadAllDataFilesButton.Enabled = True
+            DownloadUpdatedArchivesButton.Enabled = True
+            CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
+            CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
+            ' reset the EndThingsButton
+
+            If EndThingsButton.Text = "&Cancel" Then
+                EndThingsButton.Text = "E&xit"
+
+                Me.AcceptButton = LoadAllDataFilesButton
+                Me.CancelButton = EndThingsButton
+
+            End If
+        End If
+
+    End Sub
+
+
 #Region "BackgroundWorker Objects DoWork Event Handlers"
     ''' <summary>
     ''' Handles the DoWork event for the NameBasicsBackgroundWorker.
@@ -2028,7 +2180,6 @@ Public Class MainForm2
     Private Sub NameBasicsBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
         Handles NameBasicsBackgroundWorker.DoWork
 
-
         If TitleAkasBackgroundWorker.CancellationPending OrElse
            TitleBasicsBackgroundWorker.CancellationPending OrElse
            TitleCrewBackgroundWorker.CancellationPending OrElse
@@ -2040,13 +2191,20 @@ Public Class MainForm2
             NameBasicsBackgroundWorker.CancelAsync()
         End If
 
-        If ImportType = ImportTypeEnum.Compressed Then
-            NameBasicsRowCount = CountCompressedFileRows(C.NameBasicsCompressedFileName)
+        Dim localFT As FT = FT.NameBasics
+        Dim rowCount As Long = 0
 
-        ElseIf ImportType = ImportTypeEnum.Decompressed Then
-            NameBasicsRowCount = CountFileRows(C.NameBasicsDecompFileName)
+        Select Case ImportType
+            Case IT.Compressed
+                rowCount = CountCompressedFileRows(FolderLocation, C.NameBasicsCompressedFileName)
 
-        End If
+            Case IT.Decompressed
+                rowCount = CountFileRows(FolderLocation, C.NameBasicsDecompressedFileName)
+
+        End Select
+
+        FilesRowCount(localFT) = rowCount
+        FilesCountedList(localFT) = True
 
     End Sub
 
@@ -2072,13 +2230,20 @@ Public Class MainForm2
             TitleAkasBackgroundWorker.CancelAsync()
         End If
 
-        If ImportType = ImportTypeEnum.Compressed Then
-            TitleAkasRowCount = CountCompressedFileRows(C.TitleAkasCompressedFileName)
+        Dim localFT As FT = FT.TitleAkas
+        Dim rowCount As Long = 0
 
-        ElseIf ImportType = ImportTypeEnum.Decompressed Then
-            TitleAkasRowCount = CountFileRows(C.TitleAkasDecompFileName)
+        Select Case ImportType
+            Case IT.Compressed
+                rowCount = CountCompressedFileRows(FolderLocation, C.TitleAkasCompressedFileName)
 
-        End If
+            Case IT.Decompressed
+                rowCount = CountFileRows(FolderLocation, C.TitleAkasDecompressedFileName)
+
+        End Select
+
+        FilesRowCount(localFT) = rowCount
+        FilesCountedList(localFT) = True
 
     End Sub
 
@@ -2104,13 +2269,20 @@ Public Class MainForm2
             TitleBasicsBackgroundWorker.CancelAsync()
         End If
 
-        If ImportType = ImportTypeEnum.Compressed Then
-            TitleBasicsRowCount = CountCompressedFileRows(C.TitleBasicsCompressedFileName)
+        Dim localFT As FT = FT.TitleBasics
+        Dim rowCount As Long = 0
 
-        ElseIf ImportType = ImportTypeEnum.Decompressed Then
-            TitleBasicsRowCount = CountFileRows(C.TitleBasicsDecompFileName)
+        Select Case ImportType
+            Case IT.Compressed
+                rowCount = CountCompressedFileRows(FolderLocation, C.TitleBasicsCompressedFileName)
 
-        End If
+            Case IT.Decompressed
+                rowCount = CountFileRows(FolderLocation, C.TitleBasicsDecompressedFileName)
+
+        End Select
+
+        FilesRowCount(localFT) = rowCount
+        FilesCountedList(localFT) = True
 
     End Sub
 
@@ -2136,13 +2308,20 @@ Public Class MainForm2
             TitleCrewBackgroundWorker.CancelAsync()
         End If
 
-        If ImportType = ImportTypeEnum.Compressed Then
-            TitleCrewRowCount = CountCompressedFileRows(C.TitleCrewCompressedFileName)
+        Dim localFT As FT = FT.TitleCrew
+        Dim rowCount As Long = 0
 
-        ElseIf ImportType = ImportTypeEnum.Decompressed Then
-            TitleCrewRowCount = CountFileRows(C.TitleCrewDecompFileName)
+        Select Case ImportType
+            Case IT.Compressed
+                rowCount = CountCompressedFileRows(FolderLocation, C.TitleCrewCompressedFileName)
 
-        End If
+            Case IT.Decompressed
+                rowCount = CountFileRows(FolderLocation, C.TitleCrewDecompressedFileName)
+
+        End Select
+
+        FilesRowCount(localFT) = rowCount
+        FilesCountedList(localFT) = True
 
     End Sub
 
@@ -2168,13 +2347,20 @@ Public Class MainForm2
             TitleEpisodeBackgroundWorker.CancelAsync()
         End If
 
-        If ImportType = ImportTypeEnum.Compressed Then
-            TitleEpisodeRowCount = CountCompressedFileRows(C.TitleEpisodeCompressedFileName)
+        Dim localFT As FT = FT.TitleEpisode
+        Dim rowCount As Long = 0
 
-        ElseIf ImportType = ImportTypeEnum.Decompressed Then
-            TitleEpisodeRowCount = CountFileRows(C.TitleEpisodeDecompFileName)
+        Select Case ImportType
+            Case IT.Compressed
+                rowCount = CountCompressedFileRows(FolderLocation, C.TitleEpisodeCompressedFileName)
 
-        End If
+            Case IT.Decompressed
+                rowCount = CountFileRows(FolderLocation, C.TitleEpisodeDecompressedFileName)
+
+        End Select
+
+        FilesRowCount(localFT) = rowCount
+        FilesCountedList(localFT) = True
 
     End Sub
 
@@ -2200,13 +2386,20 @@ Public Class MainForm2
             TitlePrincipalsBackgroundWorker.CancelAsync()
         End If
 
-        If ImportType = ImportTypeEnum.Compressed Then
-            TitlePrincipalsRowCount = CountCompressedFileRows(C.TitlePrincipalsCompressedFileName)
+        Dim localFT As FT = FT.TitlePrincipals
+        Dim rowCount As Long = 0
 
-        ElseIf ImportType = ImportTypeEnum.Decompressed Then
-            TitlePrincipalsRowCount = CountFileRows(C.TitlePrincipalsDecompFileName)
+        Select Case ImportType
+            Case IT.Compressed
+                rowCount = CountCompressedFileRows(FolderLocation, C.TitlePrincipalsCompressedFileName)
 
-        End If
+            Case IT.Decompressed
+                rowCount = CountFileRows(FolderLocation, C.TitlePrincipalsDecompressedFileName)
+
+        End Select
+
+        FilesRowCount(localFT) = rowCount
+        FilesCountedList(localFT) = True
 
     End Sub
 
@@ -2232,13 +2425,20 @@ Public Class MainForm2
             TitleRatingsBackgroundWorker.CancelAsync()
         End If
 
-        If ImportType = ImportTypeEnum.Compressed Then
-            TitleRatingsRowCount = CountCompressedFileRows(C.TitleRatingsCompressedFileName)
+        Dim localFT As FT = FT.TitleRatings
+        Dim rowCount As Long = 0
 
-        ElseIf ImportType = ImportTypeEnum.Decompressed Then
-            TitleRatingsRowCount = CountFileRows(C.TitleRatingsDecompFileName)
+        Select Case ImportType
+            Case IT.Compressed
+                rowCount = CountCompressedFileRows(FolderLocation, C.TitleRatingsCompressedFileName)
 
-        End If
+            Case IT.Decompressed
+                rowCount = CountFileRows(FolderLocation, C.TitleRatingsDecompressedFileName)
+
+        End Select
+
+        FilesRowCount(localFT) = rowCount
+        FilesCountedList(localFT) = True
 
     End Sub
 
@@ -2250,14 +2450,17 @@ Public Class MainForm2
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
     Private Sub AllArchivesBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
-        Handles AllArchivesBackgroundWorker.DoWork
+        Handles AllArchivesSequentialBackgroundWorker.DoWork
 
         Dim fileNumber As Integer = 0
+        Dim localRowCount As Long = 0
+        Dim fileCounted As Boolean = False
+        Dim localFileType As FT = FT.Unknown
 
         For Each fileToProcess As String In CountFilesList
             fileNumber += 1
 
-            If AllArchivesBackgroundWorker.CancellationPending Then
+            If AllArchivesSequentialBackgroundWorker.CancellationPending Then
                 CancelledOperations = True
 
                 Exit For
@@ -2267,95 +2470,30 @@ Public Class MainForm2
                 fileToProcess = Path.GetFileName(fileToProcess)
             End If
 
-            Dim localFileType As FT = GetFileTypeBasedOnFileName(fileToProcess)
-            Dim localRowCount As Long = 0
-            Dim fileCounted As Boolean = False
+            localFileType = GetFileTypeBasedOnFileName(fileToProcess)
+
+            FilesToCountList(localFileType) = True
 
             If File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
+
                 Select Case ImportType
 
-                    Case ImportTypeEnum.Compressed
-                        localRowCount = CountCompressedFileRows(fileToProcess)
+                    Case IT.Compressed
+                        localRowCount = CountCompressedFileRows(FolderLocation, fileToProcess)
 
-                        MyRawFileInfo(localFileType).CountedRows = localRowCount
+                    Case IT.Decompressed
+                        localRowCount = CountFileRows(FolderLocation, fileToProcess)
 
-                        fileCounted = True
-
-                        Select Case localFileType
-                            Case FT.NameBasics
-                                NameBasicsRowCount = localRowCount
-                                NameBasicsCounted = True
-
-                            Case FT.TitleAkas
-                                TitleAkasRowCount = localRowCount
-                                TitleAkasCounted = True
-
-                            Case FT.TitleBasics
-                                TitleBasicsRowCount = localRowCount
-                                TitleBasicsCounted = True
-
-                            Case FT.TitleCrew
-                                TitleCrewRowCount = localRowCount
-                                TitleCrewCounted = True
-
-                            Case FT.TitleEpisode
-                                TitleEpisodeRowCount = localRowCount
-                                TitleEpisodeCounted = True
-
-                            Case FT.TitlePrincipals
-                                TitlePrincipalsRowCount = localRowCount
-                                TitlePrincipalsCounted = True
-
-                            Case FT.TitleRatings
-                                TitleRatingsRowCount = localRowCount
-                                TitleRatingsCounted = True
-
-                            Case FT.Unknown
-                                fileCounted = False
-
-                        End Select
-
-                    Case ImportTypeEnum.Decompressed
-                        localRowCount = CountFileRows(fileToProcess)
-
-                        MyRawFileInfo(localFileType).CountedRows = localRowCount
-
-                        fileCounted = True
-
-                        Select Case localFileType
-                            Case FT.NameBasics
-                                NameBasicsRowCount = localRowCount
-                                NameBasicsCounted = True
-
-                            Case FT.TitleAkas
-                                TitleAkasRowCount = localRowCount
-                                TitleAkasCounted = True
-
-                            Case FT.TitleBasics
-                                TitleBasicsRowCount = localRowCount
-                                TitleBasicsCounted = True
-
-                            Case FT.TitleCrew
-                                TitleCrewRowCount = localRowCount
-                                TitleCrewCounted = True
-
-                            Case FT.TitleEpisode
-                                TitleEpisodeRowCount = localRowCount
-                                TitleEpisodeCounted = True
-
-                            Case FT.TitlePrincipals
-                                TitlePrincipalsRowCount = localRowCount
-                                TitlePrincipalsCounted = True
-
-                            Case FT.TitleRatings
-                                TitleRatingsRowCount = localRowCount
-                                TitleRatingsCounted = True
-
-                            Case FT.Unknown
-                                fileCounted = False
-
-                        End Select
                 End Select
+
+                MyRawFileInfo(localFileType).CountedRows = localRowCount
+
+                If FilesRowCount.ContainsKey(localFileType) Then
+                    fileCounted = True
+
+                    FilesRowCount(localFileType) = localRowCount
+                    FilesCountedList(localFileType) = True
+                End If
 
                 ' update the log textbox with the row count for the current file, 
                 ' as we want to show the user that we're making progress on counting 
@@ -2388,37 +2526,37 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="fileName">The name of the file to check.</param>
     ''' <returns>The file type enumeration (FT) corresponding to the file name.</returns>
-    Private Function GetFileTypeBasedOnFileName(fileName As String) As FT
+    Public Shared Function GetFileTypeBasedOnFileName(fileName As String) As FT
 
         Dim result As FT = FT.Unknown
 
         Select Case fileName
             Case C.NameBasicsCompressedFileName,
-                 C.NameBasicsDecompFileName
+                 C.NameBasicsDecompressedFileName
                 result = FT.NameBasics
 
             Case C.TitleAkasCompressedFileName,
-                 C.TitleAkasDecompFileName
+                 C.TitleAkasDecompressedFileName
                 result = FT.TitleAkas
 
             Case C.TitleBasicsCompressedFileName,
-                 C.TitleBasicsDecompFileName
+                 C.TitleBasicsDecompressedFileName
                 result = FT.TitleBasics
 
             Case C.TitleCrewCompressedFileName,
-                 C.TitleCrewDecompFileName
+                 C.TitleCrewDecompressedFileName
                 result = FT.TitleCrew
 
             Case C.TitleEpisodeCompressedFileName,
-                 C.TitleEpisodeDecompFileName
+                 C.TitleEpisodeDecompressedFileName
                 result = FT.TitleEpisode
 
             Case C.TitlePrincipalsCompressedFileName,
-                 C.TitlePrincipalsDecompFileName
+                 C.TitlePrincipalsDecompressedFileName
                 result = FT.TitlePrincipals
 
             Case C.TitleRatingsCompressedFileName,
-                 C.TitleRatingsDecompFileName
+                 C.TitleRatingsDecompressedFileName
                 result = FT.TitleRatings
 
             Case Else
@@ -2430,8 +2568,8 @@ Public Class MainForm2
 
     End Function
 
-    Private Function GetFileTypeBasedOnFileName(fileName As String,
-                                          ByRef importType As ImportTypeEnum) As FT
+    Public Shared Function GetFileTypeBasedOnFileName(fileName As String,
+                                                ByRef importType As IT) As FT
 
         Dim result As FT = FT.Unknown
 
@@ -2439,74 +2577,76 @@ Public Class MainForm2
             ' Name.Basics
             Case C.NameBasicsCompressedFileName
                 result = FT.NameBasics
-                importType = ImportTypeEnum.Compressed
+                importType = IT.Compressed
 
-            Case C.NameBasicsDecompFileName
+            Case C.NameBasicsDecompressedFileName
                 result = FT.NameBasics
-                importType = ImportTypeEnum.Decompressed
+                importType = IT.Decompressed
+
 
                 ' Title.Akas
             Case C.TitleAkasCompressedFileName
                 result = FT.TitleAkas
-                importType = ImportTypeEnum.Compressed
+                importType = IT.Compressed
 
-            Case C.TitleAkasDecompFileName
+            Case C.TitleAkasDecompressedFileName
                 result = FT.TitleAkas
-                importType = ImportTypeEnum.Decompressed
+                importType = IT.Decompressed
 
 
                 ' Title.Basics
             Case C.TitleBasicsCompressedFileName
                 result = FT.TitleBasics
-                importType = ImportTypeEnum.Compressed
+                importType = IT.Compressed
 
-            Case C.TitleBasicsDecompFileName
+            Case C.TitleBasicsDecompressedFileName
                 result = FT.TitleBasics
-                importType = ImportTypeEnum.Decompressed
+                importType = IT.Decompressed
 
 
                 ' Title.Crew
             Case C.TitleCrewCompressedFileName
                 result = FT.TitleCrew
-                importType = ImportTypeEnum.Compressed
+                importType = IT.Compressed
 
-            Case C.TitleCrewDecompFileName
+            Case C.TitleCrewDecompressedFileName
                 result = FT.TitleCrew
-                importType = ImportTypeEnum.Decompressed
+                importType = IT.Decompressed
 
 
                 ' Title.Episode
             Case C.TitleEpisodeCompressedFileName
                 result = FT.TitleEpisode
-                importType = ImportTypeEnum.Compressed
+                importType = IT.Compressed
 
-            Case C.TitleEpisodeDecompFileName
+            Case C.TitleEpisodeDecompressedFileName
                 result = FT.TitleEpisode
-                importType = ImportTypeEnum.Decompressed
+                importType = IT.Decompressed
 
 
                 ' Title.Principals
             Case C.TitlePrincipalsCompressedFileName
                 result = FT.TitlePrincipals
-                importType = ImportTypeEnum.Compressed
+                importType = IT.Compressed
 
-            Case C.TitlePrincipalsDecompFileName
+            Case C.TitlePrincipalsDecompressedFileName
                 result = FT.TitlePrincipals
-                importType = ImportTypeEnum.Decompressed
+                importType = IT.Decompressed
 
 
                 ' Title.Ratings
             Case C.TitleRatingsCompressedFileName
                 result = FT.TitleRatings
-                importType = ImportTypeEnum.Compressed
+                importType = IT.Compressed
 
-            Case C.TitleRatingsDecompFileName
+            Case C.TitleRatingsDecompressedFileName
                 result = FT.TitleRatings
-                importType = ImportTypeEnum.Decompressed
+                importType = IT.Decompressed
+
 
             Case Else
                 result = FT.Unknown
-                importType = ImportTypeEnum.Unknown
+                importType = IT.Unknown
 
         End Select
 
@@ -2997,13 +3137,20 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub NameBasicsBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                              e As RunWorkerCompletedEventArgs) _
+    Private Sub NameBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles NameBasicsBackgroundWorker.RunWorkerCompleted
 
-        NameBasicsCounted = True
+        FilesCountedList(FT.NameBasics) = True
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 
@@ -3015,13 +3162,20 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleAkasBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                             e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleAkasBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleAkasBackgroundWorker.RunWorkerCompleted
 
-        TitleAkasCounted = True
+        FilesCountedList(FT.TitleAkas) = True
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 
@@ -3033,13 +3187,20 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleBasicsBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                               e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleBasicsBackgroundWorker.RunWorkerCompleted
 
-        TitleBasicsCounted = True
+        FilesCountedList(FT.TitleBasics) = True
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 
@@ -3051,13 +3212,20 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleCrewBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                             e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleCrewBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleCrewBackgroundWorker.RunWorkerCompleted
 
-        TitleCrewCounted = True
+        FilesCountedList(FT.TitleCrew) = True
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 
@@ -3069,13 +3237,20 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleEpisodeBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                                e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleEpisodeBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleEpisodeBackgroundWorker.RunWorkerCompleted
 
-        TitleEpisodeCounted = True
+        FilesCountedList(FT.TitleEpisode) = True
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 
@@ -3087,13 +3262,20 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitlePrincipalsBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                                   e As RunWorkerCompletedEventArgs) _
+    Private Sub TitlePrincipalsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitlePrincipalsBackgroundWorker.RunWorkerCompleted
 
-        TitlePrincipalsCounted = True
+        FilesCountedList(FT.TitlePrincipals) = True
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 
@@ -3105,13 +3287,20 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub TitleRatingsBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                                e As RunWorkerCompletedEventArgs) _
+    Private Sub TitleRatingsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleRatingsBackgroundWorker.RunWorkerCompleted
 
-        TitleRatingsCounted = True
+        FilesCountedList(FT.TitleRatings) = True
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 
@@ -3122,11 +3311,18 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub AllArchivesBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                               e As RunWorkerCompletedEventArgs) _
-        Handles AllArchivesBackgroundWorker.RunWorkerCompleted
+    Private Sub AllArchivesBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+        Handles AllArchivesSequentialBackgroundWorker.RunWorkerCompleted
 
-        CheckAllCounted()
+        Select Case Me.ChooseAllOrSelected
+
+            Case CAS.AllFiles
+                CheckAllCounted()
+
+            Case CAS.SelectedFiles
+                CheckSelectedCounted(CountFilesList)
+
+        End Select
 
     End Sub
 

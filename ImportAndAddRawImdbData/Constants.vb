@@ -1,4 +1,5 @@
 ﻿Imports AH25 = ImportAndAddRawImdbData.Constants.AdHoc2_5TableNameEnum
+Imports FT = ImportAndAddRawImdbData.RawFileInfo.FileTypeEnum
 
 ''' <summary>
 ''' This class contains all the constants used in the ImportAndAddRawImdbData 
@@ -21,6 +22,8 @@ Public Class Constants
     Public Const CompressedFileExtension As String =
                  ".tsv.gz"
     Public Const UnCompressedFileExtension As String =
+                 ".tsv"
+    Public Const DecompressedFileExtension As String =
                  ".tsv"
 
     Public Const NameBasicsType As String =
@@ -53,20 +56,42 @@ Public Class Constants
     Public Const TitleRatingsCompressedFileName As String =
                  "title.ratings.tsv.gz"
 
-    Public Const NameBasicsDecompFileName As String =
+    Public Const NameBasicsDecompressedFileName As String =
                  "name.basics.tsv"
-    Public Const TitleAkasDecompFileName As String =
+    Public Const TitleAkasDecompressedFileName As String =
                  "title.akas.tsv"
-    Public Const TitleBasicsDecompFileName As String =
+    Public Const TitleBasicsDecompressedFileName As String =
                  "title.basics.tsv"
-    Public Const TitleCrewDecompFileName As String =
+    Public Const TitleCrewDecompressedFileName As String =
                  "title.crew.tsv"
-    Public Const TitleEpisodeDecompFileName As String =
+    Public Const TitleEpisodeDecompressedFileName As String =
                  "title.episode.tsv"
-    Public Const TitlePrincipalsDecompFileName As String =
+    Public Const TitlePrincipalsDecompressedFileName As String =
                  "title.principals.tsv"
-    Public Const TitleRatingsDecompFileName As String =
+    Public Const TitleRatingsDecompressedFileName As String =
                  "title.ratings.tsv"
+
+    Public Shared CompressedFileNames As New SortedList(Of FT, String) From
+        {
+            {FT.NameBasics, NameBasicsCompressedFileName},
+            {FT.TitleAkas, TitleAkasCompressedFileName},
+            {FT.TitleBasics, TitleBasicsCompressedFileName},
+            {FT.TitleCrew, TitleCrewCompressedFileName},
+            {FT.TitleEpisode, TitleEpisodeCompressedFileName},
+            {FT.TitlePrincipals, TitlePrincipalsCompressedFileName},
+            {FT.TitleRatings, TitleRatingsCompressedFileName}
+        }
+
+    Public Shared DecompressedFileNames As New SortedList(Of FT, String) From
+        {
+            {FT.NameBasics, NameBasicsDecompressedFileName},
+            {FT.TitleAkas, TitleAkasDecompressedFileName},
+            {FT.TitleBasics, TitleBasicsDecompressedFileName},
+            {FT.TitleCrew, TitleCrewDecompressedFileName},
+            {FT.TitleEpisode, TitleEpisodeDecompressedFileName},
+            {FT.TitlePrincipals, TitlePrincipalsDecompressedFileName},
+            {FT.TitleRatings, TitleRatingsDecompressedFileName}
+        }
 
     Public Const DASHES As String =
                  "------------------------------------------------------------------------------------------"

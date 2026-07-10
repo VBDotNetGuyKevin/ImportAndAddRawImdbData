@@ -87,7 +87,7 @@ Partial Class MainForm2
         TitlePrincipalsBackgroundWorker = New ComponentModel.BackgroundWorker()
         TitleRatingsBackgroundWorker = New ComponentModel.BackgroundWorker()
         DecompressAfterDownloadCheckBox = New CheckBox()
-        AllArchivesBackgroundWorker = New ComponentModel.BackgroundWorker()
+        AllArchivesSequentialBackgroundWorker = New ComponentModel.BackgroundWorker()
         ImportDataButton = New Button()
         SqlImportBackgroundWorker = New ComponentModel.BackgroundWorker()
         Label2 = New Label()
@@ -689,7 +689,7 @@ Partial Class MainForm2
         ' 
         ' AllArchivesBackgroundWorker
         ' 
-        AllArchivesBackgroundWorker.WorkerSupportsCancellation = True
+        AllArchivesSequentialBackgroundWorker.WorkerSupportsCancellation = True
         ' 
         ' ImportDataButton
         ' 
@@ -964,7 +964,7 @@ Partial Class MainForm2
     Friend WithEvents TitleRatingsBackgroundWorker As System.ComponentModel.BackgroundWorker
     Friend WithEvents DecompressAfterDownloadCheckBox As CheckBox
     Friend WithEvents CountTsvRowsButton As Button
-    Friend WithEvents AllArchivesBackgroundWorker As System.ComponentModel.BackgroundWorker
+    Friend WithEvents AllArchivesSequentialBackgroundWorker As System.ComponentModel.BackgroundWorker
     Friend WithEvents ImportDataButton As Button
     Friend WithEvents SqlImportBackgroundWorker As System.ComponentModel.BackgroundWorker
     Friend WithEvents Label2 As Label

@@ -23,7 +23,7 @@ Partial Class CountOrInsertData
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         ChooseArchivesCheckedListBox = New CheckedListBox()
-        ChooseAllOrSpecificComboBox = New ComboBox()
+        ChooseAllOrSelectedComboBox = New ComboBox()
         Label1 = New Label()
         ProcessFilesButton = New Button()
         ExitButton = New Button()
@@ -44,16 +44,16 @@ Partial Class CountOrInsertData
         ChooseArchivesCheckedListBox.Size = New Size(237, 130)
         ChooseArchivesCheckedListBox.TabIndex = 0
         ' 
-        ' ChooseAllOrSpecificComboBox
+        ' ChooseAllOrSelectedComboBox
         ' 
-        ChooseAllOrSpecificComboBox.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        ChooseAllOrSpecificComboBox.DropDownStyle = ComboBoxStyle.DropDownList
-        ChooseAllOrSpecificComboBox.FormattingEnabled = True
-        ChooseAllOrSpecificComboBox.Items.AddRange(New Object() {"All Available Archives", "Specific Archives"})
-        ChooseAllOrSpecificComboBox.Location = New Point(12, 27)
-        ChooseAllOrSpecificComboBox.Name = "ChooseAllOrSpecificComboBox"
-        ChooseAllOrSpecificComboBox.Size = New Size(238, 23)
-        ChooseAllOrSpecificComboBox.TabIndex = 1
+        ChooseAllOrSelectedComboBox.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
+        ChooseAllOrSelectedComboBox.DropDownStyle = ComboBoxStyle.DropDownList
+        ChooseAllOrSelectedComboBox.FormattingEnabled = True
+        ChooseAllOrSelectedComboBox.Items.AddRange(New Object() {"All Available Archives", "Specific Archives"})
+        ChooseAllOrSelectedComboBox.Location = New Point(12, 27)
+        ChooseAllOrSelectedComboBox.Name = "ChooseAllOrSelectedComboBox"
+        ChooseAllOrSelectedComboBox.Size = New Size(238, 23)
+        ChooseAllOrSelectedComboBox.TabIndex = 1
         ' 
         ' Label1
         ' 
@@ -132,7 +132,7 @@ Partial Class CountOrInsertData
         Controls.Add(ProcessFilesButton)
         Controls.Add(ChooseSequentialOrParallelGroupBox)
         Controls.Add(Label1)
-        Controls.Add(ChooseAllOrSpecificComboBox)
+        Controls.Add(ChooseAllOrSelectedComboBox)
         Controls.Add(ChooseArchivesCheckedListBox)
         FormBorderStyle = FormBorderStyle.FixedDialog
         MaximumSize = New Size(278, 350)
@@ -146,7 +146,7 @@ Partial Class CountOrInsertData
     End Sub
 
     Friend WithEvents ChooseArchivesCheckedListBox As CheckedListBox
-    Friend WithEvents ChooseAllOrSpecificComboBox As ComboBox
+    Friend WithEvents ChooseAllOrSelectedComboBox As ComboBox
     Friend WithEvents Label1 As Label
     Friend WithEvents ProcessFilesButton As Button
     Friend WithEvents ExitButton As Button

@@ -1,15 +1,32 @@
-﻿
+﻿Imports FT = ImportAndAddRawImdbData.RawFileInfo.FileTypeEnum
 Imports PT = ImportAndAddRawImdbData.CountOrInsertData.ProcessTypeEnum
 Imports SP = ImportAndAddRawImdbData.CountOrInsertData.SequentialOrParallelEnum
 Imports PFT = ImportAndAddRawImdbData.CountOrInsertData.ProcessFileTypeEnum
 Imports C = ImportAndAddRawImdbData.Constants
-Imports CAS = ImportAndAddRawImdbData.CountOrInsertData.ChooseAllOrSpecificEnum
+Imports CAS = ImportAndAddRawImdbData.CountOrInsertData.ChooseAllOrSelectedEnum
 Imports System.IO
 
 Public Class CountOrInsertData
 
     Private _ProcessType As PT = PT.CountData
+    Public Property ProcessType As PT
+        Get
+            Return _ProcessType
+        End Get
+        Private Set(value As PT)
+            _ProcessType = value
+        End Set
+    End Property
+
     Private _SequentialOrParallel As SP = SP.Sequential
+    Public Property SequentialOrParallel As SP
+        Get
+            Return _SequentialOrParallel
+        End Get
+        Private Set(value As SP)
+            _SequentialOrParallel = value
+        End Set
+    End Property
 
     Public Sub New()
         InitializeComponent()
@@ -17,22 +34,35 @@ Public Class CountOrInsertData
 
     Public Sub New(processType As PT,
                    sequentialOrParallel As SP,
-                   processFileType As PFT)
+                   processFileType As PFT,
+                   filesDirectoryLocation As String)
 
         InitializeComponent()
 
-        _ProcessType = processType
-        _SequentialOrParallel = sequentialOrParallel
-        _processFileType = processFileType
+        Me.ProcessType = processType
+        Me.SequentialOrParallel = sequentialOrParallel
+        Me.ProcessFileType = processFileType
+
+        Me.FilesLocation = filesDirectoryLocation
 
     End Sub
+
+    Private Property _filesLocation As String = String.Empty
+    Private Property FilesLocation As String
+        Get
+            Return _filesLocation
+        End Get
+        Set(value As String)
+            _filesLocation = value
+        End Set
+    End Property
 
     Private Sub CountOrInsertData_Load(sender As Object, e As EventArgs) _
         Handles Me.Load
 
-        ChooseAllOrSpecificComboBox.SelectedIndex = CInt(CAS.Unknown)
+        ChooseAllOrSelectedComboBox.SelectedIndex = CInt(CAS.Unknown)
 
-        If _ProcessType = PT.CountData Then
+        If Me.ProcessType = PT.CountData Then
             Me.Text = "Count Data File Rows"
             Label1.Text = "Count All or Specific Data Files"
 
@@ -42,7 +72,7 @@ Public Class CountOrInsertData
 
             Me.Size = New Size(271, 350)
 
-        ElseIf _ProcessType = PT.InsertData Then
+        ElseIf Me.ProcessType = PT.InsertData Then
             Me.Text = "Insert Data Rows to IMDB DB"
             Label1.Text = "Insert All or Specific Data Files to IMDB DB"
             ProcessFilesButton.Text = "Insert &Files in DB"
@@ -68,10 +98,13 @@ Public Class CountOrInsertData
     End Property
 
     Private _processFileType As PFT = PFT.Compressed
-    Public ReadOnly Property ProcessFileType As PFT
+    Public Property ProcessFileType As PFT
         Get
             Return _processFileType
         End Get
+        Private Set(value As PFT)
+            _processFileType = value
+        End Set
     End Property
 
     Public Enum ProcessFileTypeEnum
@@ -89,88 +122,137 @@ Public Class CountOrInsertData
         Parallel
     End Enum
 
-    Public Enum ChooseAllOrSpecificEnum As Integer
+    Public Enum ChooseAllOrSelectedEnum As Integer
         Unknown = -1
         AllFiles = 0
-        SpecificFiles = 1
+        SelectedFiles = 1
     End Enum
 
-    Private _ChooseAllOrSpecific As CAS =
-            CAS.Unknown
+    Private _ChooseAllOrSelected As CAS = CAS.Unknown
 
-    Public ReadOnly Property ChooseAllOrSpecific As CAS
+    Public Property ChooseAllOrSelected As CAS
         Get
-            Return _ChooseAllOrSpecific
+            Return _ChooseAllOrSelected
         End Get
-    End Property
-
-    Public ReadOnly Property ProcessType As PT
-        Get
-            Return _ProcessType
-        End Get
-    End Property
-
-    Public ReadOnly Property SequentialOrParallel As SP
-        Get
-            Return _SequentialOrParallel
-        End Get
+        Private Set(value As CAS)
+            _ChooseAllOrSelected = value
+        End Set
     End Property
 
     Private Sub ProcessInParallelRadioButton_CheckedChanged(sender As Object, e As EventArgs) _
         Handles ProcessInParallelRadioButton.CheckedChanged
 
-        _SequentialOrParallel = SequentialOrParallelEnum.Parallel
+        Me.SequentialOrParallel = SequentialOrParallelEnum.Parallel
 
     End Sub
 
     Private Sub ProcessSequentiallyRadioButton_CheckedChanged(sender As Object, e As EventArgs) _
         Handles ProcessSequentiallyRadioButton.CheckedChanged
 
-        _SequentialOrParallel = SequentialOrParallelEnum.Sequential
+        Me.SequentialOrParallel = SequentialOrParallelEnum.Sequential
 
     End Sub
 
-    Private Sub ChooseAllOrSpecificComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) _
-        Handles ChooseAllOrSpecificComboBox.SelectedIndexChanged
+    Private Sub ChooseAllOrSelectedComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles ChooseAllOrSelectedComboBox.SelectedIndexChanged
 
-        Select Case CType(ChooseAllOrSpecificComboBox.SelectedIndex, CAS)
+        Select Case CType(ChooseAllOrSelectedComboBox.SelectedIndex, CAS)
             Case CAS.AllFiles
+                ChooseAllOrSelected = CAS.AllFiles
+
                 ProcessFilesList.Clear()
 
                 Select Case Me.ProcessFileType
                     Case PFT.Compressed
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.NameBasicsCompressedFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleAkasCompressedFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleBasicsCompressedFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleCrewCompressedFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleEpisodeCompressedFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitlePrincipalsCompressedFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleRatingsCompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.NameBasicsCompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleAkasCompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleBasicsCompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleCrewCompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleEpisodeCompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitlePrincipalsCompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleRatingsCompressedFileName))
 
                     Case PFT.Decompressed
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.NameBasicsDecompFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleAkasDecompFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleBasicsDecompFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleCrewDecompFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleEpisodeDecompFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitlePrincipalsDecompFileName))
-                        ProcessFilesList.Add(Path.Combine(MainForm2.FilesLocation, C.TitleRatingsDecompFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.NameBasicsDecompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleAkasDecompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleBasicsDecompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleCrewDecompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleEpisodeDecompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitlePrincipalsDecompressedFileName))
+                        ProcessFilesList.Add(Path.Combine(Me.FilesLocation, C.TitleRatingsDecompressedFileName))
 
                 End Select
 
-                _ChooseAllOrSpecific = CAS.AllFiles
                 ChooseArchivesCheckedListBox.Enabled = False
                 ProcessFilesButton.Enabled = True
 
-            Case CAS.SpecificFiles
-                _ChooseAllOrSpecific = CAS.SpecificFiles
+            Case CAS.SelectedFiles
+                ChooseAllOrSelected = CAS.SelectedFiles
+
                 ChooseArchivesCheckedListBox.Enabled = True
                 ProcessFilesButton.Enabled = True
+
+                ProcessFilesList.Clear()
+
+                ' I need code to populate the ChooseArchivesCheckedListBox with the available files for selection. and to 
+                ' save the selected files to the ProcessFilesList when the user clicks the ProcessFilesButton.
+
+                For Each checkedItem As String In ChooseArchivesCheckedListBox.CheckedItems
+                    Dim fileName As String = checkedItem
+
+                    Select Case Me.ProcessFileType
+                        Case PFT.Compressed : fileName &= C.CompressedFileExtension
+                        Case PFT.Decompressed : fileName &= C.DecompressedFileExtension
+                    End Select
+
+                    fileName = Path.Combine(Me.FilesLocation, fileName)
+
+                    If Not MainForm2.GetFileTypeBasedOnFileName(fileName) = FT.Unknown Then
+                        ProcessFilesList.Add(fileName)
+                    End If
+                Next
+
+                ProcessFilesButton.Enabled =
+                    (ChooseArchivesCheckedListBox.CheckedItems.Count > 0)
 
             Case CAS.Unknown
                 ProcessFilesButton.Enabled = False
 
         End Select
+
+    End Sub
+
+    Private Sub ChooseArchivesCheckedListBox_SelectedIndexChanged(sender As Object, e As EventArgs) _
+        Handles ChooseArchivesCheckedListBox.SelectedIndexChanged
+
+        ProcessFilesList.Clear()
+
+        ' I need code to populate the ChooseArchivesCheckedListBox with the available files for selection. and to 
+        ' save the selected files to the ProcessFilesList when the user clicks the ProcessFilesButton.
+
+
+        Dim checkedItemsList As List(Of String) =
+            ChooseArchivesCheckedListBox.CheckedItems.Cast(Of Object)().Select(Function(x) x.ToString()).ToList()
+
+        For Each checkedItem As String In checkedItemsList ' allCheckedItems ' ChooseArchivesCheckedListBox.CheckedItems
+
+            Dim fileName As String = checkedItem
+
+            Select Case Me.ProcessFileType
+                Case PFT.Compressed : fileName &= C.CompressedFileExtension
+                Case PFT.Decompressed : fileName &= C.DecompressedFileExtension
+            End Select
+
+
+            If Not MainForm2.GetFileTypeBasedOnFileName(fileName) = FT.Unknown Then
+                fileName = Path.Combine(Me.FilesLocation, fileName)
+
+                ProcessFilesList.Add(fileName)
+            End If
+        Next
+
+        ProcessFilesButton.Enabled =
+            (ChooseArchivesCheckedListBox.CheckedItems.Count > 0)
 
     End Sub
 
