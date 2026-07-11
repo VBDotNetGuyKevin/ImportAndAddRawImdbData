@@ -2203,6 +2203,8 @@ Public Class MainForm2
 
         End Select
 
+        MyRawFileInfo(localFT).CountedRows = rowCount
+
         FilesRowCount(localFT) = rowCount
         FilesCountedList(localFT) = True
 
@@ -2241,6 +2243,8 @@ Public Class MainForm2
                 rowCount = CountFileRows(FolderLocation, C.TitleAkasDecompressedFileName)
 
         End Select
+
+        MyRawFileInfo(localFT).CountedRows = rowCount
 
         FilesRowCount(localFT) = rowCount
         FilesCountedList(localFT) = True
@@ -2281,6 +2285,8 @@ Public Class MainForm2
 
         End Select
 
+        MyRawFileInfo(localFT).CountedRows = rowCount
+
         FilesRowCount(localFT) = rowCount
         FilesCountedList(localFT) = True
 
@@ -2319,6 +2325,8 @@ Public Class MainForm2
                 rowCount = CountFileRows(FolderLocation, C.TitleCrewDecompressedFileName)
 
         End Select
+
+        MyRawFileInfo(localFT).CountedRows = rowCount
 
         FilesRowCount(localFT) = rowCount
         FilesCountedList(localFT) = True
@@ -2359,6 +2367,8 @@ Public Class MainForm2
 
         End Select
 
+        MyRawFileInfo(localFT).CountedRows = rowCount
+
         FilesRowCount(localFT) = rowCount
         FilesCountedList(localFT) = True
 
@@ -2398,6 +2408,8 @@ Public Class MainForm2
 
         End Select
 
+        MyRawFileInfo(localFT).CountedRows = rowCount
+
         FilesRowCount(localFT) = rowCount
         FilesCountedList(localFT) = True
 
@@ -2436,6 +2448,8 @@ Public Class MainForm2
                 rowCount = CountFileRows(FolderLocation, C.TitleRatingsDecompressedFileName)
 
         End Select
+
+        MyRawFileInfo(localFT).CountedRows = rowCount
 
         FilesRowCount(localFT) = rowCount
         FilesCountedList(localFT) = True
@@ -2487,6 +2501,8 @@ Public Class MainForm2
                 End Select
 
                 MyRawFileInfo(localFileType).CountedRows = localRowCount
+                'MyRawFileInfo(localFileType).RowsHaveBeenCounted = True
+
 
                 If FilesRowCount.ContainsKey(localFileType) Then
                     fileCounted = True
@@ -2730,12 +2746,33 @@ Public Class MainForm2
                     lastRowCount = .LastRowCount
                     countedRows = .CountedRows
 
+                    If .RowsHaveBeenCounted Then
+                        TS.SetText(EstimatedOrCountedRowsTextBox,
+                                   .CountedRows.ToString(C.COMMA_MASK))
+
+                        TS.SetText(PreviousCountOrCountedHeaderLabel,
+                                   "Total Row Count")
+
+                    Else
+                        TS.SetText(EstimatedOrCountedRowsTextBox,
+                                   .LastRowCount.ToString(C.COMMA_MASK))
+
+                        TS.SetText(PreviousCountOrCountedHeaderLabel,
+                                   "Previous Total Row Count")
+
+                    End If
+
                     TS.SetText(FileEstimatedProcessingTimeTextBox,
                                .EstimatedTotalTimeString)
 
                     .CurrentStartTime = Now
                     .CurrentTime = .CurrentStartTime
                 End With
+
+                'PreviousCountOrCountedHeaderLabel.Text = "Previous Total Row Count" or "Total Row Count"
+                'EstimatedOrCountedRowsTextBox
+                'CurrentRowNumberTextBox
+
 
                 CurrentlyUploadingFilename =
                     Path.Combine(FolderLocation, fileToProcess)
@@ -3325,6 +3362,10 @@ Public Class MainForm2
         End Select
 
     End Sub
+
+    'PreviousCountOrCountedHeaderLabel.Text = "Previous Total Row Count" or "Total Row Count"
+    'EstimatedOrCountedRowsTextBox
+    'CurrentRowNumberTextBox
 
     ''' <summary>
     ''' Handles the RunWorkerCompleted event for the SqlBackgroundWorker. 

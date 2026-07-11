@@ -386,13 +386,21 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    Private _RowsHaveBeenCounted As Boolean = False
+
     ''' <summary>
     ''' Indicates whether or not the rows have been counted. If not, 
     ''' we use the last row count as the total expected number of rows.
     ''' </summary>
     ''' <returns></returns>
-    Private Property RowsHaveBeenCounted As Boolean = False
-
+    Public Property RowsHaveBeenCounted As Boolean
+        Get
+            Return _RowsHaveBeenCounted
+        End Get
+        Set(value As Boolean)
+            _RowsHaveBeenCounted = value
+        End Set
+    End Property
     ''' <summary>
     ''' This is the current number of counted rows for the current file
     ''' </summary>

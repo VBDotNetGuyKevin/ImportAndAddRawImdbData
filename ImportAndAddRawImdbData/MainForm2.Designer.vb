@@ -106,6 +106,9 @@ Partial Class MainForm2
         ImportArchiveFileProgressBar = New ProgressBar()
         DownloadPanel = New Panel()
         LoadAllDataFilesPanel = New Panel()
+        Label11 = New Label()
+        EstimatedOrCountedRowsTextBox = New TextBox()
+        PreviousCountOrCountedHeaderLabel = New Label()
         FileCountsPanel.SuspendLayout()
         DownloadPanel.SuspendLayout()
         LoadAllDataFilesPanel.SuspendLayout()
@@ -226,8 +229,7 @@ Partial Class MainForm2
         ' 
         ' CurrentImportFileNumberTextBox
         ' 
-        CurrentImportFileNumberTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        CurrentImportFileNumberTextBox.Location = New Point(735, 26)
+        CurrentImportFileNumberTextBox.Location = New Point(434, 26)
         CurrentImportFileNumberTextBox.Name = "CurrentImportFileNumberTextBox"
         CurrentImportFileNumberTextBox.ReadOnly = True
         CurrentImportFileNumberTextBox.Size = New Size(74, 23)
@@ -238,7 +240,7 @@ Partial Class MainForm2
         ' 
         CurrentRowNumberLabel.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         CurrentRowNumberLabel.AutoSize = True
-        CurrentRowNumberLabel.Location = New Point(815, 29)
+        CurrentRowNumberLabel.Location = New Point(636, 29)
         CurrentRowNumberLabel.Name = "CurrentRowNumberLabel"
         CurrentRowNumberLabel.Size = New Size(43, 15)
         CurrentRowNumberLabel.TabIndex = 22
@@ -247,7 +249,7 @@ Partial Class MainForm2
         ' CurrentRowNumberTextBox
         ' 
         CurrentRowNumberTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        CurrentRowNumberTextBox.Location = New Point(864, 26)
+        CurrentRowNumberTextBox.Location = New Point(685, 26)
         CurrentRowNumberTextBox.Name = "CurrentRowNumberTextBox"
         CurrentRowNumberTextBox.ReadOnly = True
         CurrentRowNumberTextBox.Size = New Size(149, 23)
@@ -687,7 +689,7 @@ Partial Class MainForm2
         DecompressAfterDownloadCheckBox.Text = "Decom&press and Delete After Download"
         DecompressAfterDownloadCheckBox.UseVisualStyleBackColor = True
         ' 
-        ' AllArchivesBackgroundWorker
+        ' AllArchivesSequentialBackgroundWorker
         ' 
         AllArchivesSequentialBackgroundWorker.WorkerSupportsCancellation = True
         ' 
@@ -756,7 +758,6 @@ Partial Class MainForm2
         ' 
         ' Label7
         ' 
-        Label7.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label7.AutoSize = True
         Label7.Location = New Point(387, 87)
         Label7.Name = "Label7"
@@ -766,7 +767,6 @@ Partial Class MainForm2
         ' 
         ' Label8
         ' 
-        Label8.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label8.AutoSize = True
         Label8.Location = New Point(387, 116)
         Label8.Name = "Label8"
@@ -776,7 +776,6 @@ Partial Class MainForm2
         ' 
         ' ElapsedTimeForFileTextBox
         ' 
-        ElapsedTimeForFileTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         ElapsedTimeForFileTextBox.Location = New Point(512, 84)
         ElapsedTimeForFileTextBox.Name = "ElapsedTimeForFileTextBox"
         ElapsedTimeForFileTextBox.ReadOnly = True
@@ -785,7 +784,6 @@ Partial Class MainForm2
         ' 
         ' OverallElapsedTimeTextBox
         ' 
-        OverallElapsedTimeTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         OverallElapsedTimeTextBox.Location = New Point(513, 113)
         OverallElapsedTimeTextBox.Name = "OverallElapsedTimeTextBox"
         OverallElapsedTimeTextBox.ReadOnly = True
@@ -794,7 +792,6 @@ Partial Class MainForm2
         ' 
         ' Label9
         ' 
-        Label9.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label9.AutoSize = True
         Label9.Location = New Point(3, 87)
         Label9.Name = "Label9"
@@ -804,7 +801,6 @@ Partial Class MainForm2
         ' 
         ' Label10
         ' 
-        Label10.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label10.AutoSize = True
         Label10.Location = New Point(3, 116)
         Label10.Name = "Label10"
@@ -854,6 +850,9 @@ Partial Class MainForm2
         ' 
         LoadAllDataFilesPanel.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         LoadAllDataFilesPanel.BorderStyle = BorderStyle.FixedSingle
+        LoadAllDataFilesPanel.Controls.Add(PreviousCountOrCountedHeaderLabel)
+        LoadAllDataFilesPanel.Controls.Add(EstimatedOrCountedRowsTextBox)
+        LoadAllDataFilesPanel.Controls.Add(Label11)
         LoadAllDataFilesPanel.Controls.Add(LoadAllDataFilesButton)
         LoadAllDataFilesPanel.Controls.Add(CurrentImportFileLabel)
         LoadAllDataFilesPanel.Controls.Add(OverallElapsedTimeTextBox)
@@ -877,6 +876,37 @@ Partial Class MainForm2
         LoadAllDataFilesPanel.Name = "LoadAllDataFilesPanel"
         LoadAllDataFilesPanel.Size = New Size(1018, 147)
         LoadAllDataFilesPanel.TabIndex = 44
+        ' 
+        ' Label11
+        ' 
+        Label11.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        Label11.AutoSize = True
+        Label11.Location = New Point(840, 29)
+        Label11.Name = "Label11"
+        Label11.Size = New Size(18, 15)
+        Label11.TabIndex = 42
+        Label11.Text = "of"
+        ' 
+        ' EstimatedOrCountedRowsTextBox
+        ' 
+        EstimatedOrCountedRowsTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        EstimatedOrCountedRowsTextBox.Location = New Point(864, 26)
+        EstimatedOrCountedRowsTextBox.Name = "EstimatedOrCountedRowsTextBox"
+        EstimatedOrCountedRowsTextBox.ReadOnly = True
+        EstimatedOrCountedRowsTextBox.Size = New Size(149, 23)
+        EstimatedOrCountedRowsTextBox.TabIndex = 43
+        EstimatedOrCountedRowsTextBox.Text = "0"
+        ' 
+        ' PreviousCountOrCountedHeaderLabel
+        ' 
+        PreviousCountOrCountedHeaderLabel.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        PreviousCountOrCountedHeaderLabel.AutoSize = True
+        PreviousCountOrCountedHeaderLabel.Font = New Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, CByte(0))
+        PreviousCountOrCountedHeaderLabel.Location = New Point(864, 7)
+        PreviousCountOrCountedHeaderLabel.Name = "PreviousCountOrCountedHeaderLabel"
+        PreviousCountOrCountedHeaderLabel.Size = New Size(143, 15)
+        PreviousCountOrCountedHeaderLabel.TabIndex = 44
+        PreviousCountOrCountedHeaderLabel.Text = "Previous Total Row Count"
         ' 
         ' MainForm2
         ' 
@@ -992,4 +1022,7 @@ Partial Class MainForm2
     Friend WithEvents ImportArchiveFileProgressBar As ProgressBar
     Friend WithEvents DownloadPanel As Panel
     Friend WithEvents LoadAllDataFilesPanel As Panel
+    Friend WithEvents EstimatedOrCountedRowsTextBox As TextBox
+    Friend WithEvents Label11 As Label
+    Friend WithEvents PreviousCountOrCountedHeaderLabel As Label
 End Class
