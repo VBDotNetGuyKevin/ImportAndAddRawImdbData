@@ -28,6 +28,46 @@ Imports IT = ImportAndAddRawImdbData.MainForm2.ImportTypeEnum
 
 Public Class MainForm2
 
+    ''' <summary>
+    ''' Defines the types of raw files that can be processed, with each type associated with an integer value.
+    ''' </summary>
+    Public Enum RawFileTypeEnum As Integer
+        UNKNOWN = -1
+        NameBasics = 0
+        TitleAkas = 1
+        TitleBasics = 2
+        TitleCrew = 3
+        TitleEpisode = 4
+        TitlePrincipals = 5
+        TitleRatings = 6
+    End Enum
+
+    ''' <summary>
+    ''' Defines the types of SQL commands that can be executed, with each type associated with an integer value.
+    ''' </summary>
+    Public Enum SqlCmdTypeEnum As Integer
+        INSERT
+        UPDATE
+        TRUNCATE
+        ADD_CONSTRAINT
+        DROP_CONSTRAINT
+    End Enum
+
+    ''' <summary>
+    ''' Defines an enumeration for the operations of dropping or adding table constraints in a database. 
+    ''' The enumeration has two members: DROP and ADD, which represent the respective operations.
+    ''' </summary>
+    Private Enum DropAddEnum As Integer
+        ''' <summary>
+        ''' Represents the operation of dropping a table constraint.
+        ''' </summary>
+        DROP
+        ''' <summary>
+        ''' Represents the operation of adding a table constraint.
+        ''' </summary>
+        ADD
+    End Enum
+
     Private Property FolderLocation As String = String.Empty
     Private Property LocationExists As Boolean = False
 
@@ -40,15 +80,6 @@ Public Class MainForm2
 
     Private Property DecompressedFileList As New List(Of String)
 
-    Public Const CompressedFileExtension As String = ".tsv.gz"
-    Public Const UnCompressedFileExtension As String = ".tsv"
-
-    Public Enum ImportTypeEnum
-        Unknown
-        Compressed
-        Decompressed
-    End Enum
-
     ''' <summary>
     ''' This property holds the type of import being performed, which can 
     ''' be either Compressed, Decompressed, or Unknown. It is used to 
@@ -56,27 +87,6 @@ Public Class MainForm2
     ''' </summary>
     ''' <returns></returns>
     Private Property ImportType As IT = IT.Unknown
-
-    ''' <summary>
-    ''' This event handler is triggered when the "Choose Folder" button is clicked. It opens a folder
-    ''' browser dialog to allow the user to select a folder. If a folder is selected, it updates the
-    ''' FolderLocation property and the FolderLocationTextBox.
-    ''' </summary>
-    ''' <param name="sender">The source of the event.</param>
-    ''' <param name="e">An EventArgs that contains the event data.</param>
-    Private Sub ChooseFolderButton_Click(sender As Object, e As EventArgs) _
-        Handles ChooseFolderButton.Click
-
-        With ChooseFolderDialog
-            .SelectedPath = FolderLocation
-
-            If .ShowDialog() = DialogResult.OK Then
-                FolderLocation = .SelectedPath
-                FolderLocationTextBox.Text = FolderLocation
-            End If
-        End With
-
-    End Sub
 
     ''' <summary>
     ''' Gets the raw file information for each file type.
@@ -92,6 +102,277 @@ Public Class MainForm2
             {FT.TitlePrincipals, New RawFileInfo(FT.TitlePrincipals)},
             {FT.TitleRatings, New RawFileInfo(FT.TitleRatings)}
         }
+
+    ''' <summary>
+    ''' Gets or sets the type of import being performed, which can be either Compressed, Decompressed, or Unknown.
+    ''' It is used to determine how to process the files during the import operation.
+    ''' </summary>
+    Private Property ProcessFileType As PFT = PFT.Compressed
+
+    Private Property _SequentialOrParallel As SP = SP.Sequential
+    Public Property SequentialOrParallel As SP
+        Get
+            Return _SequentialOrParallel
+        End Get
+        Private Set(value As SP)
+            _SequentialOrParallel = value
+        End Set
+    End Property
+
+    Private Property _ChooseAllOrSelected As CAS = CAS.Unknown
+    Public Property ChooseAllOrSelected As CAS
+        Get
+            Return _ChooseAllOrSelected
+        End Get
+        Private Set(value As CAS)
+            _ChooseAllOrSelected = value
+        End Set
+    End Property
+
+    Private _ProcessType As PT = PT.CountData
+    Public Property ProcessType As PT
+        Get
+            Return _ProcessType
+        End Get
+        Private Set(value As PT)
+            _ProcessType = value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Gets or sets the list of files to be counted.
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property CountFilesList As New List(Of String)
+
+    Private Property FilesToCountList As New SortedList(Of FT, Boolean) From
+        {
+            {FT.NameBasics, False},
+            {FT.TitleAkas, False},
+            {FT.TitleBasics, False},
+            {FT.TitleCrew, False},
+            {FT.TitleEpisode, False},
+            {FT.TitlePrincipals, False},
+            {FT.TitleRatings, False}
+        }
+
+    Private Property FilesCountedList As New SortedList(Of FT, Boolean) From
+        {
+            {FT.NameBasics, False},
+            {FT.TitleAkas, False},
+            {FT.TitleBasics, False},
+            {FT.TitleCrew, False},
+            {FT.TitleEpisode, False},
+            {FT.TitlePrincipals, False},
+            {FT.TitleRatings, False}
+        }
+
+    Private Property CountingFilesList As New SortedList(Of FT, Boolean) From
+        {
+            {FT.NameBasics, False},
+            {FT.TitleAkas, False},
+            {FT.TitleBasics, False},
+            {FT.TitleCrew, False},
+            {FT.TitleEpisode, False},
+            {FT.TitlePrincipals, False},
+            {FT.TitleRatings, False}
+        }
+
+    Private Property FilesRowCount As New SortedList(Of FT, Long) From
+        {
+            {FT.NameBasics, 0},
+            {FT.TitleAkas, 0},
+            {FT.TitleBasics, 0},
+            {FT.TitleCrew, 0},
+            {FT.TitleEpisode, 0},
+            {FT.TitlePrincipals, 0},
+            {FT.TitleRatings, 0}
+        }
+
+    ''' <summary>
+    ''' Gets or sets the list of files to be inserted into the database.
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property InsertDataFilesList As New List(Of String)
+
+    Private Property CountTsvRowsButtonEnabled As Boolean = True
+    Private Property CountArchiveRowsButtonEnabled As Boolean = True
+
+    ''' <summary>
+    ''' Gets or sets a value indicating whether any of the background worker 
+    ''' operations have been cancelled. This property is used to track the 
+    ''' cancellation state of the operations and to control the 
+    ''' enabling/disabling of UI controls based on that state.
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property CancelledOperations As Boolean = False
+
+    Private Property CountArchiveRowsEnabled As Boolean = False
+    Private Property CountTsvRowsEnabled As Boolean = False
+    Private Property DecompressAfterDownloadEnabled As Boolean = False
+
+    ''' <summary>
+    ''' Gets the location of the folder where the files are stored.
+    ''' </summary>
+    ''' <returns>The folder location as a string.</returns>
+    Public ReadOnly Property FilesLocation As String
+        Get
+            Return FolderLocation
+        End Get
+    End Property
+
+    Public Const CompressedFileExtension As String = ".tsv.gz"
+    Public Const UnCompressedFileExtension As String = ".tsv"
+
+    Public Enum ImportTypeEnum
+        Unknown
+        Compressed
+        Decompressed
+    End Enum
+
+    ''' <summary>
+    ''' Determines the file type based on the provided file name. It checks 
+    ''' the file name against known IMDB data file names and returns the 
+    ''' corresponding file type enumeration (FT). If the file name does 
+    ''' not match any known types, it returns FT.Unknown.
+    ''' </summary>
+    ''' <param name="fileName">The name of the file to check.</param>
+    ''' <returns>The file type enumeration (FT) corresponding to the file name.</returns>
+    Public Shared Function GetFileTypeBasedOnFileName(fileName As String) As FT
+
+        Dim result As FT = FT.Unknown
+
+        Select Case fileName
+            Case C.NameBasicsCompressedFileName,
+                 C.NameBasicsDecompressedFileName
+                result = FT.NameBasics
+
+            Case C.TitleAkasCompressedFileName,
+                 C.TitleAkasDecompressedFileName
+                result = FT.TitleAkas
+
+            Case C.TitleBasicsCompressedFileName,
+                 C.TitleBasicsDecompressedFileName
+                result = FT.TitleBasics
+
+            Case C.TitleCrewCompressedFileName,
+                 C.TitleCrewDecompressedFileName
+                result = FT.TitleCrew
+
+            Case C.TitleEpisodeCompressedFileName,
+                 C.TitleEpisodeDecompressedFileName
+                result = FT.TitleEpisode
+
+            Case C.TitlePrincipalsCompressedFileName,
+                 C.TitlePrincipalsDecompressedFileName
+                result = FT.TitlePrincipals
+
+            Case C.TitleRatingsCompressedFileName,
+                 C.TitleRatingsDecompressedFileName
+                result = FT.TitleRatings
+
+            Case Else
+                result = FT.Unknown
+
+        End Select
+
+        Return result
+
+    End Function
+
+    Public Shared Function GetFileTypeBasedOnFileName(fileName As String,
+                                                ByRef importType As IT) As FT
+
+        Dim result As FT = FT.Unknown
+
+        Select Case fileName
+            ' Name.Basics
+            Case C.NameBasicsCompressedFileName,
+                 C.NameBasicsDecompressedFileName
+
+                result = FT.NameBasics
+                importType = IT.Decompressed
+
+                If fileName = C.NameBasicsCompressedFileName Then
+                    importType = IT.Compressed
+                End If
+
+
+                ' Title.Akas
+            Case C.TitleAkasCompressedFileName,
+                 C.TitleAkasDecompressedFileName
+                result = FT.TitleAkas
+                importType = IT.Decompressed
+
+                If fileName = C.TitleAkasCompressedFileName Then
+                    importType = IT.Compressed
+                End If
+
+
+                ' Title.Basics
+            Case C.TitleBasicsCompressedFileName,
+                 C.TitleBasicsDecompressedFileName
+                result = FT.TitleBasics
+                importType = IT.Decompressed
+
+                If fileName = C.TitleBasicsCompressedFileName Then
+                    importType = IT.Compressed
+                End If
+
+
+                ' Title.Crew
+            Case C.TitleCrewCompressedFileName,
+                 C.TitleCrewDecompressedFileName
+                result = FT.TitleCrew
+                importType = IT.Decompressed
+
+                If fileName = C.TitleCrewCompressedFileName Then
+                    importType = IT.Compressed
+                End If
+
+
+                ' Title.Episode
+            Case C.TitleEpisodeCompressedFileName,
+                 C.TitleEpisodeDecompressedFileName
+                result = FT.TitleEpisode
+                importType = IT.Decompressed
+
+                If fileName = C.TitleEpisodeCompressedFileName Then
+                    importType = IT.Compressed
+                End If
+
+
+                ' Title.Principals
+            Case C.TitlePrincipalsCompressedFileName,
+                 C.TitlePrincipalsDecompressedFileName
+                result = FT.TitlePrincipals
+                importType = IT.Decompressed
+
+                If fileName = C.TitlePrincipalsCompressedFileName Then
+                    importType = IT.Compressed
+                End If
+
+
+                ' Title.Ratings
+            Case C.TitleRatingsCompressedFileName,
+                 C.TitleRatingsDecompressedFileName
+                result = FT.TitleRatings
+                importType = IT.Decompressed
+
+                If fileName = C.TitleRatingsCompressedFileName Then
+                    importType = IT.Compressed
+                End If
+
+
+            Case Else
+                result = FT.Unknown
+                importType = IT.Unknown
+
+        End Select
+
+        Return result
+
+    End Function
 
     ''' <summary>
     ''' This event handler is triggered when the form is loaded. It initializes the form's controls
@@ -534,6 +815,27 @@ Public Class MainForm2
     End Sub
 
     ''' <summary>
+    ''' This event handler is triggered when the "Choose Folder" button is clicked. It opens a folder
+    ''' browser dialog to allow the user to select a folder. If a folder is selected, it updates the
+    ''' FolderLocation property and the FolderLocationTextBox.
+    ''' </summary>
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">An EventArgs that contains the event data.</param>
+    Private Sub ChooseFolderButton_Click(sender As Object, e As EventArgs) _
+        Handles ChooseFolderButton.Click
+
+        With ChooseFolderDialog
+            .SelectedPath = FolderLocation
+
+            If .ShowDialog() = DialogResult.OK Then
+                FolderLocation = .SelectedPath
+                FolderLocationTextBox.Text = FolderLocation
+            End If
+        End With
+
+    End Sub
+
+    ''' <summary>
     ''' This event handler is triggered when the text in the FolderLocationTextBox changes. 
     ''' It checks if the specified folder location exists and updates the UI accordingly. If 
     ''' the folder exists, it enables the DownloadUpdatedArchivesButton and other related 
@@ -567,12 +869,6 @@ Public Class MainForm2
         End If
 
     End Sub
-
-    ''' <summary>
-    ''' Gets or sets the type of import being performed, which can be either Compressed, Decompressed, or Unknown.
-    ''' It is used to determine how to process the files during the import operation.
-    ''' </summary>
-    Private Property ProcessFileType As PFT = PFT.Compressed
 
     ''' <summary>
     ''' This event handler is triggered when the "Load All Data Files" 
@@ -763,16 +1059,6 @@ Public Class MainForm2
         End Using
 
     End Function
-
-    ''' <summary>
-    ''' Gets the location of the folder where the files are stored.
-    ''' </summary>
-    ''' <returns>The folder location as a string.</returns>
-    Public ReadOnly Property FilesLocation As String
-        Get
-            Return FolderLocation
-        End Get
-    End Property
 
     ''' <summary>
     ''' This event handler is triggered when the "Download Updated Archives" 
@@ -1539,36 +1825,6 @@ Public Class MainForm2
 
     End Function
 
-    Private Property _SequentialOrParallel As SP = SP.Sequential
-    Public Property SequentialOrParallel As SP
-        Get
-            Return _SequentialOrParallel
-        End Get
-        Private Set(value As SP)
-            _SequentialOrParallel = value
-        End Set
-    End Property
-
-    Private Property _ChooseAllOrSelected As CAS = CAS.Unknown
-    Public Property ChooseAllOrSelected As CAS
-        Get
-            Return _ChooseAllOrSelected
-        End Get
-        Private Set(value As CAS)
-            _ChooseAllOrSelected = value
-        End Set
-    End Property
-
-    Private _ProcessType As PT = PT.CountData
-    Public Property ProcessType As PT
-        Get
-            Return _ProcessType
-        End Get
-        Private Set(value As PT)
-            _ProcessType = value
-        End Set
-    End Property
-
     ''' <summary>
     ''' Handles the click event for the "Count Archive Rows" button. It 
     ''' initializes the counting process for the rows in the compressed 
@@ -1778,65 +2034,6 @@ Public Class MainForm2
     End Sub
 
     ''' <summary>
-    ''' Gets or sets the list of files to be counted.
-    ''' </summary>
-    ''' <returns></returns>
-    Private Property CountFilesList As New List(Of String)
-
-    Private Property FilesToCountList As New SortedList(Of FT, Boolean) From
-        {
-            {FT.NameBasics, False},
-            {FT.TitleAkas, False},
-            {FT.TitleBasics, False},
-            {FT.TitleCrew, False},
-            {FT.TitleEpisode, False},
-            {FT.TitlePrincipals, False},
-            {FT.TitleRatings, False}
-        }
-
-    Private Property FilesCountedList As New SortedList(Of FT, Boolean) From
-        {
-            {FT.NameBasics, False},
-            {FT.TitleAkas, False},
-            {FT.TitleBasics, False},
-            {FT.TitleCrew, False},
-            {FT.TitleEpisode, False},
-            {FT.TitlePrincipals, False},
-            {FT.TitleRatings, False}
-        }
-
-    Private Property CountingFilesList As New SortedList(Of FT, Boolean) From
-        {
-            {FT.NameBasics, False},
-            {FT.TitleAkas, False},
-            {FT.TitleBasics, False},
-            {FT.TitleCrew, False},
-            {FT.TitleEpisode, False},
-            {FT.TitlePrincipals, False},
-            {FT.TitleRatings, False}
-        }
-
-    Private Property FilesRowCount As New SortedList(Of FT, Long) From
-        {
-            {FT.NameBasics, 0},
-            {FT.TitleAkas, 0},
-            {FT.TitleBasics, 0},
-            {FT.TitleCrew, 0},
-            {FT.TitleEpisode, 0},
-            {FT.TitlePrincipals, 0},
-            {FT.TitleRatings, 0}
-        }
-
-    ''' <summary>
-    ''' Gets or sets the list of files to be inserted into the database.
-    ''' </summary>
-    ''' <returns></returns>
-    Private Property InsertDataFilesList As New List(Of String)
-
-    Private Property CountTsvRowsButtonEnabled As Boolean = True
-    Private Property CountArchiveRowsButtonEnabled As Boolean = True
-
-    ''' <summary>
     ''' Handles the click event for the "Count TSV Rows" button. It 
     ''' initializes the counting process for the rows in the 
     ''' decompressed TSV files. Depending on the user's choice, it 
@@ -2036,15 +2233,6 @@ Public Class MainForm2
     End Function
 
     ''' <summary>
-    ''' Gets or sets a value indicating whether any of the background worker 
-    ''' operations have been cancelled. This property is used to track the 
-    ''' cancellation state of the operations and to control the 
-    ''' enabling/disabling of UI controls based on that state.
-    ''' </summary>
-    ''' <returns></returns>
-    Private Property CancelledOperations As Boolean = False
-
-    ''' <summary>
     ''' Checks if all the data files have been counted and updates the UI controls accordingly. 
     ''' If all files are counted or if any operation has been cancelled, it re-enables the relevant 
     ''' UI controls (FolderLocationTextBox, ChooseFolderButton, LoadAllDataFilesButton, DownloadUpdatedArchivesButton). 
@@ -2099,30 +2287,6 @@ Public Class MainForm2
         Dim countingFiles As Integer = 0
         Dim countedFiles As Integer = 0
 
-        'For Each fileToProcess As String In countFilesList
-        '    If fileToProcess.StartsWith(FolderLocation) Then
-        '        fileToProcess = Path.GetFileName(fileToProcess)
-        '    End If
-
-        '    Dim localImportType As IT =
-        '        IT.Unknown
-
-        '    Dim localFileType As FT =
-        '        GetFileTypeBasedOnFileName(fileToProcess, localImportType)
-
-        '    'If localImportType = IT.Decompressed Then
-        '    '    Select Case localFileType
-        '    '        Case FT.NameBasics : allCounted = allCounted And FilesCountedList(localFileType)
-        '    '        Case FT.TitleAkas : allCounted = allCounted And FilesCountedList(localFileType)
-        '    '        Case FT.TitleBasics : allCounted = allCounted And FilesCountedList(localFileType)
-        '    '        Case FT.TitleCrew : allCounted = allCounted And FilesCountedList(localFileType)
-        '    '        Case FT.TitleEpisode : allCounted = allCounted And FilesCountedList(localFileType)
-        '    '        Case FT.TitlePrincipals : allCounted = allCounted And FilesCountedList(localFileType)
-        '    '        Case FT.TitleRatings : allCounted = allCounted And FilesCountedList(localFileType)
-        '    '    End Select
-        '    'End If
-        'Next
-
         For Each localFT As FT In [Enum].GetValues(Of FT)()
             If ((localFT = FT.OVERALL) OrElse
                 (localFT = FT.Unknown)) Then
@@ -2131,11 +2295,9 @@ Public Class MainForm2
 
             If FilesToCountList(localFT) Then countingFiles += 1
             If FilesCountedList(localFT) Then countedFiles += 1
-
         Next
 
         allCounted = (countedFiles = countingFiles)
-
 
         If CancelledOperations OrElse
            allCounted Then
@@ -2501,8 +2663,6 @@ Public Class MainForm2
                 End Select
 
                 MyRawFileInfo(localFileType).CountedRows = localRowCount
-                'MyRawFileInfo(localFileType).RowsHaveBeenCounted = True
-
 
                 If FilesRowCount.ContainsKey(localFileType) Then
                     fileCounted = True
@@ -2535,142 +2695,6 @@ Public Class MainForm2
     End Sub
 
     ''' <summary>
-    ''' Determines the file type based on the provided file name. It checks 
-    ''' the file name against known IMDB data file names and returns the 
-    ''' corresponding file type enumeration (FT). If the file name does 
-    ''' not match any known types, it returns FT.Unknown.
-    ''' </summary>
-    ''' <param name="fileName">The name of the file to check.</param>
-    ''' <returns>The file type enumeration (FT) corresponding to the file name.</returns>
-    Public Shared Function GetFileTypeBasedOnFileName(fileName As String) As FT
-
-        Dim result As FT = FT.Unknown
-
-        Select Case fileName
-            Case C.NameBasicsCompressedFileName,
-                 C.NameBasicsDecompressedFileName
-                result = FT.NameBasics
-
-            Case C.TitleAkasCompressedFileName,
-                 C.TitleAkasDecompressedFileName
-                result = FT.TitleAkas
-
-            Case C.TitleBasicsCompressedFileName,
-                 C.TitleBasicsDecompressedFileName
-                result = FT.TitleBasics
-
-            Case C.TitleCrewCompressedFileName,
-                 C.TitleCrewDecompressedFileName
-                result = FT.TitleCrew
-
-            Case C.TitleEpisodeCompressedFileName,
-                 C.TitleEpisodeDecompressedFileName
-                result = FT.TitleEpisode
-
-            Case C.TitlePrincipalsCompressedFileName,
-                 C.TitlePrincipalsDecompressedFileName
-                result = FT.TitlePrincipals
-
-            Case C.TitleRatingsCompressedFileName,
-                 C.TitleRatingsDecompressedFileName
-                result = FT.TitleRatings
-
-            Case Else
-                result = FT.Unknown
-
-        End Select
-
-        Return result
-
-    End Function
-
-    Public Shared Function GetFileTypeBasedOnFileName(fileName As String,
-                                                ByRef importType As IT) As FT
-
-        Dim result As FT = FT.Unknown
-
-        Select Case fileName
-            ' Name.Basics
-            Case C.NameBasicsCompressedFileName
-                result = FT.NameBasics
-                importType = IT.Compressed
-
-            Case C.NameBasicsDecompressedFileName
-                result = FT.NameBasics
-                importType = IT.Decompressed
-
-
-                ' Title.Akas
-            Case C.TitleAkasCompressedFileName
-                result = FT.TitleAkas
-                importType = IT.Compressed
-
-            Case C.TitleAkasDecompressedFileName
-                result = FT.TitleAkas
-                importType = IT.Decompressed
-
-
-                ' Title.Basics
-            Case C.TitleBasicsCompressedFileName
-                result = FT.TitleBasics
-                importType = IT.Compressed
-
-            Case C.TitleBasicsDecompressedFileName
-                result = FT.TitleBasics
-                importType = IT.Decompressed
-
-
-                ' Title.Crew
-            Case C.TitleCrewCompressedFileName
-                result = FT.TitleCrew
-                importType = IT.Compressed
-
-            Case C.TitleCrewDecompressedFileName
-                result = FT.TitleCrew
-                importType = IT.Decompressed
-
-
-                ' Title.Episode
-            Case C.TitleEpisodeCompressedFileName
-                result = FT.TitleEpisode
-                importType = IT.Compressed
-
-            Case C.TitleEpisodeDecompressedFileName
-                result = FT.TitleEpisode
-                importType = IT.Decompressed
-
-
-                ' Title.Principals
-            Case C.TitlePrincipalsCompressedFileName
-                result = FT.TitlePrincipals
-                importType = IT.Compressed
-
-            Case C.TitlePrincipalsDecompressedFileName
-                result = FT.TitlePrincipals
-                importType = IT.Decompressed
-
-
-                ' Title.Ratings
-            Case C.TitleRatingsCompressedFileName
-                result = FT.TitleRatings
-                importType = IT.Compressed
-
-            Case C.TitleRatingsDecompressedFileName
-                result = FT.TitleRatings
-                importType = IT.Decompressed
-
-
-            Case Else
-                result = FT.Unknown
-                importType = IT.Unknown
-
-        End Select
-
-        Return result
-
-    End Function
-
-    ''' <summary>
     ''' Handles the DoWork event for the SqlBackgroundWorker. This event 
     ''' is triggered when the background worker starts its operation. It 
     ''' processes each file in the InsertDataFilesList, reads the data 
@@ -2680,8 +2704,7 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">A DoWorkEventArgs that contains the event data.</param>
-    Private Sub SqlBackgroundWorker_DoWork(sender As Object,
-                                           e As System.ComponentModel.DoWorkEventArgs) _
+    Private Sub SqlBackgroundWorker_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) _
         Handles SqlBackgroundWorker.DoWork
 
         ' refer to the backgroundworker by its name: SqlBackgroundWorker
@@ -2747,32 +2770,20 @@ Public Class MainForm2
                     countedRows = .CountedRows
 
                     If .RowsHaveBeenCounted Then
-                        TS.SetText(EstimatedOrCountedRowsTextBox,
-                                   .CountedRows.ToString(C.COMMA_MASK))
-
-                        TS.SetText(PreviousCountOrCountedHeaderLabel,
-                                   "Total Row Count")
+                        TS.SetText(EstimatedOrCountedRowsTextBox, .CountedRows.ToString(C.COMMA_MASK))
+                        TS.SetText(PreviousCountOrCountedHeaderLabel, "Total Row Count")
 
                     Else
-                        TS.SetText(EstimatedOrCountedRowsTextBox,
-                                   .LastRowCount.ToString(C.COMMA_MASK))
-
-                        TS.SetText(PreviousCountOrCountedHeaderLabel,
-                                   "Previous Total Row Count")
+                        TS.SetText(EstimatedOrCountedRowsTextBox, .LastRowCount.ToString(C.COMMA_MASK))
+                        TS.SetText(PreviousCountOrCountedHeaderLabel, "Previous Total Row Count")
 
                     End If
 
-                    TS.SetText(FileEstimatedProcessingTimeTextBox,
-                               .EstimatedTotalTimeString)
+                    TS.SetText(FileEstimatedProcessingTimeTextBox, .EstimatedTotalTimeString)
 
                     .CurrentStartTime = Now
                     .CurrentTime = .CurrentStartTime
                 End With
-
-                'PreviousCountOrCountedHeaderLabel.Text = "Previous Total Row Count" or "Total Row Count"
-                'EstimatedOrCountedRowsTextBox
-                'CurrentRowNumberTextBox
-
 
                 CurrentlyUploadingFilename =
                     Path.Combine(FolderLocation, fileToProcess)
@@ -3100,14 +3111,9 @@ Public Class MainForm2
                     LogErrorsToFile($"Command: {cmd.CommandText}")
                     LogErrorsToFile($"Exception: {ex.ToString()}")
 
-                    TS.AppendText(ProgressLogTextBox,
-                                  $"Error processing file: {fileToProcess}" & Environment.NewLine)
-
-                    TS.AppendText(ProgressLogTextBox,
-                                  $"Command: {cmd.CommandText}" & Environment.NewLine)
-
-                    TS.AppendText(ProgressLogTextBox,
-                                  $"Exception: {ex.ToString()}" & Environment.NewLine)
+                    TS.AppendText(ProgressLogTextBox, $"Error processing file: {fileToProcess}" & Environment.NewLine)
+                    TS.AppendText(ProgressLogTextBox, $"Command: {cmd.CommandText}" & Environment.NewLine)
+                    TS.AppendText(ProgressLogTextBox, $"Exception: {ex.ToString()}" & Environment.NewLine)
 
                 Finally
                     myStreamReader.Close()
@@ -3363,10 +3369,6 @@ Public Class MainForm2
 
     End Sub
 
-    'PreviousCountOrCountedHeaderLabel.Text = "Previous Total Row Count" or "Total Row Count"
-    'EstimatedOrCountedRowsTextBox
-    'CurrentRowNumberTextBox
-
     ''' <summary>
     ''' Handles the RunWorkerCompleted event for the SqlBackgroundWorker. 
     ''' This event is triggered when the background worker has completed its operation. 
@@ -3397,31 +3399,6 @@ Public Class MainForm2
         Me.CancelButton = EndThingsButton
 
     End Sub
-
-    ''' <summary>
-    ''' Defines the types of raw files that can be processed, with each type associated with an integer value.
-    ''' </summary>
-    Public Enum RawFileTypeEnum As Integer
-        UNKNOWN = -1
-        NameBasics = 0
-        TitleAkas = 1
-        TitleBasics = 2
-        TitleCrew = 3
-        TitleEpisode = 4
-        TitlePrincipals = 5
-        TitleRatings = 6
-    End Enum
-
-    ''' <summary>
-    ''' Defines the types of SQL commands that can be executed, with each type associated with an integer value.
-    ''' </summary>
-    Public Enum SqlCmdTypeEnum As Integer
-        INSERT
-        UPDATE
-        TRUNCATE
-        ADD_CONSTRAINT
-        DROP_CONSTRAINT
-    End Enum
 
     ''' <summary>
     ''' Counts the number of rows in a specified table in the database. 
@@ -3656,21 +3633,6 @@ Public Class MainForm2
         Return success
 
     End Function
-
-    ''' <summary>
-    ''' Defines an enumeration for the operations of dropping or adding table constraints in a database. 
-    ''' The enumeration has two members: DROP and ADD, which represent the respective operations.
-    ''' </summary>
-    Private Enum DropAddEnum As Integer
-        ''' <summary>
-        ''' Represents the operation of dropping a table constraint.
-        ''' </summary>
-        DROP
-        ''' <summary>
-        ''' Represents the operation of adding a table constraint.
-        ''' </summary>
-        ADD
-    End Enum
 
     ''' <summary>
     ''' Adds or drops a table constraint in the database based on the specified operation (drop or add). 
@@ -4108,10 +4070,6 @@ Public Class MainForm2
         SqlImportBackgroundWorker.RunWorkerAsync()
 
     End Sub
-
-    Private Property CountArchiveRowsEnabled As Boolean = False
-    Private Property CountTsvRowsEnabled As Boolean = False
-    Private Property DecompressAfterDownloadEnabled As Boolean = False
 
     ''' <summary>
     ''' Handles the DoWork event of the SqlImportBackgroundWorker. It processes
