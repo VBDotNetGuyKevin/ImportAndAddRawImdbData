@@ -386,21 +386,52 @@ Public Class RawFileInfo
         End Set
     End Property
 
-    Private _RowsHaveBeenCounted As Boolean = False
+    Private _ToBeCounted As Boolean = False
+    ''' <summary>
+    ''' Indicates whether or not the rows need to be counted. If not, 
+    ''' we use the last row count as the total expected number of rows.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property ToBeCounted As Boolean
+        Get
+            Return _ToBeCounted
+        End Get
+        Set(value As Boolean)
+            _ToBeCounted = value
+        End Set
+    End Property
+
+    Private _IsBeingCounted As Boolean = False
+    ''' <summary>
+    ''' Indicates whether or not the rows are currently being counted. If not, 
+    ''' we use the last row count as the total expected number of rows.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property IsBeingCounted As Boolean
+        Get
+            Return _IsBeingCounted
+        End Get
+        Set(value As Boolean)
+            _IsBeingCounted = value
+        End Set
+    End Property
+
+    Private _HasBeenCounted As Boolean = False
 
     ''' <summary>
     ''' Indicates whether or not the rows have been counted. If not, 
     ''' we use the last row count as the total expected number of rows.
     ''' </summary>
     ''' <returns></returns>
-    Public Property RowsHaveBeenCounted As Boolean
+    Public Property HasBeenCounted As Boolean
         Get
-            Return _RowsHaveBeenCounted
+            Return _HasBeenCounted
         End Get
         Set(value As Boolean)
-            _RowsHaveBeenCounted = value
+            _HasBeenCounted = value
         End Set
     End Property
+
     ''' <summary>
     ''' This is the current number of counted rows for the current file
     ''' </summary>
@@ -416,7 +447,7 @@ Public Class RawFileInfo
         Set(value As Long)
             _CountedRows = value
 
-            RowsHaveBeenCounted = True
+            HasBeenCounted = True
 
             If ((Not Initializing) AndAlso
                 (Not CompletedProcessing) AndAlso
@@ -488,7 +519,7 @@ Public Class RawFileInfo
                 Dim modCommits As Integer = 0
                 Dim quotCommits As Integer = 0
 
-                If RowsHaveBeenCounted Then
+                If HasBeenCounted Then
                     ' if the rows were actually counted, then go with that value
                     modCommits = ((CountedRows - value) Mod Constants.DEFAULT_COMMIT_COUNT)
                     quotCommits = ((CountedRows - value) \ Constants.DEFAULT_COMMIT_COUNT)

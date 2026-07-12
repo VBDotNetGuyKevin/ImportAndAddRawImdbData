@@ -145,50 +145,6 @@ Public Class MainForm2
     ''' <returns></returns>
     Private Property CountFilesList As New List(Of String)
 
-    Private Property FilesToCountList As New SortedList(Of FT, Boolean) From
-        {
-            {FT.NameBasics, False},
-            {FT.TitleAkas, False},
-            {FT.TitleBasics, False},
-            {FT.TitleCrew, False},
-            {FT.TitleEpisode, False},
-            {FT.TitlePrincipals, False},
-            {FT.TitleRatings, False}
-        }
-
-    Private Property FilesCountedList As New SortedList(Of FT, Boolean) From
-        {
-            {FT.NameBasics, False},
-            {FT.TitleAkas, False},
-            {FT.TitleBasics, False},
-            {FT.TitleCrew, False},
-            {FT.TitleEpisode, False},
-            {FT.TitlePrincipals, False},
-            {FT.TitleRatings, False}
-        }
-
-    Private Property CountingFilesList As New SortedList(Of FT, Boolean) From
-        {
-            {FT.NameBasics, False},
-            {FT.TitleAkas, False},
-            {FT.TitleBasics, False},
-            {FT.TitleCrew, False},
-            {FT.TitleEpisode, False},
-            {FT.TitlePrincipals, False},
-            {FT.TitleRatings, False}
-        }
-
-    Private Property FilesRowCount As New SortedList(Of FT, Long) From
-        {
-            {FT.NameBasics, 0},
-            {FT.TitleAkas, 0},
-            {FT.TitleBasics, 0},
-            {FT.TitleCrew, 0},
-            {FT.TitleEpisode, 0},
-            {FT.TitlePrincipals, 0},
-            {FT.TitleRatings, 0}
-        }
-
     ''' <summary>
     ''' Gets or sets the list of files to be inserted into the database.
     ''' </summary>
@@ -1853,9 +1809,13 @@ Public Class MainForm2
                 Continue For
             End If
 
-            FilesToCountList(localFT) = False
-            FilesCountedList(localFT) = False
-            CountingFilesList(localFT) = False
+            With MyRawFileInfo(localFT)
+                .ToBeCounted = False
+                .IsBeingCounted = False
+                .HasBeenCounted = False
+
+                .CountedRows = 0
+            End With
         Next
 
         Using countOrInsertDataForm As New CountOrInsertData(PT.CountData,
@@ -1888,9 +1848,9 @@ Public Class MainForm2
                 localFileType = GetFileTypeBasedOnFileName(Path.GetFileName(gzFile))
 
                 ' This check shouldn't be needed, but I'm simply being careful to be robust
-                If CountingFilesList.ContainsKey(localFileType) Then
-                    FilesToCountList(localFileType) = True
-                    CountingFilesList(localFileType) = True
+                If MyRawFileInfo(localFileType).ToBeCounted Then
+                    MyRawFileInfo(localFileType).ToBeCounted = True
+                    MyRawFileInfo(localFileType).IsBeingCounted = True
                 End If
             Next
 
@@ -1956,10 +1916,10 @@ Public Class MainForm2
                         localFileType = GetFileTypeBasedOnFileName(Path.GetFileName(fileName), localImportType)
 
                         If localImportType = IT.Compressed Then
-                            MyRawFileInfo(localFileType).CountedRows = lineCount
-
-                            FilesRowCount(localFileType) = lineCount
-                            FilesCountedList(localFileType) = True
+                            With MyRawFileInfo(localFileType)
+                                .CountedRows = lineCount
+                                .HasBeenCounted = True
+                            End With
 
                             Select Case localFileType
                                 Case FT.NameBasics
@@ -1997,13 +1957,10 @@ Public Class MainForm2
                             Continue For
                         End If
 
-                        If FilesToCountList(localFT) Then
-                            filesToCount += 1
-                        End If
-
-                        If FilesCountedList(localFT) Then
-                            countedFiles += 1
-                        End If
+                        With MyRawFileInfo(localFT)
+                            If .IsBeingCounted Then filesToCount += 1
+                            If .HasBeenCounted Then countedFiles += 1
+                        End With
                     Next
 
                     If countedFiles = filesToCount Then
@@ -2016,9 +1973,11 @@ Public Class MainForm2
                                 Continue For
                             End If
 
-                            If FilesCountedList(localFT) Then
-                                MyRawFileInfo(FT.OVERALL).CountedRows += MyRawFileInfo(localFT).CountedRows
-                            End If
+                            With MyRawFileInfo(localFT)
+                                If .HasBeenCounted Then
+                                    MyRawFileInfo(FT.OVERALL).CountedRows += .CountedRows
+                                End If
+                            End With
                         Next
                     End If
 
@@ -2060,10 +2019,13 @@ Public Class MainForm2
                 Continue For
             End If
 
-            FilesToCountList(localFT) = False
-            FilesCountedList(localFT) = False
-            CountingFilesList(localFT) = False
-            FilesRowCount(localFT) = 0
+            With MyRawFileInfo(localFT)
+                .IsBeingCounted = False
+                .HasBeenCounted = False
+                .ToBeCounted = False
+
+                .CountedRows = 0
+            End With
         Next
 
         ' kick off separate tasks to count the rows in each file using BackgroundWorker, 
@@ -2098,7 +2060,8 @@ Public Class MainForm2
             CountFilesList.Clear()
 
             For Each fileToProcess As String In filesToProcess
-                FilesToCountList(GetFileTypeBasedOnFileName(Path.GetFileName(fileToProcess))) = True
+                Dim localFileType As FT = GetFileTypeBasedOnFileName(Path.GetFileName(fileToProcess))
+                MyRawFileInfo(localFileType).IsBeingCounted = True
 
                 CountFilesList.Add(fileToProcess)
             Next
@@ -2153,7 +2116,7 @@ Public Class MainForm2
                         If localImportType = IT.Decompressed AndAlso
                            File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
 
-                            FilesToCountList(localFileType) = True
+                            MyRawFileInfo(localFileType).IsBeingCounted = True
 
                             Select Case localFileType
                                 Case FT.NameBasics
@@ -2240,13 +2203,13 @@ Public Class MainForm2
     ''' </summary>
     Private Sub CheckAllCounted()
 
-        Dim allCounted As Boolean = (FilesCountedList(FT.NameBasics) AndAlso
-                                     FilesCountedList(FT.TitleAkas) AndAlso
-                                     FilesCountedList(FT.TitleBasics) AndAlso
-                                     FilesCountedList(FT.TitleCrew) AndAlso
-                                     FilesCountedList(FT.TitleEpisode) AndAlso
-                                     FilesCountedList(FT.TitlePrincipals) AndAlso
-                                     FilesCountedList(FT.TitleRatings))
+        Dim allCounted As Boolean = (MyRawFileInfo(FT.NameBasics).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleAkas).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleBasics).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleCrew).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleEpisode).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitlePrincipals).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleRatings).HasBeenCounted)
 
         Dim reEnableControls As Boolean = (allCounted OrElse
                                            CancelledOperations)
@@ -2293,8 +2256,10 @@ Public Class MainForm2
                 Continue For
             End If
 
-            If FilesToCountList(localFT) Then countingFiles += 1
-            If FilesCountedList(localFT) Then countedFiles += 1
+            With MyRawFileInfo(localFT)
+                If .IsBeingCounted Then countingFiles += 1
+                If .HasBeenCounted Then countedFiles += 1
+            End With
         Next
 
         allCounted = (countedFiles = countingFiles)
@@ -2302,13 +2267,33 @@ Public Class MainForm2
         If CancelledOperations OrElse
            allCounted Then
 
-            If FilesCountedList(FT.NameBasics) Then CountingFilesList(FT.NameBasics) = False
-            If FilesCountedList(FT.TitleAkas) Then CountingFilesList(FT.TitleAkas) = False
-            If FilesCountedList(FT.TitleBasics) Then CountingFilesList(FT.TitleBasics) = False
-            If FilesCountedList(FT.TitleCrew) Then CountingFilesList(FT.TitleCrew) = False
-            If FilesCountedList(FT.TitleEpisode) Then CountingFilesList(FT.TitleEpisode) = False
-            If FilesCountedList(FT.TitlePrincipals) Then CountingFilesList(FT.TitlePrincipals) = False
-            If FilesCountedList(FT.TitleRatings) Then CountingFilesList(FT.TitleRatings) = False
+            With MyRawFileInfo(FT.NameBasics)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleAkas)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleBasics)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleCrew)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleEpisode)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitlePrincipals)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleRatings)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
 
             FolderLocationTextBox.Enabled = True
             ChooseFolderButton.Enabled = True
@@ -2365,10 +2350,12 @@ Public Class MainForm2
 
         End Select
 
-        MyRawFileInfo(localFT).CountedRows = rowCount
+        With MyRawFileInfo(localFT)
+            .CountedRows = rowCount
 
-        FilesRowCount(localFT) = rowCount
-        FilesCountedList(localFT) = True
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
     End Sub
 
@@ -2406,10 +2393,12 @@ Public Class MainForm2
 
         End Select
 
-        MyRawFileInfo(localFT).CountedRows = rowCount
+        With MyRawFileInfo(localFT)
+            .CountedRows = rowCount
 
-        FilesRowCount(localFT) = rowCount
-        FilesCountedList(localFT) = True
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
     End Sub
 
@@ -2447,10 +2436,12 @@ Public Class MainForm2
 
         End Select
 
-        MyRawFileInfo(localFT).CountedRows = rowCount
+        With MyRawFileInfo(localFT)
+            .CountedRows = rowCount
 
-        FilesRowCount(localFT) = rowCount
-        FilesCountedList(localFT) = True
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
     End Sub
 
@@ -2488,10 +2479,12 @@ Public Class MainForm2
 
         End Select
 
-        MyRawFileInfo(localFT).CountedRows = rowCount
+        With MyRawFileInfo(localFT)
+            .CountedRows = rowCount
 
-        FilesRowCount(localFT) = rowCount
-        FilesCountedList(localFT) = True
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
     End Sub
 
@@ -2529,10 +2522,12 @@ Public Class MainForm2
 
         End Select
 
-        MyRawFileInfo(localFT).CountedRows = rowCount
+        With MyRawFileInfo(localFT)
+            .CountedRows = rowCount
 
-        FilesRowCount(localFT) = rowCount
-        FilesCountedList(localFT) = True
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
     End Sub
 
@@ -2570,10 +2565,12 @@ Public Class MainForm2
 
         End Select
 
-        MyRawFileInfo(localFT).CountedRows = rowCount
+        With MyRawFileInfo(localFT)
+            .CountedRows = rowCount
 
-        FilesRowCount(localFT) = rowCount
-        FilesCountedList(localFT) = True
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
     End Sub
 
@@ -2611,10 +2608,12 @@ Public Class MainForm2
 
         End Select
 
-        MyRawFileInfo(localFT).CountedRows = rowCount
+        With MyRawFileInfo(localFT)
+            .CountedRows = rowCount
 
-        FilesRowCount(localFT) = rowCount
-        FilesCountedList(localFT) = True
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
     End Sub
 
@@ -2648,7 +2647,7 @@ Public Class MainForm2
 
             localFileType = GetFileTypeBasedOnFileName(fileToProcess)
 
-            FilesToCountList(localFileType) = True
+            MyRawFileInfo(localFileType).ToBeCounted = True
 
             If File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
 
@@ -2662,14 +2661,16 @@ Public Class MainForm2
 
                 End Select
 
-                MyRawFileInfo(localFileType).CountedRows = localRowCount
+                With MyRawFileInfo(localFileType)
+                    If .ToBeCounted Then
+                        .IsBeingCounted = False
+                        .HasBeenCounted = True
 
-                If FilesRowCount.ContainsKey(localFileType) Then
+                        .CountedRows = localRowCount
+                    End If
+
                     fileCounted = True
-
-                    FilesRowCount(localFileType) = localRowCount
-                    FilesCountedList(localFileType) = True
-                End If
+                End With
 
                 ' update the log textbox with the row count for the current file, 
                 ' as we want to show the user that we're making progress on counting 
@@ -2769,7 +2770,7 @@ Public Class MainForm2
                     lastRowCount = .LastRowCount
                     countedRows = .CountedRows
 
-                    If .RowsHaveBeenCounted Then
+                    If .HasBeenCounted Then
                         TS.SetText(EstimatedOrCountedRowsTextBox, .CountedRows.ToString(C.COMMA_MASK))
                         TS.SetText(PreviousCountOrCountedHeaderLabel, "Total Row Count")
 
@@ -3183,7 +3184,7 @@ Public Class MainForm2
     Private Sub NameBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles NameBasicsBackgroundWorker.RunWorkerCompleted
 
-        FilesCountedList(FT.NameBasics) = True
+        MyRawFileInfo(FT.NameBasics).HasBeenCounted = True
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3208,7 +3209,7 @@ Public Class MainForm2
     Private Sub TitleAkasBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleAkasBackgroundWorker.RunWorkerCompleted
 
-        FilesCountedList(FT.TitleAkas) = True
+        MyRawFileInfo(FT.TitleAkas).HasBeenCounted = True
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3233,7 +3234,7 @@ Public Class MainForm2
     Private Sub TitleBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleBasicsBackgroundWorker.RunWorkerCompleted
 
-        FilesCountedList(FT.TitleBasics) = True
+        MyRawFileInfo(FT.TitleBasics).HasBeenCounted = True
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3258,7 +3259,7 @@ Public Class MainForm2
     Private Sub TitleCrewBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleCrewBackgroundWorker.RunWorkerCompleted
 
-        FilesCountedList(FT.TitleCrew) = True
+        MyRawFileInfo(FT.TitleCrew).HasBeenCounted = True
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3283,7 +3284,7 @@ Public Class MainForm2
     Private Sub TitleEpisodeBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleEpisodeBackgroundWorker.RunWorkerCompleted
 
-        FilesCountedList(FT.TitleEpisode) = True
+        MyRawFileInfo(FT.TitleEpisode).HasBeenCounted = True
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3308,7 +3309,7 @@ Public Class MainForm2
     Private Sub TitlePrincipalsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitlePrincipalsBackgroundWorker.RunWorkerCompleted
 
-        FilesCountedList(FT.TitlePrincipals) = True
+        MyRawFileInfo(FT.TitlePrincipals).HasBeenCounted = True
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3333,7 +3334,7 @@ Public Class MainForm2
     Private Sub TitleRatingsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleRatingsBackgroundWorker.RunWorkerCompleted
 
-        FilesCountedList(FT.TitleRatings) = True
+        MyRawFileInfo(FT.TitleRatings).HasBeenCounted = True
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3376,8 +3377,7 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender">The source of the event.</param>
     ''' <param name="e">The RunWorkerCompletedEventArgs instance containing the event data.</param>
-    Private Sub SqlBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                       e As RunWorkerCompletedEventArgs) _
+    Private Sub SqlBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles SqlBackgroundWorker.RunWorkerCompleted
 
         ' refer to the backgroundworker by its name: SqlBackgroundWorker
@@ -4246,8 +4246,7 @@ Public Class MainForm2
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub SqlImportBackgroundWorker_RunWorkerCompleted(sender As Object,
-                                                             e As RunWorkerCompletedEventArgs) _
+    Private Sub SqlImportBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles SqlImportBackgroundWorker.RunWorkerCompleted
 
         ImportDataButton.Enabled = True
