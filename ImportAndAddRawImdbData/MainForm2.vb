@@ -2679,7 +2679,9 @@ Public Class MainForm2
 
                 If fileCounted Then
                     Dim rowCountMessage As String =
-                        "Row count for " & fileToProcess & ": " & localRowCount.ToString(C.COMMA_MASK) & Environment.NewLine
+                        "Row count for " & fileToProcess &
+                        ": " & localRowCount.ToString(C.COMMA_MASK) &
+                        Environment.NewLine
                     ' 
                     If fileNumber = 1 Then
                         TS.AppendText(ProgressLogTextBox,
@@ -3209,7 +3211,10 @@ Public Class MainForm2
     Private Sub TitleAkasBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleAkasBackgroundWorker.RunWorkerCompleted
 
-        MyRawFileInfo(FT.TitleAkas).HasBeenCounted = True
+        With MyRawFileInfo(FT.TitleAkas)
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3234,7 +3239,10 @@ Public Class MainForm2
     Private Sub TitleBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleBasicsBackgroundWorker.RunWorkerCompleted
 
-        MyRawFileInfo(FT.TitleBasics).HasBeenCounted = True
+        With MyRawFileInfo(FT.TitleBasics)
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3259,7 +3267,10 @@ Public Class MainForm2
     Private Sub TitleCrewBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleCrewBackgroundWorker.RunWorkerCompleted
 
-        MyRawFileInfo(FT.TitleCrew).HasBeenCounted = True
+        With MyRawFileInfo(FT.TitleCrew)
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3309,7 +3320,10 @@ Public Class MainForm2
     Private Sub TitlePrincipalsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitlePrincipalsBackgroundWorker.RunWorkerCompleted
 
-        MyRawFileInfo(FT.TitlePrincipals).HasBeenCounted = True
+        With MyRawFileInfo(FT.TitlePrincipals)
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
         Select Case Me.ChooseAllOrSelected
 
@@ -3334,7 +3348,10 @@ Public Class MainForm2
     Private Sub TitleRatingsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleRatingsBackgroundWorker.RunWorkerCompleted
 
-        MyRawFileInfo(FT.TitleRatings).HasBeenCounted = True
+        With MyRawFileInfo(FT.TitleRatings)
+            .IsBeingCounted = False
+            .HasBeenCounted = True
+        End With
 
         Select Case Me.ChooseAllOrSelected
 
@@ -4110,7 +4127,6 @@ Public Class MainForm2
 
                 Do While Not CancelledOperations
                     With localCmd
-
                         '======================================================================================================
                         '======================================================================================================
                         '== #1 drop the constraints
