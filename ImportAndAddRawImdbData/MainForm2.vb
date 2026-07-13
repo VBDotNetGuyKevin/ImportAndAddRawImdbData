@@ -28,20 +28,7 @@ Imports IT = ImportAndAddRawImdbData.MainForm2.ImportTypeEnum
 
 Public Class MainForm2
 
-    ''' <summary>
-    ''' Defines the types of raw files that can be processed, with each type associated with an integer value.
-    ''' </summary>
-    Public Enum RawFileTypeEnum As Integer
-        UNKNOWN = -1
-        NameBasics = 0
-        TitleAkas = 1
-        TitleBasics = 2
-        TitleCrew = 3
-        TitleEpisode = 4
-        TitlePrincipals = 5
-        TitleRatings = 6
-    End Enum
-
+#Region "Enumerations"
     ''' <summary>
     ''' Defines the types of SQL commands that can be executed, with each type associated with an integer value.
     ''' </summary>
@@ -68,6 +55,15 @@ Public Class MainForm2
         ADD
     End Enum
 
+    Public Enum ImportTypeEnum
+        Unknown
+        Compressed
+        Decompressed
+    End Enum
+
+#End Region
+
+#Region "Private Properties"
     Private Property FolderLocation As String = String.Empty
     Private Property LocationExists As Boolean = False
 
@@ -109,6 +105,38 @@ Public Class MainForm2
     ''' </summary>
     Private Property ProcessFileType As PFT = PFT.Compressed
 
+    ''' <summary>
+    ''' Gets or sets the list of files to be counted.
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property CountFilesList As New List(Of String)
+
+    ''' <summary>
+    ''' Gets or sets the list of files to be inserted into the database.
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property InsertDataFilesList As New List(Of String)
+
+    Private Property CountTsvRowsButtonEnabled As Boolean = True
+    Private Property CountArchiveRowsButtonEnabled As Boolean = True
+
+    ''' <summary>
+    ''' Gets or sets a value indicating whether any of the background worker 
+    ''' operations have been cancelled. This property is used to track the 
+    ''' cancellation state of the operations and to control the 
+    ''' enabling/disabling of UI controls based on that state.
+    ''' </summary>
+    ''' <returns></returns>
+    Private Property CancelledOperations As Boolean = False
+
+    Private Property CountArchiveRowsEnabled As Boolean = False
+    Private Property CountTsvRowsEnabled As Boolean = False
+    Private Property DecompressAfterDownloadEnabled As Boolean = False
+
+#End Region
+
+#Region "Public Properties"
+
     Private Property _SequentialOrParallel As SP = SP.Sequential
     Public Property SequentialOrParallel As SP
         Get
@@ -139,33 +167,7 @@ Public Class MainForm2
         End Set
     End Property
 
-    ''' <summary>
-    ''' Gets or sets the list of files to be counted.
-    ''' </summary>
-    ''' <returns></returns>
-    Private Property CountFilesList As New List(Of String)
-
-    ''' <summary>
-    ''' Gets or sets the list of files to be inserted into the database.
-    ''' </summary>
-    ''' <returns></returns>
-    Private Property InsertDataFilesList As New List(Of String)
-
-    Private Property CountTsvRowsButtonEnabled As Boolean = True
-    Private Property CountArchiveRowsButtonEnabled As Boolean = True
-
-    ''' <summary>
-    ''' Gets or sets a value indicating whether any of the background worker 
-    ''' operations have been cancelled. This property is used to track the 
-    ''' cancellation state of the operations and to control the 
-    ''' enabling/disabling of UI controls based on that state.
-    ''' </summary>
-    ''' <returns></returns>
-    Private Property CancelledOperations As Boolean = False
-
-    Private Property CountArchiveRowsEnabled As Boolean = False
-    Private Property CountTsvRowsEnabled As Boolean = False
-    Private Property DecompressAfterDownloadEnabled As Boolean = False
+#End Region
 
     ''' <summary>
     ''' Gets the location of the folder where the files are stored.
@@ -180,12 +182,7 @@ Public Class MainForm2
     Public Const CompressedFileExtension As String = ".tsv.gz"
     Public Const UnCompressedFileExtension As String = ".tsv"
 
-    Public Enum ImportTypeEnum
-        Unknown
-        Compressed
-        Decompressed
-    End Enum
-
+#Region "Public Shared Functions"
     ''' <summary>
     ''' Determines the file type based on the provided file name. It checks 
     ''' the file name against known IMDB data file names and returns the 
@@ -330,6 +327,9 @@ Public Class MainForm2
 
     End Function
 
+#End Region
+
+#Region "Event Handlers"
     ''' <summary>
     ''' This event handler is triggered when the form is loaded. It initializes the form's controls
     ''' and loads the saved settings from the My.Settings file.
@@ -922,100 +922,6 @@ Public Class MainForm2
 
     End Sub
 
-    ' 7 files to download, each around 1.5GB, so we need to do this asynchronously and with progress reporting
-    ' https://datasets.imdbws.com/name.basics.tsv.gz
-    ' https://datasets.imdbws.com/title.akas.tsv.gz
-    ' https://datasets.imdbws.com/title.basics.tsv.gz
-    ' https://datasets.imdbws.com/title.crew.tsv.gz
-    ' https://datasets.imdbws.com/title.episode.tsv.gz
-    ' https://datasets.imdbws.com/title.principals.tsv.gz
-    ' https://datasets.imdbws.com/title.ratings.tsv.gz
-
-    ''' <summary>
-    ''' Downloads a file from the specified URL to the specified destination path, while reporting progress. 
-    ''' It uses HttpClient to send an asynchronous GET request and reads the response stream in chunks, writing them to a file. 
-    ''' The progress is calculated based on the total bytes read and the total content length, and it updates a progress bar in the UI.
-    ''' </summary>
-    ''' <param name="url"></param>
-    ''' <param name="destinationPath"></param>
-    ''' <returns></returns>
-    Public Async Function DownloadFileWithProgress(url As String,
-                                                   destinationPath As String) As Task
-
-        Using client As New HttpClient()
-            ' Get headers first without downloading the whole body
-
-            Using response = Await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead)
-                response.EnsureSuccessStatusCode()
-
-                Dim totalBytes = response.Content.Headers.ContentLength
-
-                Dim totalBytesDisplay As String = String.Empty
-
-                If totalBytes.HasValue Then
-                    totalBytesDisplay = (GetFileDisplayLength(totalBytes) &
-                                         " " &
-                                         GetFileDisplayLengthString(totalBytes))
-
-                Else
-                    totalBytesDisplay = "Unknown Size"
-
-                End If
-
-                ' Handle file specific logic for each of the 7 files, and update the UI with 
-                ' the file size info for each file so the user has a sense of how big the file 
-                ' is before it starts downloading
-
-                Select Case GetFileTypeBasedOnFileName(Path.GetFileName(destinationPath))
-                    Case FT.NameBasics : TS.SetText(NameBasicsSizeTextBox, totalBytesDisplay)
-                    Case FT.TitleAkas : TS.SetText(TitleAkasSizeTextBox, totalBytesDisplay)
-                    Case FT.TitleBasics : TS.SetText(TitleBasicsSizeTextBox, totalBytesDisplay)
-                    Case FT.TitleCrew : TS.SetText(TitleCrewSizeTextBox, totalBytesDisplay)
-                    Case FT.TitleEpisode : TS.SetText(TitleEpisodeSizeTextBox, totalBytesDisplay)
-                    Case FT.TitlePrincipals : TS.SetText(TitlePrincipalsSizeTextBox, totalBytesDisplay)
-                    Case FT.TitleRatings : TS.SetText(TitleRatingsSizeTextBox, totalBytesDisplay)
-                End Select
-
-                Using contentStream = Await response.Content.ReadAsStreamAsync(),
-                    fileStream = New FileStream(destinationPath,
-                                                FileMode.Create,
-                                                FileAccess.Write,
-                                                FileShare.None,
-                                                81919,
-                                                True)
-
-                    Dim buffer(81919) As Byte
-                    Dim totalRead As Long = 0
-                    Dim bytesRead As Integer
-
-                    Do
-                        bytesRead = Await contentStream.ReadAsync(buffer, 0, buffer.Length)
-
-                        If bytesRead = 0 Then
-                            Exit Do
-                        End If
-
-                        Await fileStream.WriteAsync(buffer, 0, bytesRead)
-
-                        totalRead += bytesRead
-
-                        ' Calculate and report progress
-                        If totalBytes.HasValue Then
-                            Dim progress = (totalRead / totalBytes.Value) * 100
-                            'Console.WriteLine($"Progress: {progress:F2}%")
-
-                            ' From inside your background thread:
-                            TS.SetValue(ArchiveDownloadProgressBar, CInt(progress))
-                        End If
-
-                    Loop While True
-
-                End Using
-            End Using
-        End Using
-
-    End Function
-
     ''' <summary>
     ''' This event handler is triggered when the "Download Updated Archives" 
     ''' button is clicked. It disables other buttons and controls in the UI 
@@ -1377,409 +1283,6 @@ Public Class MainForm2
         Me.AcceptButton = LoadAllDataFilesButton
 
     End Sub
-
-    ''' <summary>
-    ''' Gets the display string for the file length, either "GB" or "MB".
-    ''' </summary>
-    ''' <param name="fileLength">The length of the file in bytes.</param>
-    ''' <returns>A string representing the file length unit.</returns>
-    Private Function GetFileDisplayLengthString(fileLength As Long) As String
-
-        Return IIf(FileIsGbOrLarger(fileLength), "GB", "MB")
-
-    End Function
-
-    ''' <summary>
-    ''' Gets the display string for the file length value.
-    ''' </summary>
-    ''' <param name="fileLength">The length of the file in bytes.</param>
-    ''' <returns>A string representing the file length value.</returns>
-    Private Function GetFileDisplayLength(fileLength As Long) As String
-
-        Return CType(IIf(FileIsGbOrLarger(fileLength),
-                         GetGBDisplayLength(fileLength),
-                         GetMBDisplayLength(fileLength)), Double).ToString("F2")
-
-
-    End Function
-
-    ''' <summary>
-    ''' Determines if the file length is greater than or equal to 1 GB.
-    ''' </summary>
-    ''' <param name="fileLength">The length of the file in bytes.</param>
-    ''' <returns>True if the file length is greater than or equal to 1 GB, otherwise False.</returns>
-    Private Function FileIsGbOrLarger(fileLength As Long) As Boolean
-
-        Return (GetMBDisplayLength(fileLength) >= 1024.0)
-
-    End Function
-
-    ''' <summary>
-    ''' Gets the display length in gigabytes for the given file length in bytes.
-    ''' </summary>
-    ''' <param name="fileLength">The length of the file in bytes.</param>
-    ''' <returns>The display length in gigabytes.</returns>
-    Private Function GetGBDisplayLength(fileLength As Long) As Double
-
-        Return CType((fileLength / (1024 * 1024 * 1024)), Double)
-
-    End Function
-
-    ''' <summary>
-    ''' Gets the display length in megabytes for the given file length in bytes.
-    ''' </summary>
-    ''' <param name="fileLength">The length of the file in bytes.</param>
-    ''' <returns>The display length in megabytes.</returns>
-    Private Function GetMBDisplayLength(fileLength As Long) As Double
-
-        Return CType((fileLength / (1024 * 1024)), Double)
-
-    End Function
-
-    ''' <summary>
-    ''' Decompresses a downloaded GZip file asynchronously. It reads the 
-    ''' compressed file, decompresses it, and writes the decompressed data 
-    ''' to the specified output path. The function returns the size of the 
-    ''' decompressed file in bytes.
-    ''' </summary>
-    ''' <param name="zipPath">The path to the compressed GZip file.</param>
-    ''' <param name="outputPath">The path where the decompressed file will be written.</param>
-    ''' <returns>The size of the decompressed file in bytes.</returns>
-    Private Async Function DecompressDownloadedGZipFile(zipPath As String, outputPath As String) As Task(Of Long)
-
-        Dim decompAsync =
-            Async Function(compressedPath As String, decompressedPath As String) As Task(Of Long)
-                ' Open the compressed file for reading
-                Using compressedStream As New FileStream(compressedPath,
-                                                         FileMode.Open,
-                                                         FileAccess.Read)
-                    ' Create the output file for writing
-                    Using outputStream As New FileStream(decompressedPath,
-                                                         FileMode.Create,
-                                                         FileAccess.Write)
-                        ' Wrap the compressed stream in a GZipStream set to Decompress mode
-                        Using decompressor As New Comp.GZipStream(compressedStream,
-                                                                  Comp.CompressionMode.Decompress)
-                            Await Task.Delay(100)
-
-                            ' Copy the decompressed data to the output file stream
-                            decompressor.CopyTo(outputStream)
-                        End Using
-                    End Using
-                End Using
-
-                Dim myFileInfo As New FileInfo(outputPath)
-
-                Dim result As Long = myFileInfo.Length
-                myFileInfo = Nothing
-
-                Return result
-            End Function
-
-        Return Await decompAsync(zipPath, outputPath)
-
-    End Function
-
-    ''' <summary>
-    ''' Decompresses a GZip file. It reads the compressed file, decompresses 
-    ''' it, and writes the decompressed data to the specified output path.
-    ''' </summary>
-    ''' <param name="zipPath">The path to the compressed GZip file.</param>
-    ''' <param name="outputPath">The path where the decompressed file will be written.</param>
-    Public Sub DecompressGZipFile(zipPath As String,
-                                  outputPath As String)
-
-        ' Open the compressed file for reading
-        Using compressedStream As New FileStream(zipPath, FileMode.Open, FileAccess.Read)
-            ' Create the output file for writing
-            Using outputStream As New FileStream(outputPath, FileMode.Create, FileAccess.Write)
-                ' Wrap the compressed stream in a GZipStream set to Decompress mode
-                Using decompressor As New Comp.GZipStream(compressedStream, Comp.CompressionMode.Decompress)
-                    ' Copy the decompressed data to the output file stream
-                    decompressor.CopyTo(outputStream)
-                End Using
-            End Using
-        End Using
-
-    End Sub
-
-    ''' <summary>
-    ''' Handles the click event for the "End Things" button. Depending 
-    ''' on the button's text, it either cancels any ongoing background 
-    ''' worker operations or exits the application. If the button's text 
-    ''' is "&Cancel", it checks which background worker is busy and 
-    ''' requests cancellation. If the button's text is "E&xit", it 
-    ''' closes the application.
-    ''' </summary>
-    ''' <param name="sender">The source of the event.</param>
-    ''' <param name="e">The event data.</param>
-    Private Sub EndThingsButton_Click(sender As Object, e As EventArgs) _
-        Handles EndThingsButton.Click
-
-        If EndThingsButton.Text = "&Cancel" Then
-            ' end the backgroundworker thread
-
-            If SqlBackgroundWorker.IsBusy Then
-                SqlBackgroundWorker.CancelAsync()
-
-            ElseIf SqlImportBackgroundWorker.IsBusy Then
-                SqlImportBackgroundWorker.CancelAsync()
-
-            ElseIf AllArchivesSequentialBackgroundWorker.IsBusy Then
-                AllArchivesSequentialBackgroundWorker.CancelAsync()
-
-            ElseIf NameBasicsBackgroundWorker.IsBusy Then
-                NameBasicsBackgroundWorker.CancelAsync()
-
-            ElseIf TitleAkasBackgroundWorker.IsBusy Then
-                TitleAkasBackgroundWorker.CancelAsync()
-
-            ElseIf TitleBasicsBackgroundWorker.IsBusy Then
-                TitleBasicsBackgroundWorker.CancelAsync()
-
-            ElseIf TitleCrewBackgroundWorker.IsBusy Then
-                TitleCrewBackgroundWorker.CancelAsync()
-
-            ElseIf TitleEpisodeBackgroundWorker.IsBusy Then
-                TitleEpisodeBackgroundWorker.CancelAsync()
-
-            ElseIf TitlePrincipalsBackgroundWorker.IsBusy Then
-                TitlePrincipalsBackgroundWorker.CancelAsync()
-
-            ElseIf TitleRatingsBackgroundWorker.IsBusy Then
-                TitleRatingsBackgroundWorker.CancelAsync()
-
-            End If
-
-        ElseIf EndThingsButton.Text = "E&xit" Then
-            ' exit the app
-            Me.Close()
-
-        End If
-
-    End Sub
-
-    ''' <summary>
-    ''' Counts the number of rows in a specified file and updates the corresponding text box.
-    ''' </summary>
-    ''' <param name="localFileName">The name of the file to count rows for.</param>
-    ''' <returns>The number of rows in the file.</returns>
-    Private Function CountFileRows(localFolderLocation As String,
-                                   localFileName As String) As Long
-
-        Dim rowCount As Long = IO.File.ReadLines(Path.Combine(localFolderLocation, localFileName)).Count - 1
-
-        Dim localImportType As IT = IT.Unknown
-        Dim localFileType As FT = GetFileTypeBasedOnFileName(localFileName, localImportType)
-
-        If localImportType = IT.Decompressed Then
-            Select Case localFileType
-                Case FT.NameBasics : TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleAkas : TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleBasics : TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleCrew : TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleEpisode : TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitlePrincipals : TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleRatings : TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-            End Select
-        End If
-
-        Return rowCount
-
-    End Function
-
-    ''' <summary>
-    ''' Counts the number of rows in a specified compressed file and updates the corresponding text box.
-    ''' </summary>
-    ''' <param name="fileName">The name of the compressed file to count rows for.</param>
-    ''' <returns>The number of rows in the compressed file.</returns>
-    Private Function CountCompressedFileRows(ByVal folderLocation As String,
-                                             ByVal fileName As String) As Long
-
-        Dim rowCount As Long = 0
-        Dim actualRowCount As Long = 0
-
-        Dim fileInfoObj As New FileInfo(Path.Combine(folderLocation, fileName))
-        Dim gzipFileStream As FileStream = IO.File.OpenRead(fileInfoObj.FullName)
-
-        Using decompressionStream As New Comp.GZipStream(gzipFileStream,
-                                                         Comp.CompressionMode.Decompress)
-
-            ' Create a stream reader to read from the decompression stream
-            Using myStreamReader As New StreamReader(decompressionStream)
-                Try
-                    Dim line As String =
-                        myStreamReader.ReadLine()
-
-                    Do While (line IsNot Nothing)
-                        actualRowCount += 1
-
-                        If actualRowCount > 1 Then
-                            rowCount += 1
-                        End If
-
-                        Dim weShouldExitNow As Boolean = False
-
-                        If AllArchivesSequentialBackgroundWorker.IsBusy Then
-                            If AllArchivesSequentialBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-                            End If
-
-                        ElseIf (NameBasicsBackgroundWorker.IsBusy OrElse
-                                TitleAkasBackgroundWorker.IsBusy OrElse
-                                TitleBasicsBackgroundWorker.IsBusy OrElse
-                                TitleCrewBackgroundWorker.IsBusy OrElse
-                                TitleEpisodeBackgroundWorker.IsBusy OrElse
-                                TitlePrincipalsBackgroundWorker.IsBusy OrElse
-                                TitleRatingsBackgroundWorker.IsBusy) Then
-
-                            If NameBasicsBackgroundWorker.IsBusy Then
-                                If Not NameBasicsBackgroundWorker.CancellationPending Then
-                                    NameBasicsBackgroundWorker.CancelAsync()
-                                End If
-                                weShouldExitNow = True
-
-                            ElseIf NameBasicsBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-                            End If
-
-                            If TitleAkasBackgroundWorker.IsBusy Then
-                                If Not TitleAkasBackgroundWorker.CancellationPending Then
-                                    TitleAkasBackgroundWorker.CancelAsync()
-                                End If
-
-                                weShouldExitNow = True
-
-                            ElseIf TitleAkasBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-
-                            End If
-
-                            If TitleBasicsBackgroundWorker.IsBusy Then
-                                If Not TitleBasicsBackgroundWorker.CancellationPending Then
-                                    TitleBasicsBackgroundWorker.CancelAsync()
-                                End If
-
-                                weShouldExitNow = True
-
-                            ElseIf TitleBasicsBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-
-                            End If
-
-                            If TitleCrewBackgroundWorker.IsBusy Then
-                                If Not TitleCrewBackgroundWorker.CancellationPending Then
-                                    TitleCrewBackgroundWorker.CancelAsync()
-                                End If
-
-                                weShouldExitNow = True
-
-                            ElseIf TitleCrewBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-
-                            End If
-
-                            If TitleEpisodeBackgroundWorker.IsBusy Then
-                                If Not TitleEpisodeBackgroundWorker.CancellationPending Then
-                                    TitleEpisodeBackgroundWorker.CancelAsync()
-                                End If
-
-                                weShouldExitNow = True
-
-                            ElseIf TitleEpisodeBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-
-                            End If
-
-                            If TitlePrincipalsBackgroundWorker.IsBusy Then
-                                If Not TitlePrincipalsBackgroundWorker.CancellationPending Then
-                                    TitlePrincipalsBackgroundWorker.CancelAsync()
-                                End If
-
-                                weShouldExitNow = True
-
-                            ElseIf TitlePrincipalsBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-
-                            End If
-
-                            If TitleRatingsBackgroundWorker.IsBusy Then
-                                If Not TitleRatingsBackgroundWorker.CancellationPending Then
-                                    TitleRatingsBackgroundWorker.CancelAsync()
-                                End If
-
-                                weShouldExitNow = True
-
-                            ElseIf TitleRatingsBackgroundWorker.CancellationPending Then
-                                weShouldExitNow = True
-
-                            End If
-
-                        End If
-
-                        If weShouldExitNow Then
-                            CancelledOperations = True
-
-                            Exit Do
-                        End If
-
-                        If rowCount > 1 Then
-                            ' set the textbox text to show the progress of counting the rows in the file, 
-                            ' as this may take a while for the larger files, and it would be nice to have 
-                            ' that info available as soon as possible, rather than waiting until the file 
-                            ' is fully counted and then updating the UI with that info
-
-                            'Debug.Print(rowCount.ToString())
-                            Dim localImportType As IT = IT.Unknown
-                            Dim localFileType As FT = GetFileTypeBasedOnFileName(fileName, localImportType)
-
-                            If localImportType = IT.Compressed Then
-                                Select Case localFileType
-                                    Case FT.NameBasics
-                                        TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-
-                                    Case FT.TitleAkas
-                                        TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
-
-                                    Case FT.TitleBasics
-                                        TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-
-                                    Case FT.TitleCrew
-                                        TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
-
-                                    Case FT.TitleEpisode
-                                        TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
-
-                                    Case FT.TitlePrincipals
-                                        TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-
-                                    Case FT.TitleRatings
-                                        TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-
-                                End Select
-                            End If
-                        End If
-
-                        line = myStreamReader.ReadLine()
-                    Loop
-
-                Catch ex As Exception
-                    Debug.Print(ex.Message)
-
-                    LogErrorsToFile($"Exception: {ex.ToString()}")
-
-                Finally
-                    myStreamReader.Close()
-                    decompressionStream.Close()
-                    gzipFileStream.Close()
-
-                End Try
-            End Using
-        End Using
-
-        Return rowCount
-
-    End Function
 
     ''' <summary>
     ''' Handles the click event for the "Count Archive Rows" button. It 
@@ -2150,170 +1653,117 @@ Public Class MainForm2
     End Sub
 
     ''' <summary>
-    ''' Counts the number of lines in a GZip compressed file quickly by 
-    ''' reading the file in chunks and counting newline characters. It 
-    ''' uses a buffer to read the file in 64 KB chunks, which improves 
-    ''' performance for large files. The method returns the total line 
-    ''' count minus one to account for the header row.
+    ''' Handles the click event for the "End Things" button. Depending 
+    ''' on the button's text, it either cancels any ongoing background 
+    ''' worker operations or exits the application. If the button's text 
+    ''' is "&Cancel", it checks which background worker is busy and 
+    ''' requests cancellation. If the button's text is "E&xit", it 
+    ''' closes the application.
     ''' </summary>
-    ''' <param name="filePath">The path to the GZip compressed file.</param>
-    ''' <returns>The number of lines in the file, excluding the header row.</returns>
-    Private Function CountGZipLinesFast(filePath As String) As Long
+    ''' <param name="sender">The source of the event.</param>
+    ''' <param name="e">The event data.</param>
+    Private Sub EndThingsButton_Click(sender As Object, e As EventArgs) _
+        Handles EndThingsButton.Click
 
-        Dim lineCount As Long = 0
-        Dim bufferSize As Integer = 65536 ' 64 KB
-        Dim buffer(bufferSize - 1) As Byte
+        If EndThingsButton.Text = "&Cancel" Then
+            ' end the backgroundworker thread
 
-        Using fileStream As New FileStream(filePath,
-                                           FileMode.Open,
-                                           FileAccess.Read,
-                                           FileShare.Read,
-                                           bufferSize)
+            If SqlBackgroundWorker.IsBusy Then
+                SqlBackgroundWorker.CancelAsync()
 
-            Using gzipStream As New GZipStream(fileStream,
-                                               CompressionMode.Decompress)
+            ElseIf SqlImportBackgroundWorker.IsBusy Then
+                SqlImportBackgroundWorker.CancelAsync()
 
-                Dim bytesRead As Integer = gzipStream.Read(buffer, 0, bufferSize)
+            ElseIf AllArchivesSequentialBackgroundWorker.IsBusy Then
+                AllArchivesSequentialBackgroundWorker.CancelAsync()
 
-                While bytesRead > 0
+            ElseIf NameBasicsBackgroundWorker.IsBusy Then
+                NameBasicsBackgroundWorker.CancelAsync()
 
-                    For i As Integer = 0 To bytesRead - 1
-                        If buffer(i) = 10 Then
-                            lineCount += 1
-                        End If
-                    Next
+            ElseIf TitleAkasBackgroundWorker.IsBusy Then
+                TitleAkasBackgroundWorker.CancelAsync()
 
-                    bytesRead = gzipStream.Read(buffer, 0, bufferSize)
-                End While
-            End Using
-        End Using
+            ElseIf TitleBasicsBackgroundWorker.IsBusy Then
+                TitleBasicsBackgroundWorker.CancelAsync()
 
-        ' since each file has one first row that has the column names, 
-        ' we subtract that one since it isn't part of the actual data
+            ElseIf TitleCrewBackgroundWorker.IsBusy Then
+                TitleCrewBackgroundWorker.CancelAsync()
 
-        Return lineCount - 1
+            ElseIf TitleEpisodeBackgroundWorker.IsBusy Then
+                TitleEpisodeBackgroundWorker.CancelAsync()
 
-    End Function
+            ElseIf TitlePrincipalsBackgroundWorker.IsBusy Then
+                TitlePrincipalsBackgroundWorker.CancelAsync()
 
-    ''' <summary>
-    ''' Checks if all the data files have been counted and updates the UI controls accordingly. 
-    ''' If all files are counted or if any operation has been cancelled, it re-enables the relevant 
-    ''' UI controls (FolderLocationTextBox, ChooseFolderButton, LoadAllDataFilesButton, DownloadUpdatedArchivesButton). 
-    ''' It also resets the EndThingsButton text to "E&xit" if it was previously set to "&Cancel".
-    ''' </summary>
-    Private Sub CheckAllCounted()
+            ElseIf TitleRatingsBackgroundWorker.IsBusy Then
+                TitleRatingsBackgroundWorker.CancelAsync()
 
-        Dim allCounted As Boolean = (MyRawFileInfo(FT.NameBasics).HasBeenCounted AndAlso
-                                     MyRawFileInfo(FT.TitleAkas).HasBeenCounted AndAlso
-                                     MyRawFileInfo(FT.TitleBasics).HasBeenCounted AndAlso
-                                     MyRawFileInfo(FT.TitleCrew).HasBeenCounted AndAlso
-                                     MyRawFileInfo(FT.TitleEpisode).HasBeenCounted AndAlso
-                                     MyRawFileInfo(FT.TitlePrincipals).HasBeenCounted AndAlso
-                                     MyRawFileInfo(FT.TitleRatings).HasBeenCounted)
-
-        Dim reEnableControls As Boolean = (allCounted OrElse
-                                           CancelledOperations)
-
-        FolderLocationTextBox.Enabled = reEnableControls
-        ChooseFolderButton.Enabled = reEnableControls
-        LoadAllDataFilesButton.Enabled = reEnableControls
-        DownloadUpdatedArchivesButton.Enabled = reEnableControls
-
-        CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
-        CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
-
-        If reEnableControls Then
-            ' reset the EndThingsButton
-            If EndThingsButton.Text = "&Cancel" Then
-                EndThingsButton.Text = "E&xit"
-
-                Me.AcceptButton = LoadAllDataFilesButton
-                Me.CancelButton = EndThingsButton
             End If
+
+        ElseIf EndThingsButton.Text = "E&xit" Then
+            ' exit the app
+            Me.Close()
+
         End If
 
     End Sub
 
     ''' <summary>
-    ''' Checks if the selected files in the provided list have been counted and updates the UI controls accordingly. 
-    ''' If all selected files are counted or if any operation has been cancelled, it re-enables the relevant 
-    ''' UI controls (FolderLocationTextBox, ChooseFolderButton, LoadAllDataFilesButton, DownloadUpdatedArchivesButton). 
-    ''' It also resets the EndThingsButton text to "E&xit" if it was previously set to "&Cancel".
+    ''' Handles the click event of the ImportDataButton. It prompts the 
+    ''' user for confirmation before proceeding with the data import 
+    ''' operation. If confirmed, it disables relevant controls, sets 
+    ''' up the background worker for SQL import, and starts the 
+    ''' asynchronous operation to import data into the database.
     ''' </summary>
-    ''' <param name="countFilesList"></param>
-    Private Sub CheckSelectedCounted(countFilesList As List(Of String))
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub ImportDataButton_Click(sender As Object, e As EventArgs) _
+        Handles ImportDataButton.Click
 
-        Dim allCounted As Boolean = False
-
-        ' keep a list of all files being counted, and check if all of them have been counted, and if so, re-enable the controls
-
-        Dim countingFiles As Integer = 0
-        Dim countedFiles As Integer = 0
-
-        For Each localFT As FT In [Enum].GetValues(Of FT)()
-            If ((localFT = FT.OVERALL) OrElse
-                (localFT = FT.Unknown)) Then
-                Continue For
-            End If
-
-            With MyRawFileInfo(localFT)
-                If .IsBeingCounted Then countingFiles += 1
-                If .HasBeenCounted Then countedFiles += 1
-            End With
-        Next
-
-        allCounted = (countedFiles = countingFiles)
-
-        If CancelledOperations OrElse
-           allCounted Then
-
-            With MyRawFileInfo(FT.NameBasics)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleAkas)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleBasics)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleCrew)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleEpisode)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitlePrincipals)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleRatings)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            FolderLocationTextBox.Enabled = True
-            ChooseFolderButton.Enabled = True
-            LoadAllDataFilesButton.Enabled = True
-            DownloadUpdatedArchivesButton.Enabled = True
-            CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
-            CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
-            ' reset the EndThingsButton
-
-            If EndThingsButton.Text = "&Cancel" Then
-                EndThingsButton.Text = "E&xit"
-
-                Me.AcceptButton = LoadAllDataFilesButton
-                Me.CancelButton = EndThingsButton
-
-            End If
+        If MessageBox.Show("Are you sure you want to import all the data into the database?" & Environment.NewLine &
+                           "This operation will take a while and cannot be undone." & Environment.NewLine &
+                           "Please make sure you have a backup of your database before proceeding." & Environment.NewLine &
+                           "Do you want to continue?",
+                           "Confirm Data Import",
+                           MessageBoxButtons.YesNo,
+                           MessageBoxIcon.Warning) = DialogResult.No Then
+            Exit Sub
         End If
 
-    End Sub
+        ' launch the sqlimportbackgroundworker after disabling all of the controls needed
+        EndThingsButton.Text = "&Cancel"
 
+        AcceptButton = EndThingsButton
+        CancelButton = EndThingsButton
+
+        CancelledOperations = False
+
+        CountArchiveRowsEnabled = CountArchiveRowsButton.Enabled
+        CountTsvRowsEnabled = CountTsvRowsButton.Enabled
+        DecompressAfterDownloadEnabled = DecompressAfterDownloadCheckBox.Enabled
+
+        If CountArchiveRowsEnabled Then
+            CountArchiveRowsButton.Enabled = False
+        End If
+
+        If CountTsvRowsEnabled Then
+            CountTsvRowsButton.Enabled = False
+        End If
+
+        If DecompressAfterDownloadEnabled Then
+            DecompressAfterDownloadCheckBox.Enabled = False
+        End If
+
+        DownloadUpdatedArchivesButton.Enabled = False
+        LoadAllDataFilesButton.Enabled = False
+        ChooseFolderButton.Enabled = False
+        FolderLocationTextBox.Enabled = False
+        ImportDataButton.Enabled = False
+        CancelledOperations = False
+
+        SqlImportBackgroundWorker.RunWorkerAsync()
+
+    End Sub
 
 #Region "BackgroundWorker Objects DoWork Event Handlers"
     ''' <summary>
@@ -3148,31 +2598,176 @@ Public Class MainForm2
         ' calculate the TimeSpan values and save them to the Settings?
 
     End Sub
-#End Region
 
     ''' <summary>
-    ''' Logs error messages to a file named "error_log.txt" in the 
-    ''' application's base directory. Each log entry includes a 
-    ''' timestamp and the provided error message. If an exception 
-    ''' occurs while attempting to write to the log file, it is 
-    ''' caught and printed to the debug output.
+    ''' Handles the DoWork event of the SqlImportBackgroundWorker. It processes
+    ''' the database commands to load the data into the proper tables from the
+    ''' [Raw] Data Tables.
     ''' </summary>
-    ''' <param name="errorMessage">The error message to log.</param>
-    Public Sub LogErrorsToFile(errorMessage As String)
-        Try
-            Dim logPath As String = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error_log.txt")
-            Dim appendToFile As Boolean = True
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub SqlImportBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
+        Handles SqlImportBackgroundWorker.DoWork
 
-            Using writer As New StreamWriter(logPath, appendToFile)
-                writer.WriteLine($"{DateTime.Now}: {errorMessage}")
-            End Using
+        ' process the Database commands to load the data into the proper tables from the [Raw] Data Tables.
 
-        Catch ex As Exception
-            ' Handle any exceptions that occur while trying to log the error.
-            Debug.Print($"Failed to log error to file: {ex.Message}")
+        Dim localCmd As SqlCommand = Nothing
+        Dim localTransaction As SqlTransaction = Nothing
+        Dim commandText As String = String.Empty
+        Dim rowsAffected As Long = 0
+        Dim approximateRowCount As Long = 0
 
-        End Try
+        Dim basicLogMessage As String = String.Empty
+
+        Using conn As New SqlConnection(C.IMDB_CONNECTION_STRING)
+            conn.Open()
+
+            localCmd = conn.CreateCommand()
+            localCmd.CommandType = CommandType.Text
+
+
+            localTransaction = conn.BeginTransaction(IsolationLevel.Serializable)
+            localCmd.Transaction = localTransaction
+
+            Try
+                ' #1: We need to drop all of the constraints on the tables 
+                ' #2: Truncate the tables 
+                ' #3: Re-add the constraints.  
+
+                ' This is much faster than deleting the data and then trying to insert it with the constraints in place.
+
+                Do While Not CancelledOperations
+                    With localCmd
+                        '======================================================================================================
+                        '======================================================================================================
+                        '== #1 drop the constraints
+                        '======================================================================================================
+                        '======================================================================================================
+                        For currentStep As Integer = 1 To C.ADHOC_COUNT_1_MAX
+                            If Not AddOrDropTableConstraint(currentStep,
+                                                            C.ADHOC_COUNT_1_MAX,
+                                                            conn,
+                                                            localCmd,
+                                                            DropAddEnum.DROP,
+                                                            C.DEFAULT_TIMEOUT) OrElse
+                               SqlImportBackgroundWorker.CancellationPending Then
+
+                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
+
+                                localTransaction.Rollback()
+
+                                Exit Do
+                            End If
+                        Next
+
+                        '======================================================================================================
+                        '======================================================================================================
+                        '== #2 truncate the tables
+                        '======================================================================================================
+                        '======================================================================================================
+                        For Each ah25Table As AH25 In [Enum].GetValues(Of AH25)()
+
+                            If Not TruncateTable(ah25Table, conn, localCmd) OrElse
+                               SqlImportBackgroundWorker.CancellationPending Then
+                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
+
+                                localTransaction.Rollback()
+
+                                Exit Do
+                            End If
+
+                        Next
+
+                        '======================================================================================================
+                        '======================================================================================================
+                        '== #3 re-add the constraints
+                        '======================================================================================================
+                        '======================================================================================================
+                        For currentStep As Integer = 1 To C.ADHOC_COUNT_3_MAX
+
+                            If Not AddOrDropTableConstraint(currentStep,
+                                                            C.ADHOC_COUNT_3_MAX,
+                                                            conn,
+                                                            localCmd,
+                                                            DropAddEnum.ADD,
+                                                            C.DEFAULT_TIMEOUT) OrElse
+                               SqlImportBackgroundWorker.CancellationPending Then
+
+                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
+
+                                localTransaction.Rollback()
+
+                                Exit Do
+                            End If
+
+                        Next
+
+                        '======================================================================================================
+                        '======================================================================================================
+                        '== #4 Import data into IMDB.dbo Db Tables from IMDB.Raw Db Tables
+                        '======================================================================================================
+                        '======================================================================================================
+                        For currentStep As Integer =
+                            C.ADHOC_COUNT_4_MIN To C.ADHOC_COUNT_4_MAX
+
+                            If Not InsertOrUpdateTable(currentStep,
+                                                       C.ADHOC_COUNT_4_MAX,
+                                                       rowsAffected,
+                                                       conn,
+                                                       localCmd) OrElse
+                               SqlImportBackgroundWorker.CancellationPending Then
+                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
+
+                                localTransaction.Rollback()
+
+                                Exit Do
+                            End If
+                        Next
+
+                        '======================================================================================================
+                        '======================================================================================================
+                        '== #5 Get Final Table Counts for the IMDB.dbo Db Tables
+                        '======================================================================================================
+                        '======================================================================================================
+                        For Each ah25Table As AH25 In [Enum].GetValues(Of AH25)()
+
+                            If Not CountTable(ah25Table, conn, localCmd) OrElse
+                               SqlImportBackgroundWorker.CancellationPending Then
+
+                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
+
+                                localTransaction.Rollback()
+
+                                Exit Do
+                            End If
+
+                        Next
+
+                        Exit Do
+                    End With
+                Loop
+
+                If Not CancelledOperations Then
+                    localTransaction.Commit()
+                End If
+
+            Catch ex As Exception
+                LogErrorsToFile($"Exception: {ex.ToString()}")
+
+                If conn.State = ConnectionState.Open Then
+                    localTransaction.Rollback()
+                End If
+
+            Finally
+                If localCmd IsNot Nothing Then
+                    localCmd.Dispose()
+                End If
+            End Try
+        End Using
+
     End Sub
+
+#End Region
 
 #Region "BackgroundWorker Objects RunWorkerCompleted Event Handlers"
     ''' <summary>
@@ -3414,6 +3009,537 @@ Public Class MainForm2
 
         Me.AcceptButton = LoadAllDataFilesButton
         Me.CancelButton = EndThingsButton
+
+    End Sub
+
+    ''' <summary>
+    ''' Handles the RunWorkerCompleted event of the SqlImportBackgroundWorker. It re-enables
+    ''' the controls and updates the UI after the background worker has completed its operation.
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub SqlImportBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
+        Handles SqlImportBackgroundWorker.RunWorkerCompleted
+
+        ImportDataButton.Enabled = True
+
+        ' refer to the backgroundworker by its name: SqlBackgroundWorker
+        EndThingsButton.Text = "E&xit"
+
+        CountArchiveRowsButton.Enabled = CountArchiveRowsEnabled
+        CountTsvRowsButton.Enabled = CountTsvRowsEnabled
+        DecompressAfterDownloadCheckBox.Enabled = DecompressAfterDownloadEnabled
+
+        DownloadUpdatedArchivesButton.Enabled = True
+        LoadAllDataFilesButton.Enabled = True
+        ChooseFolderButton.Enabled = True
+        FolderLocationTextBox.Enabled = True
+
+        Me.AcceptButton = LoadAllDataFilesButton
+        Me.CancelButton = EndThingsButton
+
+    End Sub
+
+#End Region
+
+#End Region
+
+    ' 7 files to download, each around 1.5GB, so we need to do this asynchronously and with progress reporting
+    ' https://datasets.imdbws.com/name.basics.tsv.gz
+    ' https://datasets.imdbws.com/title.akas.tsv.gz
+    ' https://datasets.imdbws.com/title.basics.tsv.gz
+    ' https://datasets.imdbws.com/title.crew.tsv.gz
+    ' https://datasets.imdbws.com/title.episode.tsv.gz
+    ' https://datasets.imdbws.com/title.principals.tsv.gz
+    ' https://datasets.imdbws.com/title.ratings.tsv.gz
+
+#Region "Private Functions and Subs"
+    ''' <summary>
+    ''' Gets the display string for the file length, either "GB" or "MB".
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>A string representing the file length unit.</returns>
+    Private Function GetFileDisplayLengthString(fileLength As Long) As String
+
+        Return IIf(FileIsGbOrLarger(fileLength), "GB", "MB")
+
+    End Function
+
+    ''' <summary>
+    ''' Gets the display string for the file length value.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>A string representing the file length value.</returns>
+    Private Function GetFileDisplayLength(fileLength As Long) As String
+
+        Return CType(IIf(FileIsGbOrLarger(fileLength),
+                         GetGBDisplayLength(fileLength),
+                         GetMBDisplayLength(fileLength)), Double).ToString("F2")
+
+
+    End Function
+
+    ''' <summary>
+    ''' Determines if the file length is greater than or equal to 1 GB.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>True if the file length is greater than or equal to 1 GB, otherwise False.</returns>
+    Private Function FileIsGbOrLarger(fileLength As Long) As Boolean
+
+        Return (GetMBDisplayLength(fileLength) >= 1024.0)
+
+    End Function
+
+    ''' <summary>
+    ''' Gets the display length in gigabytes for the given file length in bytes.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>The display length in gigabytes.</returns>
+    Private Function GetGBDisplayLength(fileLength As Long) As Double
+
+        Return CType((fileLength / (1024 * 1024 * 1024)), Double)
+
+    End Function
+
+    ''' <summary>
+    ''' Gets the display length in megabytes for the given file length in bytes.
+    ''' </summary>
+    ''' <param name="fileLength">The length of the file in bytes.</param>
+    ''' <returns>The display length in megabytes.</returns>
+    Private Function GetMBDisplayLength(fileLength As Long) As Double
+
+        Return CType((fileLength / (1024 * 1024)), Double)
+
+    End Function
+
+    ''' <summary>
+    ''' Decompresses a downloaded GZip file asynchronously. It reads the 
+    ''' compressed file, decompresses it, and writes the decompressed data 
+    ''' to the specified output path. The function returns the size of the 
+    ''' decompressed file in bytes.
+    ''' </summary>
+    ''' <param name="zipPath">The path to the compressed GZip file.</param>
+    ''' <param name="outputPath">The path where the decompressed file will be written.</param>
+    ''' <returns>The size of the decompressed file in bytes.</returns>
+    Private Async Function DecompressDownloadedGZipFile(zipPath As String, outputPath As String) As Task(Of Long)
+
+        Dim decompAsync =
+            Async Function(compressedPath As String, decompressedPath As String) As Task(Of Long)
+                ' Open the compressed file for reading
+                Using compressedStream As New FileStream(compressedPath,
+                                                         FileMode.Open,
+                                                         FileAccess.Read)
+                    ' Create the output file for writing
+                    Using outputStream As New FileStream(decompressedPath,
+                                                         FileMode.Create,
+                                                         FileAccess.Write)
+                        ' Wrap the compressed stream in a GZipStream set to Decompress mode
+                        Using decompressor As New Comp.GZipStream(compressedStream,
+                                                                  Comp.CompressionMode.Decompress)
+                            Await Task.Delay(100)
+
+                            ' Copy the decompressed data to the output file stream
+                            decompressor.CopyTo(outputStream)
+                        End Using
+                    End Using
+                End Using
+
+                Dim myFileInfo As New FileInfo(outputPath)
+
+                Dim result As Long = myFileInfo.Length
+                myFileInfo = Nothing
+
+                Return result
+            End Function
+
+        Return Await decompAsync(zipPath, outputPath)
+
+    End Function
+
+    ''' <summary>
+    ''' Counts the number of rows in a specified file and updates the corresponding text box.
+    ''' </summary>
+    ''' <param name="localFileName">The name of the file to count rows for.</param>
+    ''' <returns>The number of rows in the file.</returns>
+    Private Function CountFileRows(localFolderLocation As String,
+                                   localFileName As String) As Long
+
+        Dim rowCount As Long = IO.File.ReadLines(Path.Combine(localFolderLocation, localFileName)).Count - 1
+
+        Dim localImportType As IT = IT.Unknown
+        Dim localFileType As FT = GetFileTypeBasedOnFileName(localFileName, localImportType)
+
+        If localImportType = IT.Decompressed Then
+            Select Case localFileType
+                Case FT.NameBasics : TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleAkas : TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleBasics : TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleCrew : TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleEpisode : TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitlePrincipals : TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                Case FT.TitleRatings : TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+            End Select
+        End If
+
+        Return rowCount
+
+    End Function
+
+    ''' <summary>
+    ''' Counts the number of rows in a specified compressed file and updates the corresponding text box.
+    ''' </summary>
+    ''' <param name="fileName">The name of the compressed file to count rows for.</param>
+    ''' <returns>The number of rows in the compressed file.</returns>
+    Private Function CountCompressedFileRows(ByVal folderLocation As String,
+                                             ByVal fileName As String) As Long
+
+        Dim rowCount As Long = 0
+        Dim actualRowCount As Long = 0
+
+        Dim fileInfoObj As New FileInfo(Path.Combine(folderLocation, fileName))
+        Dim gzipFileStream As FileStream = IO.File.OpenRead(fileInfoObj.FullName)
+
+        Using decompressionStream As New Comp.GZipStream(gzipFileStream,
+                                                         Comp.CompressionMode.Decompress)
+
+            ' Create a stream reader to read from the decompression stream
+            Using myStreamReader As New StreamReader(decompressionStream)
+                Try
+                    Dim line As String =
+                        myStreamReader.ReadLine()
+
+                    Do While (line IsNot Nothing)
+                        actualRowCount += 1
+
+                        If actualRowCount > 1 Then
+                            rowCount += 1
+                        End If
+
+                        Dim weShouldExitNow As Boolean = False
+
+                        If AllArchivesSequentialBackgroundWorker.IsBusy Then
+                            If AllArchivesSequentialBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+                            End If
+
+                        ElseIf (NameBasicsBackgroundWorker.IsBusy OrElse
+                                TitleAkasBackgroundWorker.IsBusy OrElse
+                                TitleBasicsBackgroundWorker.IsBusy OrElse
+                                TitleCrewBackgroundWorker.IsBusy OrElse
+                                TitleEpisodeBackgroundWorker.IsBusy OrElse
+                                TitlePrincipalsBackgroundWorker.IsBusy OrElse
+                                TitleRatingsBackgroundWorker.IsBusy) Then
+
+                            If NameBasicsBackgroundWorker.IsBusy Then
+                                If Not NameBasicsBackgroundWorker.CancellationPending Then
+                                    NameBasicsBackgroundWorker.CancelAsync()
+                                End If
+                                weShouldExitNow = True
+
+                            ElseIf NameBasicsBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+                            End If
+
+                            If TitleAkasBackgroundWorker.IsBusy Then
+                                If Not TitleAkasBackgroundWorker.CancellationPending Then
+                                    TitleAkasBackgroundWorker.CancelAsync()
+                                End If
+
+                                weShouldExitNow = True
+
+                            ElseIf TitleAkasBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+
+                            End If
+
+                            If TitleBasicsBackgroundWorker.IsBusy Then
+                                If Not TitleBasicsBackgroundWorker.CancellationPending Then
+                                    TitleBasicsBackgroundWorker.CancelAsync()
+                                End If
+
+                                weShouldExitNow = True
+
+                            ElseIf TitleBasicsBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+
+                            End If
+
+                            If TitleCrewBackgroundWorker.IsBusy Then
+                                If Not TitleCrewBackgroundWorker.CancellationPending Then
+                                    TitleCrewBackgroundWorker.CancelAsync()
+                                End If
+
+                                weShouldExitNow = True
+
+                            ElseIf TitleCrewBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+
+                            End If
+
+                            If TitleEpisodeBackgroundWorker.IsBusy Then
+                                If Not TitleEpisodeBackgroundWorker.CancellationPending Then
+                                    TitleEpisodeBackgroundWorker.CancelAsync()
+                                End If
+
+                                weShouldExitNow = True
+
+                            ElseIf TitleEpisodeBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+
+                            End If
+
+                            If TitlePrincipalsBackgroundWorker.IsBusy Then
+                                If Not TitlePrincipalsBackgroundWorker.CancellationPending Then
+                                    TitlePrincipalsBackgroundWorker.CancelAsync()
+                                End If
+
+                                weShouldExitNow = True
+
+                            ElseIf TitlePrincipalsBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+
+                            End If
+
+                            If TitleRatingsBackgroundWorker.IsBusy Then
+                                If Not TitleRatingsBackgroundWorker.CancellationPending Then
+                                    TitleRatingsBackgroundWorker.CancelAsync()
+                                End If
+
+                                weShouldExitNow = True
+
+                            ElseIf TitleRatingsBackgroundWorker.CancellationPending Then
+                                weShouldExitNow = True
+
+                            End If
+
+                        End If
+
+                        If weShouldExitNow Then
+                            CancelledOperations = True
+
+                            Exit Do
+                        End If
+
+                        If rowCount > 1 Then
+                            ' set the textbox text to show the progress of counting the rows in the file, 
+                            ' as this may take a while for the larger files, and it would be nice to have 
+                            ' that info available as soon as possible, rather than waiting until the file 
+                            ' is fully counted and then updating the UI with that info
+
+                            'Debug.Print(rowCount.ToString())
+                            Dim localImportType As IT = IT.Unknown
+                            Dim localFileType As FT = GetFileTypeBasedOnFileName(fileName, localImportType)
+
+                            If localImportType = IT.Compressed Then
+                                Select Case localFileType
+                                    Case FT.NameBasics
+                                        TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+
+                                    Case FT.TitleAkas
+                                        TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
+
+                                    Case FT.TitleBasics
+                                        TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+
+                                    Case FT.TitleCrew
+                                        TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
+
+                                    Case FT.TitleEpisode
+                                        TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
+
+                                    Case FT.TitlePrincipals
+                                        TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+
+                                    Case FT.TitleRatings
+                                        TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+
+                                End Select
+                            End If
+                        End If
+
+                        line = myStreamReader.ReadLine()
+                    Loop
+
+                Catch ex As Exception
+                    Debug.Print(ex.Message)
+
+                    LogErrorsToFile($"Exception: {ex.ToString()}")
+
+                Finally
+                    myStreamReader.Close()
+                    decompressionStream.Close()
+                    gzipFileStream.Close()
+
+                End Try
+            End Using
+        End Using
+
+        Return rowCount
+
+    End Function
+
+    ''' <summary>
+    ''' Counts the number of lines in a GZip compressed file quickly by 
+    ''' reading the file in chunks and counting newline characters. It 
+    ''' uses a buffer to read the file in 64 KB chunks, which improves 
+    ''' performance for large files. The method returns the total line 
+    ''' count minus one to account for the header row.
+    ''' </summary>
+    ''' <param name="filePath">The path to the GZip compressed file.</param>
+    ''' <returns>The number of lines in the file, excluding the header row.</returns>
+    Private Function CountGZipLinesFast(filePath As String) As Long
+
+        Dim lineCount As Long = 0
+        Dim bufferSize As Integer = 65536 ' 64 KB
+        Dim buffer(bufferSize - 1) As Byte
+
+        Using fileStream As New FileStream(filePath,
+                                           FileMode.Open,
+                                           FileAccess.Read,
+                                           FileShare.Read,
+                                           bufferSize)
+
+            Using gzipStream As New GZipStream(fileStream,
+                                               CompressionMode.Decompress)
+
+                Dim bytesRead As Integer = gzipStream.Read(buffer, 0, bufferSize)
+
+                While bytesRead > 0
+
+                    For i As Integer = 0 To bytesRead - 1
+                        If buffer(i) = 10 Then
+                            lineCount += 1
+                        End If
+                    Next
+
+                    bytesRead = gzipStream.Read(buffer, 0, bufferSize)
+                End While
+            End Using
+        End Using
+
+        ' since each file has one first row that has the column names, 
+        ' we subtract that one since it isn't part of the actual data
+
+        Return lineCount - 1
+
+    End Function
+
+    ''' <summary>
+    ''' Checks if all the data files have been counted and updates the UI controls accordingly. 
+    ''' If all files are counted or if any operation has been cancelled, it re-enables the relevant 
+    ''' UI controls (FolderLocationTextBox, ChooseFolderButton, LoadAllDataFilesButton, DownloadUpdatedArchivesButton). 
+    ''' It also resets the EndThingsButton text to "E&xit" if it was previously set to "&Cancel".
+    ''' </summary>
+    Private Sub CheckAllCounted()
+
+        Dim allCounted As Boolean = (MyRawFileInfo(FT.NameBasics).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleAkas).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleBasics).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleCrew).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleEpisode).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitlePrincipals).HasBeenCounted AndAlso
+                                     MyRawFileInfo(FT.TitleRatings).HasBeenCounted)
+
+        Dim reEnableControls As Boolean = (allCounted OrElse
+                                           CancelledOperations)
+
+        FolderLocationTextBox.Enabled = reEnableControls
+        ChooseFolderButton.Enabled = reEnableControls
+        LoadAllDataFilesButton.Enabled = reEnableControls
+        DownloadUpdatedArchivesButton.Enabled = reEnableControls
+
+        CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
+        CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
+
+        If reEnableControls Then
+            ' reset the EndThingsButton
+            If EndThingsButton.Text = "&Cancel" Then
+                EndThingsButton.Text = "E&xit"
+
+                Me.AcceptButton = LoadAllDataFilesButton
+                Me.CancelButton = EndThingsButton
+            End If
+        End If
+
+    End Sub
+
+    ''' <summary>
+    ''' Checks if the selected files in the provided list have been counted and updates the UI controls accordingly. 
+    ''' If all selected files are counted or if any operation has been cancelled, it re-enables the relevant 
+    ''' UI controls (FolderLocationTextBox, ChooseFolderButton, LoadAllDataFilesButton, DownloadUpdatedArchivesButton). 
+    ''' It also resets the EndThingsButton text to "E&xit" if it was previously set to "&Cancel".
+    ''' </summary>
+    ''' <param name="countFilesList"></param>
+    Private Sub CheckSelectedCounted(countFilesList As List(Of String))
+
+        Dim allCounted As Boolean = False
+
+        ' keep a list of all files being counted, and check if all of them have been counted, and if so, re-enable the controls
+
+        Dim countingFiles As Integer = 0
+        Dim countedFiles As Integer = 0
+
+        For Each localFT As FT In [Enum].GetValues(Of FT)()
+            If ((localFT = FT.OVERALL) OrElse
+                (localFT = FT.Unknown)) Then
+                Continue For
+            End If
+
+            With MyRawFileInfo(localFT)
+                If .IsBeingCounted Then countingFiles += 1
+                If .HasBeenCounted Then countedFiles += 1
+            End With
+        Next
+
+        allCounted = (countedFiles = countingFiles)
+
+        If CancelledOperations OrElse
+           allCounted Then
+
+            With MyRawFileInfo(FT.NameBasics)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleAkas)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleBasics)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleCrew)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleEpisode)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitlePrincipals)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            With MyRawFileInfo(FT.TitleRatings)
+                If .HasBeenCounted Then .IsBeingCounted = False
+            End With
+
+            FolderLocationTextBox.Enabled = True
+            ChooseFolderButton.Enabled = True
+            LoadAllDataFilesButton.Enabled = True
+            DownloadUpdatedArchivesButton.Enabled = True
+            CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
+            CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
+            ' reset the EndThingsButton
+
+            If EndThingsButton.Text = "&Cancel" Then
+                EndThingsButton.Text = "E&xit"
+
+                Me.AcceptButton = LoadAllDataFilesButton
+                Me.CancelButton = EndThingsButton
+
+            End If
+        End If
 
     End Sub
 
@@ -4031,259 +4157,141 @@ Public Class MainForm2
 
     End Function
 
+#End Region
+
+#Region "Public Functions and Subs"
     ''' <summary>
-    ''' Handles the click event of the ImportDataButton. It prompts the 
-    ''' user for confirmation before proceeding with the data import 
-    ''' operation. If confirmed, it disables relevant controls, sets 
-    ''' up the background worker for SQL import, and starts the 
-    ''' asynchronous operation to import data into the database.
+    ''' Downloads a file from the specified URL to the specified destination path, while reporting progress. 
+    ''' It uses HttpClient to send an asynchronous GET request and reads the response stream in chunks, writing them to a file. 
+    ''' The progress is calculated based on the total bytes read and the total content length, and it updates a progress bar in the UI.
     ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
-    Private Sub ImportDataButton_Click(sender As Object, e As EventArgs) _
-        Handles ImportDataButton.Click
+    ''' <param name="url"></param>
+    ''' <param name="destinationPath"></param>
+    ''' <returns></returns>
+    Public Async Function DownloadFileWithProgress(url As String,
+                                                   destinationPath As String) As Task
 
-        If MessageBox.Show("Are you sure you want to import all the data into the database?" & Environment.NewLine &
-                           "This operation will take a while and cannot be undone." & Environment.NewLine &
-                           "Please make sure you have a backup of your database before proceeding." & Environment.NewLine &
-                           "Do you want to continue?",
-                           "Confirm Data Import",
-                           MessageBoxButtons.YesNo,
-                           MessageBoxIcon.Warning) = DialogResult.No Then
-            Exit Sub
-        End If
+        Using client As New HttpClient()
+            ' Get headers first without downloading the whole body
 
-        ' launch the sqlimportbackgroundworker after disabling all of the controls needed
-        EndThingsButton.Text = "&Cancel"
+            Using response = Await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead)
+                response.EnsureSuccessStatusCode()
 
-        AcceptButton = EndThingsButton
-        CancelButton = EndThingsButton
+                Dim totalBytes = response.Content.Headers.ContentLength
 
-        CancelledOperations = False
+                Dim totalBytesDisplay As String = String.Empty
 
-        CountArchiveRowsEnabled = CountArchiveRowsButton.Enabled
-        CountTsvRowsEnabled = CountTsvRowsButton.Enabled
-        DecompressAfterDownloadEnabled = DecompressAfterDownloadCheckBox.Enabled
+                If totalBytes.HasValue Then
+                    totalBytesDisplay = (GetFileDisplayLength(totalBytes) &
+                                         " " &
+                                         GetFileDisplayLengthString(totalBytes))
 
-        If CountArchiveRowsEnabled Then
-            CountArchiveRowsButton.Enabled = False
-        End If
+                Else
+                    totalBytesDisplay = "Unknown Size"
 
-        If CountTsvRowsEnabled Then
-            CountTsvRowsButton.Enabled = False
-        End If
+                End If
 
-        If DecompressAfterDownloadEnabled Then
-            DecompressAfterDownloadCheckBox.Enabled = False
-        End If
+                ' Handle file specific logic for each of the 7 files, and update the UI with 
+                ' the file size info for each file so the user has a sense of how big the file 
+                ' is before it starts downloading
 
-        DownloadUpdatedArchivesButton.Enabled = False
-        LoadAllDataFilesButton.Enabled = False
-        ChooseFolderButton.Enabled = False
-        FolderLocationTextBox.Enabled = False
-        ImportDataButton.Enabled = False
-        CancelledOperations = False
+                Select Case GetFileTypeBasedOnFileName(Path.GetFileName(destinationPath))
+                    Case FT.NameBasics : TS.SetText(NameBasicsSizeTextBox, totalBytesDisplay)
+                    Case FT.TitleAkas : TS.SetText(TitleAkasSizeTextBox, totalBytesDisplay)
+                    Case FT.TitleBasics : TS.SetText(TitleBasicsSizeTextBox, totalBytesDisplay)
+                    Case FT.TitleCrew : TS.SetText(TitleCrewSizeTextBox, totalBytesDisplay)
+                    Case FT.TitleEpisode : TS.SetText(TitleEpisodeSizeTextBox, totalBytesDisplay)
+                    Case FT.TitlePrincipals : TS.SetText(TitlePrincipalsSizeTextBox, totalBytesDisplay)
+                    Case FT.TitleRatings : TS.SetText(TitleRatingsSizeTextBox, totalBytesDisplay)
+                End Select
 
-        SqlImportBackgroundWorker.RunWorkerAsync()
+                Using contentStream = Await response.Content.ReadAsStreamAsync(),
+                    fileStream = New FileStream(destinationPath,
+                                                FileMode.Create,
+                                                FileAccess.Write,
+                                                FileShare.None,
+                                                81919,
+                                                True)
 
-    End Sub
+                    Dim buffer(81919) As Byte
+                    Dim totalRead As Long = 0
+                    Dim bytesRead As Integer
+
+                    Do
+                        bytesRead = Await contentStream.ReadAsync(buffer, 0, buffer.Length)
+
+                        If bytesRead = 0 Then
+                            Exit Do
+                        End If
+
+                        Await fileStream.WriteAsync(buffer, 0, bytesRead)
+
+                        totalRead += bytesRead
+
+                        ' Calculate and report progress
+                        If totalBytes.HasValue Then
+                            Dim progress = (totalRead / totalBytes.Value) * 100
+                            'Console.WriteLine($"Progress: {progress:F2}%")
+
+                            ' From inside your background thread:
+                            TS.SetValue(ArchiveDownloadProgressBar, CInt(progress))
+                        End If
+
+                    Loop While True
+
+                End Using
+            End Using
+        End Using
+
+    End Function
 
     ''' <summary>
-    ''' Handles the DoWork event of the SqlImportBackgroundWorker. It processes
-    ''' the database commands to load the data into the proper tables from the
-    ''' [Raw] Data Tables.
+    ''' Decompresses a GZip file. It reads the compressed file, decompresses 
+    ''' it, and writes the decompressed data to the specified output path.
     ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
-    Private Sub SqlImportBackgroundWorker_DoWork(sender As Object, e As DoWorkEventArgs) _
-        Handles SqlImportBackgroundWorker.DoWork
+    ''' <param name="zipPath">The path to the compressed GZip file.</param>
+    ''' <param name="outputPath">The path where the decompressed file will be written.</param>
+    Public Sub DecompressGZipFile(zipPath As String,
+                                  outputPath As String)
 
-        ' process the Database commands to load the data into the proper tables from the [Raw] Data Tables.
-
-        Dim localCmd As SqlCommand = Nothing
-        Dim localTransaction As SqlTransaction = Nothing
-        Dim commandText As String = String.Empty
-        Dim rowsAffected As Long = 0
-        Dim approximateRowCount As Long = 0
-
-        Dim basicLogMessage As String = String.Empty
-
-        Using conn As New SqlConnection(C.IMDB_CONNECTION_STRING)
-            conn.Open()
-
-            localCmd = conn.CreateCommand()
-            localCmd.CommandType = CommandType.Text
-
-
-            localTransaction = conn.BeginTransaction(IsolationLevel.Serializable)
-            localCmd.Transaction = localTransaction
-
-            Try
-                ' #1: We need to drop all of the constraints on the tables 
-                ' #2: Truncate the tables 
-                ' #3: Re-add the constraints.  
-
-                ' This is much faster than deleting the data and then trying to insert it with the constraints in place.
-
-                Do While Not CancelledOperations
-                    With localCmd
-                        '======================================================================================================
-                        '======================================================================================================
-                        '== #1 drop the constraints
-                        '======================================================================================================
-                        '======================================================================================================
-                        For currentStep As Integer = 1 To C.ADHOC_COUNT_1_MAX
-                            If Not AddOrDropTableConstraint(currentStep,
-                                                            C.ADHOC_COUNT_1_MAX,
-                                                            conn,
-                                                            localCmd,
-                                                            DropAddEnum.DROP,
-                                                            C.DEFAULT_TIMEOUT) OrElse
-                               SqlImportBackgroundWorker.CancellationPending Then
-
-                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
-
-                                localTransaction.Rollback()
-
-                                Exit Do
-                            End If
-                        Next
-
-                        '======================================================================================================
-                        '======================================================================================================
-                        '== #2 truncate the tables
-                        '======================================================================================================
-                        '======================================================================================================
-                        For Each ah25Table As AH25 In [Enum].GetValues(Of AH25)()
-
-                            If Not TruncateTable(ah25Table, conn, localCmd) OrElse
-                               SqlImportBackgroundWorker.CancellationPending Then
-                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
-
-                                localTransaction.Rollback()
-
-                                Exit Do
-                            End If
-
-                        Next
-
-                        '======================================================================================================
-                        '======================================================================================================
-                        '== #3 re-add the constraints
-                        '======================================================================================================
-                        '======================================================================================================
-                        For currentStep As Integer = 1 To C.ADHOC_COUNT_3_MAX
-
-                            If Not AddOrDropTableConstraint(currentStep,
-                                                            C.ADHOC_COUNT_3_MAX,
-                                                            conn,
-                                                            localCmd,
-                                                            DropAddEnum.ADD,
-                                                            C.DEFAULT_TIMEOUT) OrElse
-                               SqlImportBackgroundWorker.CancellationPending Then
-
-                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
-
-                                localTransaction.Rollback()
-
-                                Exit Do
-                            End If
-
-                        Next
-
-                        '======================================================================================================
-                        '======================================================================================================
-                        '== #4 Import data into IMDB.dbo Db Tables from IMDB.Raw Db Tables
-                        '======================================================================================================
-                        '======================================================================================================
-                        For currentStep As Integer =
-                            C.ADHOC_COUNT_4_MIN To C.ADHOC_COUNT_4_MAX
-
-                            If Not InsertOrUpdateTable(currentStep,
-                                                       C.ADHOC_COUNT_4_MAX,
-                                                       rowsAffected,
-                                                       conn,
-                                                       localCmd) OrElse
-                               SqlImportBackgroundWorker.CancellationPending Then
-                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
-
-                                localTransaction.Rollback()
-
-                                Exit Do
-                            End If
-                        Next
-
-                        '======================================================================================================
-                        '======================================================================================================
-                        '== #5 Get Final Table Counts for the IMDB.dbo Db Tables
-                        '======================================================================================================
-                        '======================================================================================================
-                        For Each ah25Table As AH25 In [Enum].GetValues(Of AH25)()
-
-                            If Not CountTable(ah25Table, conn, localCmd) OrElse
-                               SqlImportBackgroundWorker.CancellationPending Then
-
-                                CancelledOperations = SqlImportBackgroundWorker.CancellationPending
-
-                                localTransaction.Rollback()
-
-                                Exit Do
-                            End If
-
-                        Next
-
-                        Exit Do
-                    End With
-                Loop
-
-                If Not CancelledOperations Then
-                    localTransaction.Commit()
-                End If
-
-            Catch ex As Exception
-                LogErrorsToFile($"Exception: {ex.ToString()}")
-
-                If conn.State = ConnectionState.Open Then
-                    localTransaction.Rollback()
-                End If
-
-            Finally
-                If localCmd IsNot Nothing Then
-                    localCmd.Dispose()
-                End If
-            End Try
+        ' Open the compressed file for reading
+        Using compressedStream As New FileStream(zipPath, FileMode.Open, FileAccess.Read)
+            ' Create the output file for writing
+            Using outputStream As New FileStream(outputPath, FileMode.Create, FileAccess.Write)
+                ' Wrap the compressed stream in a GZipStream set to Decompress mode
+                Using decompressor As New Comp.GZipStream(compressedStream, Comp.CompressionMode.Decompress)
+                    ' Copy the decompressed data to the output file stream
+                    decompressor.CopyTo(outputStream)
+                End Using
+            End Using
         End Using
 
     End Sub
 
+
     ''' <summary>
-    ''' Handles the RunWorkerCompleted event of the SqlImportBackgroundWorker. It re-enables
-    ''' the controls and updates the UI after the background worker has completed its operation.
+    ''' Logs error messages to a file named "error_log.txt" in the 
+    ''' application's base directory. Each log entry includes a 
+    ''' timestamp and the provided error message. If an exception 
+    ''' occurs while attempting to write to the log file, it is 
+    ''' caught and printed to the debug output.
     ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
-    Private Sub SqlImportBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
-        Handles SqlImportBackgroundWorker.RunWorkerCompleted
+    ''' <param name="errorMessage">The error message to log.</param>
+    Public Sub LogErrorsToFile(errorMessage As String)
+        Try
+            Dim logPath As String = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error_log.txt")
+            Dim appendToFile As Boolean = True
 
-        ImportDataButton.Enabled = True
+            Using writer As New StreamWriter(logPath, appendToFile)
+                writer.WriteLine($"{DateTime.Now}: {errorMessage}")
+            End Using
 
-        ' refer to the backgroundworker by its name: SqlBackgroundWorker
-        EndThingsButton.Text = "E&xit"
+        Catch ex As Exception
+            ' Handle any exceptions that occur while trying to log the error.
+            Debug.Print($"Failed to log error to file: {ex.Message}")
 
-        CountArchiveRowsButton.Enabled = CountArchiveRowsEnabled
-        CountTsvRowsButton.Enabled = CountTsvRowsEnabled
-        DecompressAfterDownloadCheckBox.Enabled = DecompressAfterDownloadEnabled
-
-        DownloadUpdatedArchivesButton.Enabled = True
-        LoadAllDataFilesButton.Enabled = True
-        ChooseFolderButton.Enabled = True
-        FolderLocationTextBox.Enabled = True
-
-        Me.AcceptButton = LoadAllDataFilesButton
-        Me.CancelButton = EndThingsButton
-
+        End Try
     End Sub
-
 #End Region
 
 End Class

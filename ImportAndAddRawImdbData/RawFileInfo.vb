@@ -16,8 +16,8 @@ Public Class RawFileInfo
         Unknown = -1
         OVERALL = 0
         NameBasics = 1
-        TitleBasics = 2
-        TitleAkas = 3
+        TitleAkas = 2
+        TitleBasics = 3
         TitleCrew = 4
         TitleEpisode = 5
         TitlePrincipals = 6
