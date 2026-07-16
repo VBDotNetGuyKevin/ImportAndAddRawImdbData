@@ -37,7 +37,7 @@ Public Class CountOrInsertData
                    processFileType As PFT,
                    filesDirectoryLocation As String)
 
-        InitializeComponent()
+        Me.New()
 
         Me.ProcessType = processType
         Me.SequentialOrParallel = sequentialOrParallel

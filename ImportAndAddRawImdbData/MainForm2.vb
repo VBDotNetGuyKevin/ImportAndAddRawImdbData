@@ -1,18 +1,14 @@
 ﻿Imports System.Collections.Concurrent
 Imports System.ComponentModel
 Imports System.Data.Common
-Imports System.Globalization
 Imports System.IO
 Imports System.IO.Compression
 Imports System.Linq
 Imports System.Net
 Imports System.Net.Http
 Imports System.Reflection.Metadata.Ecma335
-Imports System.Runtime.CompilerServices
 Imports System.Threading
-Imports System.Threading.Tasks
 Imports Microsoft.Data.SqlClient
-Imports ImportAndAddRawImdbData.Constants
 Imports AH25 = ImportAndAddRawImdbData.Constants.AdHoc2_5TableNameEnum
 Imports C = ImportAndAddRawImdbData.Constants
 Imports Comp = System.IO.Compression
@@ -20,7 +16,6 @@ Imports FT = ImportAndAddRawImdbData.RawFileInfo.FileTypeEnum
 Imports PFT = ImportAndAddRawImdbData.CountOrInsertData.ProcessFileTypeEnum
 Imports PT = ImportAndAddRawImdbData.CountOrInsertData.ProcessTypeEnum
 Imports CAS = ImportAndAddRawImdbData.CountOrInsertData.ChooseAllOrSelectedEnum
-Imports SCT = ImportAndAddRawImdbData.MainForm2.SqlCmdTypeEnum
 Imports SP = ImportAndAddRawImdbData.CountOrInsertData.SequentialOrParallelEnum
 Imports TS = ImportAndAddRawImdbData.ThreadSafeMethods
 Imports RFI = ImportAndAddRawImdbData.RawFileInfo
@@ -943,6 +938,7 @@ Public Class MainForm2
         TS.SetEnabled(FolderLocationTextBox, False)
         TS.SetEnabled(EndThingsButton, False)
         TS.SetEnabled(DecompressAfterDownloadCheckBox, False)
+        TS.SetEnabled(ImportDataButton, False)
 
         CountArchiveRowsButtonEnabled = TS.GetEnabled(CountArchiveRowsButton)
         TS.SetEnabled(CountArchiveRowsButton, False)
@@ -1275,6 +1271,7 @@ Public Class MainForm2
         TS.SetEnabled(EndThingsButton, True)
         TS.SetEnabled(DownloadUpdatedArchivesButton, True)
         TS.SetEnabled(DecompressAfterDownloadCheckBox, True)
+        TS.SetEnabled(ImportDataButton, True)
 
         TS.SetEnabled(CountArchiveRowsButton, CountArchiveRowsButtonEnabled)
         TS.SetEnabled(CountTsvRowsButton, CountTsvRowsButtonEnabled)
@@ -1513,6 +1510,8 @@ Public Class MainForm2
 
         Me.AcceptButton = EndThingsButton
         Me.CancelButton = EndThingsButton
+
+        TS.SetEnabled(ImportDataButton, False)
 
         Me.ImportType = IT.Decompressed
 
@@ -3447,6 +3446,7 @@ Public Class MainForm2
         ChooseFolderButton.Enabled = reEnableControls
         LoadAllDataFilesButton.Enabled = reEnableControls
         DownloadUpdatedArchivesButton.Enabled = reEnableControls
+        ImportDataButton.Enabled = reEnableControls
 
         CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
         CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
@@ -3528,10 +3528,12 @@ Public Class MainForm2
             ChooseFolderButton.Enabled = True
             LoadAllDataFilesButton.Enabled = True
             DownloadUpdatedArchivesButton.Enabled = True
+            ImportDataButton.Enabled = True
+
             CountArchiveRowsButton.Enabled = CountArchiveRowsButtonEnabled
             CountTsvRowsButton.Enabled = CountTsvRowsButtonEnabled
-            ' reset the EndThingsButton
 
+            ' reset the EndThingsButton
             If EndThingsButton.Text = "&Cancel" Then
                 EndThingsButton.Text = "E&xit"
 
