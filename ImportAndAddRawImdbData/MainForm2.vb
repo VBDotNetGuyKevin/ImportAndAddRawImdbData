@@ -20,6 +20,7 @@ Imports SP = ImportAndAddRawImdbData.CountOrInsertData.SequentialOrParallelEnum
 Imports TS = ImportAndAddRawImdbData.ThreadSafeMethods
 Imports RFI = ImportAndAddRawImdbData.RawFileInfo
 Imports IT = ImportAndAddRawImdbData.MainForm2.ImportTypeEnum
+Imports System.Security.Cryptography.Pkcs
 
 Public Class MainForm2
 
@@ -1139,7 +1140,6 @@ Public Class MainForm2
                     Dim destinationFileSize As Long =
                         Await DecompressDownloadedGZipFile(compressedFile, destinationPath)
 
-                    'DecompressGZipFile(compressedFile, destinationPath)
                     Debug.Print("Completed decompress " &
                                 " to File: " &
                                 Path.GetFileName(destinationPath) & vbTab & " - " &
@@ -1342,16 +1342,13 @@ Public Class MainForm2
             Dim filesToProcess As List(Of String) = countOrInsertDataForm.ProcessFilesList
             Dim gzFilesToProcess As String() = countOrInsertDataForm.ProcessFilesList.ToArray
 
-            Dim localFileType As FT
+            Dim localFT As FT
 
             For Each gzFile As String In gzFilesToProcess
-                localFileType = GetFileTypeBasedOnFileName(Path.GetFileName(gzFile))
+                localFT = GetFileTypeBasedOnFileName(Path.GetFileName(gzFile))
 
-                ' This check shouldn't be needed, but I'm simply being careful to be robust
-                If MyRawFileInfo(localFileType).ToBeCounted Then
-                    MyRawFileInfo(localFileType).ToBeCounted = True
-                    MyRawFileInfo(localFileType).IsBeingCounted = True
-                End If
+                MyRawFileInfo(localFT).ToBeCounted = True
+                MyRawFileInfo(localFT).IsBeingCounted = True
             Next
 
             Me.ProcessType = countOrInsertDataForm.ProcessType
@@ -1384,14 +1381,15 @@ Public Class MainForm2
 
                     Dim fileLineCounts As New ConcurrentDictionary(Of String, Long)()
 
-                    Dim watch As Stopwatch = Stopwatch.StartNew()
+                    Dim watch As Stopwatch =
+                        Stopwatch.StartNew()
 
                     Parallel.ForEach(gzFilesToProcess,
-                                 Sub(currentFile)
-                                     Dim lines As Long = CountGZipLinesFast(currentFile)
+                                     Sub(currentFile)
+                                         Dim lines As Long = CountGZipLinesFast(currentFile)
 
-                                     fileLineCounts.TryAdd(currentFile, lines)
-                                 End Sub)
+                                         fileLineCounts.TryAdd(currentFile, lines)
+                                     End Sub)
 
                     watch.Stop()
 
@@ -1413,35 +1411,41 @@ Public Class MainForm2
 
                         Dim localImportType As IT = IT.Unknown
 
-                        localFileType = GetFileTypeBasedOnFileName(Path.GetFileName(fileName), localImportType)
+                        localFT = GetFileTypeBasedOnFileName(Path.GetFileName(fileName), localImportType)
 
                         If localImportType = IT.Compressed Then
-                            With MyRawFileInfo(localFileType)
-                                .CountedRows = lineCount
-                                .HasBeenCounted = True
+                            With MyRawFileInfo(localFT)
+                                .CountedRows = lineCount    ' there is no need to set HasBeenCounted to True, as that is done in the backgroundworker thread when the counting is done
                             End With
 
-                            Select Case localFileType
+                            Select Case localFT
                                 Case FT.NameBasics
-                                    TS.SetText(NameBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                    TS.SetText(NameBasicsCountTextBox,
+                                               lineCount.ToString(C.COMMA_MASK))
 
                                 Case FT.TitleAkas
-                                    TS.SetText(TitleAkasCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                    TS.SetText(TitleAkasCountTextBox,
+                                               lineCount.ToString(C.COMMA_MASK))
 
                                 Case FT.TitleBasics
-                                    TS.SetText(TitleBasicsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                    TS.SetText(TitleBasicsCountTextBox,
+                                               lineCount.ToString(C.COMMA_MASK))
 
                                 Case FT.TitleCrew
-                                    TS.SetText(TitleCrewCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                    TS.SetText(TitleCrewCountTextBox,
+                                               lineCount.ToString(C.COMMA_MASK))
 
                                 Case FT.TitleEpisode
-                                    TS.SetText(TitleEpisodeCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                    TS.SetText(TitleEpisodeCountTextBox,
+                                               lineCount.ToString(C.COMMA_MASK))
 
                                 Case FT.TitlePrincipals
-                                    TS.SetText(TitlePrincipalsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                    TS.SetText(TitlePrincipalsCountTextBox,
+                                               lineCount.ToString(C.COMMA_MASK))
 
                                 Case FT.TitleRatings
-                                    TS.SetText(TitleRatingsCountTextBox, lineCount.ToString(C.COMMA_MASK))
+                                    TS.SetText(TitleRatingsCountTextBox,
+                                               lineCount.ToString(C.COMMA_MASK))
 
                             End Select
                         End If
@@ -1451,14 +1455,14 @@ Public Class MainForm2
                     Dim countedFiles As Integer = 0
                     Dim filesToCount As Integer = 0
 
-                    For Each localFT As FT In [Enum].GetValues(Of FT)()
-                        If ((localFT = FT.OVERALL) OrElse
-                            (localFT = FT.Unknown)) Then
+                    For Each localFT2 As FT In [Enum].GetValues(Of FT)()
+                        If ((localFT2 = FT.OVERALL) OrElse
+                            (localFT2 = FT.Unknown)) Then
                             Continue For
                         End If
 
-                        With MyRawFileInfo(localFT)
-                            If .IsBeingCounted Then filesToCount += 1
+                        With MyRawFileInfo(localFT2)
+                            If .ToBeCounted Then filesToCount += 1
                             If .HasBeenCounted Then countedFiles += 1
                         End With
                     Next
@@ -1467,13 +1471,13 @@ Public Class MainForm2
                         ' we have counted all of the files that were selected
                         MyRawFileInfo(FT.OVERALL).CountedRows = 0
 
-                        For Each localFT In [Enum].GetValues(Of FT)()
-                            If ((localFT = FT.OVERALL) OrElse
-                                (localFT = FT.Unknown)) Then
+                        For Each localFT2 In [Enum].GetValues(Of FT)()
+                            If ((localFT2 = FT.OVERALL) OrElse
+                                (localFT2 = FT.Unknown)) Then
                                 Continue For
                             End If
 
-                            With MyRawFileInfo(localFT)
+                            With MyRawFileInfo(localFT2)
                                 If .HasBeenCounted Then
                                     MyRawFileInfo(FT.OVERALL).CountedRows += .CountedRows
                                 End If
@@ -1561,11 +1565,17 @@ Public Class MainForm2
 
             CountFilesList.Clear()
 
-            For Each fileToProcess As String In filesToProcess
-                Dim localFileType As FT = GetFileTypeBasedOnFileName(Path.GetFileName(fileToProcess))
-                MyRawFileInfo(localFileType).IsBeingCounted = True
+            Dim localFT As FT
+            Dim localIT As IT
 
-                CountFilesList.Add(fileToProcess)
+            For Each fileToProcess As String In filesToProcess
+                localFT = GetFileTypeBasedOnFileName(Path.GetFileName(fileToProcess), localIT)
+
+                If localIT = IT.Decompressed Then
+                    MyRawFileInfo(localFT).ToBeCounted = True
+
+                    CountFilesList.Add(fileToProcess)
+                End If
             Next
 
             Select Case Me.SequentialOrParallel
@@ -1608,19 +1618,22 @@ Public Class MainForm2
                     ' until all the counting is done and then updating the UI with that info
 
                     For Each fileToProcess As String In CountFilesList
+
+                        Dim filenameOnly As String = String.Empty
+
                         If fileToProcess.StartsWith(FolderLocation) Then
-                            fileToProcess = Path.GetFileName(fileToProcess)
+                            filenameOnly = Path.GetFileName(fileToProcess)
                         End If
 
-                        Dim localImportType As IT = IT.Unknown
-                        Dim localFileType As FT = GetFileTypeBasedOnFileName(fileToProcess, localImportType)
+                        localIT = IT.Unknown
+                        localFT = GetFileTypeBasedOnFileName(filenameOnly, localIT)
 
-                        If localImportType = IT.Decompressed AndAlso
-                           File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
+                        If localIT = IT.Decompressed AndAlso
+                           File.Exists(fileToProcess) Then
 
-                            MyRawFileInfo(localFileType).IsBeingCounted = True
+                            MyRawFileInfo(localFT).IsBeingCounted = True
 
-                            Select Case localFileType
+                            Select Case localFT
                                 Case FT.NameBasics
                                     NameBasicsBackgroundWorker.RunWorkerAsync()
 
@@ -1788,22 +1801,24 @@ Public Class MainForm2
         End If
 
         Dim localFT As FT = FT.NameBasics
+
         Dim rowCount As Long = 0
+
+        MyRawFileInfo(localFT).IsBeingCounted = True
 
         Select Case ImportType
             Case IT.Compressed
-                rowCount = CountCompressedFileRows(FolderLocation, C.NameBasicsCompressedFileName)
+                rowCount = CountCompressedFileRows(FolderLocation,
+                                                   C.NameBasicsCompressedFileName)
 
             Case IT.Decompressed
-                rowCount = CountFileRows(FolderLocation, C.NameBasicsDecompressedFileName)
+                rowCount = CountFileRows(FolderLocation,
+                                         C.NameBasicsDecompressedFileName)
 
         End Select
 
         With MyRawFileInfo(localFT)
             .CountedRows = rowCount
-
-            .IsBeingCounted = False
-            .HasBeenCounted = True
         End With
 
     End Sub
@@ -1833,20 +1848,21 @@ Public Class MainForm2
         Dim localFT As FT = FT.TitleAkas
         Dim rowCount As Long = 0
 
+        MyRawFileInfo(localFT).IsBeingCounted = True
+
         Select Case ImportType
             Case IT.Compressed
-                rowCount = CountCompressedFileRows(FolderLocation, C.TitleAkasCompressedFileName)
+                rowCount = CountCompressedFileRows(FolderLocation,
+                                                   C.TitleAkasCompressedFileName)
 
             Case IT.Decompressed
-                rowCount = CountFileRows(FolderLocation, C.TitleAkasDecompressedFileName)
+                rowCount = CountFileRows(FolderLocation,
+                                         C.TitleAkasDecompressedFileName)
 
         End Select
 
         With MyRawFileInfo(localFT)
             .CountedRows = rowCount
-
-            .IsBeingCounted = False
-            .HasBeenCounted = True
         End With
 
     End Sub
@@ -1876,20 +1892,21 @@ Public Class MainForm2
         Dim localFT As FT = FT.TitleBasics
         Dim rowCount As Long = 0
 
+        MyRawFileInfo(localFT).IsBeingCounted = True
+
         Select Case ImportType
             Case IT.Compressed
-                rowCount = CountCompressedFileRows(FolderLocation, C.TitleBasicsCompressedFileName)
+                rowCount = CountCompressedFileRows(FolderLocation,
+                                                   C.TitleBasicsCompressedFileName)
 
             Case IT.Decompressed
-                rowCount = CountFileRows(FolderLocation, C.TitleBasicsDecompressedFileName)
+                rowCount = CountFileRows(FolderLocation,
+                                         C.TitleBasicsDecompressedFileName)
 
         End Select
 
         With MyRawFileInfo(localFT)
             .CountedRows = rowCount
-
-            .IsBeingCounted = False
-            .HasBeenCounted = True
         End With
 
     End Sub
@@ -1919,20 +1936,21 @@ Public Class MainForm2
         Dim localFT As FT = FT.TitleCrew
         Dim rowCount As Long = 0
 
+        MyRawFileInfo(localFT).IsBeingCounted = True
+
         Select Case ImportType
             Case IT.Compressed
-                rowCount = CountCompressedFileRows(FolderLocation, C.TitleCrewCompressedFileName)
+                rowCount = CountCompressedFileRows(FolderLocation,
+                                                   C.TitleCrewCompressedFileName)
 
             Case IT.Decompressed
-                rowCount = CountFileRows(FolderLocation, C.TitleCrewDecompressedFileName)
+                rowCount = CountFileRows(FolderLocation,
+                                         C.TitleCrewDecompressedFileName)
 
         End Select
 
         With MyRawFileInfo(localFT)
             .CountedRows = rowCount
-
-            .IsBeingCounted = False
-            .HasBeenCounted = True
         End With
 
     End Sub
@@ -1962,20 +1980,21 @@ Public Class MainForm2
         Dim localFT As FT = FT.TitleEpisode
         Dim rowCount As Long = 0
 
+        MyRawFileInfo(localFT).IsBeingCounted = True
+
         Select Case ImportType
             Case IT.Compressed
-                rowCount = CountCompressedFileRows(FolderLocation, C.TitleEpisodeCompressedFileName)
+                rowCount = CountCompressedFileRows(FolderLocation,
+                                                   C.TitleEpisodeCompressedFileName)
 
             Case IT.Decompressed
-                rowCount = CountFileRows(FolderLocation, C.TitleEpisodeDecompressedFileName)
+                rowCount = CountFileRows(FolderLocation,
+                                         C.TitleEpisodeDecompressedFileName)
 
         End Select
 
         With MyRawFileInfo(localFT)
             .CountedRows = rowCount
-
-            .IsBeingCounted = False
-            .HasBeenCounted = True
         End With
 
     End Sub
@@ -2005,20 +2024,21 @@ Public Class MainForm2
         Dim localFT As FT = FT.TitlePrincipals
         Dim rowCount As Long = 0
 
+        MyRawFileInfo(localFT).IsBeingCounted = True
+
         Select Case ImportType
             Case IT.Compressed
-                rowCount = CountCompressedFileRows(FolderLocation, C.TitlePrincipalsCompressedFileName)
+                rowCount = CountCompressedFileRows(FolderLocation,
+                                                   C.TitlePrincipalsCompressedFileName)
 
             Case IT.Decompressed
-                rowCount = CountFileRows(FolderLocation, C.TitlePrincipalsDecompressedFileName)
+                rowCount = CountFileRows(FolderLocation,
+                                         C.TitlePrincipalsDecompressedFileName)
 
         End Select
 
         With MyRawFileInfo(localFT)
             .CountedRows = rowCount
-
-            .IsBeingCounted = False
-            .HasBeenCounted = True
         End With
 
     End Sub
@@ -2048,20 +2068,21 @@ Public Class MainForm2
         Dim localFT As FT = FT.TitleRatings
         Dim rowCount As Long = 0
 
+        MyRawFileInfo(localFT).IsBeingCounted = True
+
         Select Case ImportType
             Case IT.Compressed
-                rowCount = CountCompressedFileRows(FolderLocation, C.TitleRatingsCompressedFileName)
+                rowCount = CountCompressedFileRows(FolderLocation,
+                                                   C.TitleRatingsCompressedFileName)
 
             Case IT.Decompressed
-                rowCount = CountFileRows(FolderLocation, C.TitleRatingsDecompressedFileName)
+                rowCount = CountFileRows(FolderLocation,
+                                         C.TitleRatingsDecompressedFileName)
 
         End Select
 
         With MyRawFileInfo(localFT)
             .CountedRows = rowCount
-
-            .IsBeingCounted = False
-            .HasBeenCounted = True
         End With
 
     End Sub
@@ -2079,7 +2100,7 @@ Public Class MainForm2
         Dim fileNumber As Integer = 0
         Dim localRowCount As Long = 0
         Dim fileCounted As Boolean = False
-        Dim localFileType As FT = FT.Unknown
+        Dim localFT As FT = FT.Unknown
 
         For Each fileToProcess As String In CountFilesList
             fileNumber += 1
@@ -2090,31 +2111,27 @@ Public Class MainForm2
                 Exit For
             End If
 
+            Dim filenameOnly As String = String.Empty
+
             If fileToProcess.StartsWith(FolderLocation) Then
-                fileToProcess = Path.GetFileName(fileToProcess)
+                filenameOnly = Path.GetFileName(fileToProcess)
             End If
 
-            localFileType = GetFileTypeBasedOnFileName(fileToProcess)
+            localFT = GetFileTypeBasedOnFileName(filenameOnly)
 
-            MyRawFileInfo(localFileType).ToBeCounted = True
-
-            If File.Exists(Path.Combine(FolderLocation, fileToProcess)) Then
-
+            If File.Exists(fileToProcess) Then
                 Select Case ImportType
-
                     Case IT.Compressed
-                        localRowCount = CountCompressedFileRows(FolderLocation, fileToProcess)
+                        localRowCount = CountCompressedFileRows(FolderLocation,
+                                                                filenameOnly)
 
                     Case IT.Decompressed
-                        localRowCount = CountFileRows(FolderLocation, fileToProcess)
-
+                        localRowCount = CountFileRows(FolderLocation,
+                                                      filenameOnly)
                 End Select
 
-                With MyRawFileInfo(localFileType)
+                With MyRawFileInfo(localFT)
                     If .ToBeCounted Then
-                        .IsBeingCounted = False
-                        .HasBeenCounted = True
-
                         .CountedRows = localRowCount
                     End If
 
@@ -2381,19 +2398,19 @@ Public Class MainForm2
                                     cmdResult = cmd.ExecuteNonQuery()
 
                                     TS.SetText(CurrentRowNumberTextBox,
-                                               rowNumber.ToString(C.COMMA_MASK))
+                                               dataRowNumber.ToString(C.COMMA_MASK))
 
                                 Catch ex As Exception
                                     If Not conn.State = ConnectionState.Open Then
                                         Throw
                                     End If
 
-                                    LogErrorsToFile("Row Number: " & rowNumber.ToString(C.COMMA_MASK))
+                                    LogErrorsToFile("Row Number: " & dataRowNumber.ToString(C.COMMA_MASK))
                                     LogErrorsToFile(cmd.CommandText)
                                     LogErrorsToFile("cmdResult = " & cmdResult.ToString())
 
                                     TS.AppendText(ProgressLogTextBox,
-                                                  "Data File Row Number: " & rowNumber.ToString(C.COMMA_MASK) & Environment.NewLine &
+                                                  "Data File Row Number: " & dataRowNumber.ToString(C.COMMA_MASK) & Environment.NewLine &
                                                   " Error inserting row: " & Environment.NewLine &
                                                   ex.Message & Environment.NewLine)
                                 End Try
@@ -2594,6 +2611,20 @@ Public Class MainForm2
             MyRawFileInfo(FT.OVERALL).CurrentEndTime = Now
         End Using
 
+        ' reset the progress bar to 0 after all files have been processed, or if the operation was cancelled
+        ' also reset the other textboxes to empty strings, as the operation is complete or cancelled
+        TS.SetValue(ImportArchiveFileProgressBar, 0)
+        TS.SetText(CurrentImportFileNumberTextBox, String.Empty)
+        TS.SetText(CurrentImportFileTextBox, String.Empty)
+        TS.SetText(FileEstimatedProcessingTimeTextBox, String.Empty)
+        TS.SetText(ElapsedTimeForFileTextBox, String.Empty)
+        TS.SetText(FileEstimatedTimeRemainingTextBox, String.Empty)
+        TS.SetText(OverallEstimatedProcessingTimeTextBox, String.Empty)
+        TS.SetText(OverallEstimatedTimeRemainingTextBox, String.Empty)
+
+        TS.SetText(CurrentRowNumberTextBox, String.Empty)
+        TS.SetText(EstimatedOrCountedRowsTextBox, String.Empty)
+
         ' calculate the TimeSpan values and save them to the Settings?
 
     End Sub
@@ -2780,7 +2811,9 @@ Public Class MainForm2
     Private Sub NameBasicsBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles NameBasicsBackgroundWorker.RunWorkerCompleted
 
-        MyRawFileInfo(FT.NameBasics).HasBeenCounted = True
+        With MyRawFileInfo(FT.NameBasics)
+            .HasBeenCounted = True
+        End With
 
         Select Case Me.ChooseAllOrSelected
 
@@ -2806,7 +2839,6 @@ Public Class MainForm2
         Handles TitleAkasBackgroundWorker.RunWorkerCompleted
 
         With MyRawFileInfo(FT.TitleAkas)
-            .IsBeingCounted = False
             .HasBeenCounted = True
         End With
 
@@ -2834,7 +2866,6 @@ Public Class MainForm2
         Handles TitleBasicsBackgroundWorker.RunWorkerCompleted
 
         With MyRawFileInfo(FT.TitleBasics)
-            .IsBeingCounted = False
             .HasBeenCounted = True
         End With
 
@@ -2862,7 +2893,6 @@ Public Class MainForm2
         Handles TitleCrewBackgroundWorker.RunWorkerCompleted
 
         With MyRawFileInfo(FT.TitleCrew)
-            .IsBeingCounted = False
             .HasBeenCounted = True
         End With
 
@@ -2889,7 +2919,9 @@ Public Class MainForm2
     Private Sub TitleEpisodeBackgroundWorker_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) _
         Handles TitleEpisodeBackgroundWorker.RunWorkerCompleted
 
-        MyRawFileInfo(FT.TitleEpisode).HasBeenCounted = True
+        With MyRawFileInfo(FT.TitleEpisode)
+            .HasBeenCounted = True
+        End With
 
         Select Case Me.ChooseAllOrSelected
 
@@ -2915,7 +2947,6 @@ Public Class MainForm2
         Handles TitlePrincipalsBackgroundWorker.RunWorkerCompleted
 
         With MyRawFileInfo(FT.TitlePrincipals)
-            .IsBeingCounted = False
             .HasBeenCounted = True
         End With
 
@@ -2943,7 +2974,6 @@ Public Class MainForm2
         Handles TitleRatingsBackgroundWorker.RunWorkerCompleted
 
         With MyRawFileInfo(FT.TitleRatings)
-            .IsBeingCounted = False
             .HasBeenCounted = True
         End With
 
@@ -3120,21 +3150,26 @@ Public Class MainForm2
     ''' <param name="zipPath">The path to the compressed GZip file.</param>
     ''' <param name="outputPath">The path where the decompressed file will be written.</param>
     ''' <returns>The size of the decompressed file in bytes.</returns>
-    Private Async Function DecompressDownloadedGZipFile(zipPath As String, outputPath As String) As Task(Of Long)
+    Private Async Function DecompressDownloadedGZipFile(zipPath As String,
+                                                        outputPath As String) As Task(Of Long)
 
         Dim decompAsync =
-            Async Function(compressedPath As String, decompressedPath As String) As Task(Of Long)
+            Async Function(compressedPath As String,
+                           decompressedPath As String) As Task(Of Long)
+
                 ' Open the compressed file for reading
                 Using compressedStream As New FileStream(compressedPath,
                                                          FileMode.Open,
                                                          FileAccess.Read)
+
                     ' Create the output file for writing
                     Using outputStream As New FileStream(decompressedPath,
                                                          FileMode.Create,
                                                          FileAccess.Write)
+
                         ' Wrap the compressed stream in a GZipStream set to Decompress mode
-                        Using decompressor As New Comp.GZipStream(compressedStream,
-                                                                  Comp.CompressionMode.Decompress)
+                        Using decompressor As New GZipStream(compressedStream,
+                                                             CompressionMode.Decompress)
                             Await Task.Delay(100)
 
                             ' Copy the decompressed data to the output file stream
@@ -3143,12 +3178,7 @@ Public Class MainForm2
                     End Using
                 End Using
 
-                Dim myFileInfo As New FileInfo(outputPath)
-
-                Dim result As Long = myFileInfo.Length
-                myFileInfo = Nothing
-
-                Return result
+                Return (New FileInfo(outputPath)).Length
             End Function
 
         Return Await decompAsync(zipPath, outputPath)
@@ -3156,27 +3186,49 @@ Public Class MainForm2
     End Function
 
     ''' <summary>
-    ''' Counts the number of rows in a specified file and updates the corresponding text box.
+    ''' Counts the number of rows in a specified uncompressed file and updates the corresponding text box.
     ''' </summary>
+    ''' <param name="localFolderLocation">The folder location of the file to count rows for.</param>
     ''' <param name="localFileName">The name of the file to count rows for.</param>
     ''' <returns>The number of rows in the file.</returns>
     Private Function CountFileRows(localFolderLocation As String,
                                    localFileName As String) As Long
 
-        Dim rowCount As Long = IO.File.ReadLines(Path.Combine(localFolderLocation, localFileName)).Count - 1
+        Dim rowCount As Long =
+            File.ReadLines(Path.Combine(localFolderLocation, localFileName)).Count - 1
 
-        Dim localImportType As IT = IT.Unknown
-        Dim localFileType As FT = GetFileTypeBasedOnFileName(localFileName, localImportType)
+        Dim localIT As IT = IT.Unknown
+        Dim localFT As FT = GetFileTypeBasedOnFileName(localFileName, localIT)
 
-        If localImportType = IT.Decompressed Then
-            Select Case localFileType
-                Case FT.NameBasics : TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleAkas : TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleBasics : TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleCrew : TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleEpisode : TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitlePrincipals : TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
-                Case FT.TitleRatings : TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+        If localIT = IT.Decompressed Then
+            Select Case localFT
+                Case FT.NameBasics
+                    TS.SetText(NameBasicsCountTextBox,
+                               rowCount.ToString(C.COMMA_MASK))
+
+                Case FT.TitleAkas
+                    TS.SetText(TitleAkasCountTextBox,
+                               rowCount.ToString(C.COMMA_MASK))
+
+                Case FT.TitleBasics
+                    TS.SetText(TitleBasicsCountTextBox,
+                               rowCount.ToString(C.COMMA_MASK))
+
+                Case FT.TitleCrew
+                    TS.SetText(TitleCrewCountTextBox,
+                               rowCount.ToString(C.COMMA_MASK))
+
+                Case FT.TitleEpisode
+                    TS.SetText(TitleEpisodeCountTextBox,
+                               rowCount.ToString(C.COMMA_MASK))
+
+                Case FT.TitlePrincipals
+                    TS.SetText(TitlePrincipalsCountTextBox,
+                               rowCount.ToString(C.COMMA_MASK))
+
+                Case FT.TitleRatings
+                    TS.SetText(TitleRatingsCountTextBox,
+                               rowCount.ToString(C.COMMA_MASK))
             End Select
         End If
 
@@ -3196,10 +3248,10 @@ Public Class MainForm2
         Dim actualRowCount As Long = 0
 
         Dim fileInfoObj As New FileInfo(Path.Combine(folderLocation, fileName))
-        Dim gzipFileStream As FileStream = IO.File.OpenRead(fileInfoObj.FullName)
+        Dim gzipFileStream As FileStream = File.OpenRead(fileInfoObj.FullName)
 
-        Using decompressionStream As New Comp.GZipStream(gzipFileStream,
-                                                         Comp.CompressionMode.Decompress)
+        Using decompressionStream As New GZipStream(gzipFileStream,
+                                                    CompressionMode.Decompress)
 
             ' Create a stream reader to read from the decompression stream
             Using myStreamReader As New StreamReader(decompressionStream)
@@ -3326,31 +3378,38 @@ Public Class MainForm2
                             ' is fully counted and then updating the UI with that info
 
                             'Debug.Print(rowCount.ToString())
-                            Dim localImportType As IT = IT.Unknown
-                            Dim localFileType As FT = GetFileTypeBasedOnFileName(fileName, localImportType)
+                            Dim localIT As IT = IT.Unknown
+                            Dim localFT As FT = GetFileTypeBasedOnFileName(fileName, localIT)
 
-                            If localImportType = IT.Compressed Then
-                                Select Case localFileType
+                            If localIT = IT.Compressed Then
+                                Select Case localFT
                                     Case FT.NameBasics
-                                        TS.SetText(NameBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(NameBasicsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleAkas
-                                        TS.SetText(TitleAkasCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleAkasCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleBasics
-                                        TS.SetText(TitleBasicsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleBasicsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleCrew
-                                        TS.SetText(TitleCrewCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleCrewCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleEpisode
-                                        TS.SetText(TitleEpisodeCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleEpisodeCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitlePrincipals
-                                        TS.SetText(TitlePrincipalsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitlePrincipalsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
 
                                     Case FT.TitleRatings
-                                        TS.SetText(TitleRatingsCountTextBox, rowCount.ToString(C.COMMA_MASK))
+                                        TS.SetText(TitleRatingsCountTextBox,
+                                                   rowCount.ToString(C.COMMA_MASK))
 
                                 End Select
                             End If
@@ -3392,6 +3451,18 @@ Public Class MainForm2
         Dim bufferSize As Integer = 65536 ' 64 KB
         Dim buffer(bufferSize - 1) As Byte
 
+        Dim localIT As IT = IT.Unknown
+
+        Dim localFileName As String = Path.GetFileName(filePath)
+        Dim localFT As FT = GetFileTypeBasedOnFileName(localFileName, localIT)
+
+        With MyRawFileInfo(localFT)
+            If localIT = IT.Compressed Then
+                .ToBeCounted = True
+                .IsBeingCounted = True
+            End If
+        End With
+
         Using fileStream As New FileStream(filePath,
                                            FileMode.Open,
                                            FileAccess.Read,
@@ -3401,7 +3472,8 @@ Public Class MainForm2
             Using gzipStream As New GZipStream(fileStream,
                                                CompressionMode.Decompress)
 
-                Dim bytesRead As Integer = gzipStream.Read(buffer, 0, bufferSize)
+                Dim bytesRead As Integer =
+                    gzipStream.Read(buffer, 0, bufferSize)
 
                 While bytesRead > 0
 
@@ -3472,9 +3544,9 @@ Public Class MainForm2
     ''' <param name="countFilesList"></param>
     Private Sub CheckSelectedCounted(countFilesList As List(Of String))
 
-        Dim allCounted As Boolean = False
-
-        ' keep a list of all files being counted, and check if all of them have been counted, and if so, re-enable the controls
+        ' keep a list of all files being counted, and check if 
+        ' all of them have been counted, and if so, re-enable 
+        ' the controls
 
         Dim countingFiles As Integer = 0
         Dim countedFiles As Integer = 0
@@ -3486,43 +3558,13 @@ Public Class MainForm2
             End If
 
             With MyRawFileInfo(localFT)
-                If .IsBeingCounted Then countingFiles += 1
+                If .ToBeCounted Then countingFiles += 1
                 If .HasBeenCounted Then countedFiles += 1
             End With
         Next
 
-        allCounted = (countedFiles = countingFiles)
-
-        If CancelledOperations OrElse
-           allCounted Then
-
-            With MyRawFileInfo(FT.NameBasics)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleAkas)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleBasics)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleCrew)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleEpisode)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitlePrincipals)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
-
-            With MyRawFileInfo(FT.TitleRatings)
-                If .HasBeenCounted Then .IsBeingCounted = False
-            End With
+        If (countedFiles = countingFiles) OrElse
+           CancelledOperations Then
 
             FolderLocationTextBox.Enabled = True
             ChooseFolderButton.Enabled = True
@@ -4246,30 +4288,6 @@ Public Class MainForm2
         End Using
 
     End Function
-
-    ''' <summary>
-    ''' Decompresses a GZip file. It reads the compressed file, decompresses 
-    ''' it, and writes the decompressed data to the specified output path.
-    ''' </summary>
-    ''' <param name="zipPath">The path to the compressed GZip file.</param>
-    ''' <param name="outputPath">The path where the decompressed file will be written.</param>
-    Public Sub DecompressGZipFile(zipPath As String,
-                                  outputPath As String)
-
-        ' Open the compressed file for reading
-        Using compressedStream As New FileStream(zipPath, FileMode.Open, FileAccess.Read)
-            ' Create the output file for writing
-            Using outputStream As New FileStream(outputPath, FileMode.Create, FileAccess.Write)
-                ' Wrap the compressed stream in a GZipStream set to Decompress mode
-                Using decompressor As New Comp.GZipStream(compressedStream, Comp.CompressionMode.Decompress)
-                    ' Copy the decompressed data to the output file stream
-                    decompressor.CopyTo(outputStream)
-                End Using
-            End Using
-        End Using
-
-    End Sub
-
 
     ''' <summary>
     ''' Logs error messages to a file named "error_log.txt" in the 

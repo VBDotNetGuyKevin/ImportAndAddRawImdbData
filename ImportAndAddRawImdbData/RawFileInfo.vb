@@ -34,6 +34,7 @@ Public Class RawFileInfo
     ''' This is the type of the current file being processed
     ''' </summary>
     Private _FileType As FT
+
     ''' <summary>
     ''' This property gets or sets the type of the current file being processed
     ''' </summary>
@@ -52,6 +53,7 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _CurrentStartTime As Date = Date.MinValue
+
     ''' <summary>
     ''' This property gets or sets the start time of the current run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -71,6 +73,7 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _CurrentEndTime As Date = Date.MinValue
+
     ''' <summary>
     ''' This property gets or sets the end time of the current run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -91,6 +94,7 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _PreviousStartTime As Date = Date.MinValue
+
     ''' <summary>
     ''' This property gets or sets the start time of the previous run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -110,6 +114,7 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _PreviousEndTime As Date = Date.MinValue
+
     ''' <summary>
     ''' This property gets or sets the end time of the previous run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -129,6 +134,7 @@ Public Class RawFileInfo
     ''' complete processing the current file
     ''' </summary>
     Private _EstimatedCommitCount As Integer
+
     ''' <summary>
     ''' This property gets or sets the estimated total number of commits to 
     ''' complete processing the current file
@@ -148,6 +154,7 @@ Public Class RawFileInfo
     ''' processing the current file
     ''' </summary>
     Private _EstimatedRemainingCommitCount As Integer
+
     ''' <summary>
     ''' This property gets or sets the estimated remaining number of 
     ''' commits to complete processing the current file
@@ -168,6 +175,7 @@ Public Class RawFileInfo
     ''' current file
     ''' </summary>
     Private _CurrentCommitTime As Date = Date.MinValue
+
     ''' <summary>
     ''' This property gets or sets the time of the current commit, which is used to 
     ''' calculate the estimated time to complete processing the 
@@ -202,7 +210,8 @@ Public Class RawFileInfo
     ''' <summary>
     ''' This is the estimated amount of time in seconds to complete processing the current file
     ''' </summary>
-    Dim _AmountOfSecondsPerCommit As Integer = 4 ' this is an initial guestimate based on my own system
+    Private _AmountOfSecondsPerCommit As Integer = 4 ' this is an initial guestimate based on my own system
+
     ''' <summary>
     ''' This property gets or sets the estimated amount of time in seconds to complete processing the current file
     ''' </summary>
@@ -222,6 +231,7 @@ Public Class RawFileInfo
     ''' processing the current file
     ''' </summary>
     Private _PreviousCommitTime As Date = Date.MinValue
+
     ''' <summary>
     ''' This property gets or sets the time of the previous commit, which is 
     ''' used to calculate the estimated time to complete processing the current file
@@ -246,12 +256,12 @@ Public Class RawFileInfo
         End Get
     End Property
 
-
     ''' <summary>
     ''' This is the estimated total time in seconds to complete 
     ''' processing the current file
     ''' </summary>
     Private _EstimatedNumberOfSeconds As Integer
+
     ''' <summary>
     ''' This property gets or sets the estimated total time in 
     ''' seconds to complete processing the current file
@@ -281,6 +291,7 @@ Public Class RawFileInfo
     ''' complete processing the current file
     ''' </summary>
     Private _EstimatedRemainingSeconds As Integer
+
     ''' <summary>
     ''' This property gets or sets the estimated remaining time 
     ''' in seconds to complete processing the current file
@@ -299,6 +310,7 @@ Public Class RawFileInfo
     ''' This is the elapsed time in seconds since the start of processing the current file
     ''' </summary>
     Private _ElapsedSeconds As Integer
+
     ''' <summary>
     ''' This property gets or sets the elapsed time in seconds since the start of processing the current file
     ''' </summary>
@@ -327,6 +339,7 @@ Public Class RawFileInfo
     ''' since the start of processing the current file
     ''' </summary>
     Private _CurrentTime As Date = Date.MinValue
+
     ''' <summary>
     ''' This property gets or sets the current time, which is used to calculate 
     ''' the elapsed time since the start of processing the current file
@@ -353,6 +366,7 @@ Public Class RawFileInfo
     ''' This is the saved row count from the last time (or zero if no previous runs)
     ''' </summary>
     Private _LastRowCount As Long = 0
+
     ''' <summary>
     ''' Saved Row Count from the last time (or zero if no previous runs)
     ''' </summary>
@@ -387,6 +401,7 @@ Public Class RawFileInfo
     End Property
 
     Private _ToBeCounted As Boolean = False
+
     ''' <summary>
     ''' Indicates whether or not the rows need to be counted. If not, 
     ''' we use the last row count as the total expected number of rows.
@@ -401,7 +416,12 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    ''' <summary>
+    ''' Indicates whether or not the rows are currently being counted. If not, 
+    ''' we use the last row count as the total expected number of rows.
+    ''' </summary>
     Private _IsBeingCounted As Boolean = False
+
     ''' <summary>
     ''' Indicates whether or not the rows are currently being counted. If not, 
     ''' we use the last row count as the total expected number of rows.
@@ -416,6 +436,10 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    ''' <summary>
+    ''' Indicates whether or not the rows have been counted. If not, 
+    ''' we use the last row count as the total expected number of rows.
+    ''' </summary>
     Private _HasBeenCounted As Boolean = False
 
     ''' <summary>
@@ -429,6 +453,15 @@ Public Class RawFileInfo
         End Get
         Set(value As Boolean)
             _HasBeenCounted = value
+
+            If ((value = True) AndAlso
+                (IsBeingCounted = True)) Then
+                IsBeingCounted = False
+            End If
+
+            If (Not ToBeCounted) Then
+                ToBeCounted = True
+            End If
         End Set
     End Property
 
@@ -436,6 +469,7 @@ Public Class RawFileInfo
     ''' This is the current number of counted rows for the current file
     ''' </summary>
     Private _CountedRows As Long = 0
+
     ''' <summary>
     ''' This is the current number of counted rows for the current file
     ''' </summary>
@@ -447,11 +481,14 @@ Public Class RawFileInfo
         Set(value As Long)
             _CountedRows = value
 
-            HasBeenCounted = True
+            If value > 0 Then
+                HasBeenCounted = True
+            End If
 
             If ((Not Initializing) AndAlso
                 (Not CompletedProcessing) AndAlso
                 (value > 0)) Then
+
                 ' once we have the current row count, we can estimate the 
                 ' number of commits and the estimated time remaining to complete
                 ' this will be updated each time a commit is performed, 
@@ -475,7 +512,14 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    ''' <summary>
+    ''' This is the current number of remaining rows for the current file
+    ''' </summary>
     Private _RemainingRowCount As Long = 0
+    ''' <summary>
+    ''' This is the current number of remaining rows for the current file
+    ''' </summary>
+    ''' <returns></returns>
     Public Property RemainingRowCount As Long
         Get
             Return _RemainingRowCount
@@ -485,6 +529,11 @@ Public Class RawFileInfo
         End Set
     End Property
 
+    ''' <summary>
+    ''' This is the current percentage of completed rows for the current file. 
+    ''' This is used to update the progress bar in the UI.
+    ''' </summary>
+    ''' <returns></returns>
     Public ReadOnly Property ProgressCompleted As Integer
         Get
             Return CInt(Math.Round((CurrentRowNumber / CountedRows) * 100))
@@ -566,11 +615,14 @@ Public Class RawFileInfo
 
     End Sub
 
+    ''' <summary>
+    ''' This method takes a total number of seconds and converts it into a formatted time string in the format of HH:MM:SS. 
+    ''' If the total number of hours is zero, it will return a string in the format of MM:SS.
+    ''' </summary>
+    ''' <param name="totalSeconds"></param>
+    ''' <returns></returns>
     Public Shared Function GetTimeStringFromSeconds(totalSeconds As Integer) As String
 
-        'Dim hours As Integer = totalSeconds \ 3600
-        'Dim minutes As Integer = (totalSeconds Mod 3600) \ 60
-        'Dim seconds As Integer = totalSeconds Mod 60
         Dim result As String = String.Empty
 
         Dim hours As Integer =
@@ -599,6 +651,13 @@ Public Class RawFileInfo
 
     End Function
 
+    ''' <summary>
+    ''' This method takes a total number of seconds and converts it into a formatted time string in the format of HH:MM:SS.
+    ''' If the total number of hours is zero, it will return a string in the format of MM:SS.
+    ''' If the total number of minutes is also zero, it will return a string in the format of SS.
+    ''' </summary>
+    ''' <param name="totalSeconds"></param>
+    ''' <returns></returns>
     Public Shared Function GetTimeStringFromSeconds_General(totalSeconds As Integer) As String
 
         Dim result As String = String.Empty
@@ -631,6 +690,7 @@ Public Class RawFileInfo
         End If
 
         Return result
+
     End Function
 
 End Class

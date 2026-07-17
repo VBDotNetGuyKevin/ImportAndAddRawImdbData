@@ -106,9 +106,9 @@ Partial Class MainForm2
         ImportArchiveFileProgressBar = New ProgressBar()
         DownloadPanel = New Panel()
         LoadAllDataFilesPanel = New Panel()
-        Label11 = New Label()
-        EstimatedOrCountedRowsTextBox = New TextBox()
         PreviousCountOrCountedHeaderLabel = New Label()
+        EstimatedOrCountedRowsTextBox = New TextBox()
+        Label11 = New Label()
         FileCountsPanel.SuspendLayout()
         DownloadPanel.SuspendLayout()
         LoadAllDataFilesPanel.SuspendLayout()
@@ -695,7 +695,6 @@ Partial Class MainForm2
         ' 
         ' ImportDataButton
         ' 
-        ImportDataButton.Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
         ImportDataButton.Location = New Point(12, 443)
         ImportDataButton.Name = "ImportDataButton"
         ImportDataButton.Size = New Size(338, 25)
@@ -712,7 +711,7 @@ Partial Class MainForm2
         ' 
         Label2.Anchor = AnchorStyles.Top Or AnchorStyles.Right
         Label2.AutoSize = True
-        Label2.Location = New Point(667, 87)
+        Label2.Location = New Point(667, 58)
         Label2.Name = "Label2"
         Label2.Size = New Size(191, 15)
         Label2.TabIndex = 28
@@ -721,7 +720,7 @@ Partial Class MainForm2
         ' FileEstimatedTimeRemainingTextBox
         ' 
         FileEstimatedTimeRemainingTextBox.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        FileEstimatedTimeRemainingTextBox.Location = New Point(864, 84)
+        FileEstimatedTimeRemainingTextBox.Location = New Point(864, 55)
         FileEstimatedTimeRemainingTextBox.Name = "FileEstimatedTimeRemainingTextBox"
         FileEstimatedTimeRemainingTextBox.ReadOnly = True
         FileEstimatedTimeRemainingTextBox.Size = New Size(149, 23)
@@ -759,7 +758,7 @@ Partial Class MainForm2
         ' Label7
         ' 
         Label7.AutoSize = True
-        Label7.Location = New Point(387, 87)
+        Label7.Location = New Point(387, 58)
         Label7.Name = "Label7"
         Label7.Size = New Size(119, 15)
         Label7.TabIndex = 33
@@ -776,7 +775,7 @@ Partial Class MainForm2
         ' 
         ' ElapsedTimeForFileTextBox
         ' 
-        ElapsedTimeForFileTextBox.Location = New Point(512, 84)
+        ElapsedTimeForFileTextBox.Location = New Point(512, 55)
         ElapsedTimeForFileTextBox.Name = "ElapsedTimeForFileTextBox"
         ElapsedTimeForFileTextBox.ReadOnly = True
         ElapsedTimeForFileTextBox.Size = New Size(149, 23)
@@ -793,7 +792,7 @@ Partial Class MainForm2
         ' Label9
         ' 
         Label9.AutoSize = True
-        Label9.Location = New Point(3, 87)
+        Label9.Location = New Point(3, 58)
         Label9.Name = "Label9"
         Label9.Size = New Size(191, 15)
         Label9.TabIndex = 37
@@ -810,7 +809,7 @@ Partial Class MainForm2
         ' 
         ' FileEstimatedProcessingTimeTextBox
         ' 
-        FileEstimatedProcessingTimeTextBox.Location = New Point(248, 84)
+        FileEstimatedProcessingTimeTextBox.Location = New Point(248, 55)
         FileEstimatedProcessingTimeTextBox.Name = "FileEstimatedProcessingTimeTextBox"
         FileEstimatedProcessingTimeTextBox.ReadOnly = True
         FileEstimatedProcessingTimeTextBox.Size = New Size(123, 23)
@@ -827,7 +826,7 @@ Partial Class MainForm2
         ' ImportArchiveFileProgressBar
         ' 
         ImportArchiveFileProgressBar.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
-        ImportArchiveFileProgressBar.Location = New Point(3, 55)
+        ImportArchiveFileProgressBar.Location = New Point(3, 84)
         ImportArchiveFileProgressBar.Name = "ImportArchiveFileProgressBar"
         ImportArchiveFileProgressBar.Size = New Size(1010, 23)
         ImportArchiveFileProgressBar.TabIndex = 41
@@ -877,15 +876,16 @@ Partial Class MainForm2
         LoadAllDataFilesPanel.Size = New Size(1018, 147)
         LoadAllDataFilesPanel.TabIndex = 44
         ' 
-        ' Label11
+        ' PreviousCountOrCountedHeaderLabel
         ' 
-        Label11.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        Label11.AutoSize = True
-        Label11.Location = New Point(840, 29)
-        Label11.Name = "Label11"
-        Label11.Size = New Size(18, 15)
-        Label11.TabIndex = 42
-        Label11.Text = "of"
+        PreviousCountOrCountedHeaderLabel.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        PreviousCountOrCountedHeaderLabel.AutoSize = True
+        PreviousCountOrCountedHeaderLabel.Font = New Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, CByte(0))
+        PreviousCountOrCountedHeaderLabel.Location = New Point(864, 7)
+        PreviousCountOrCountedHeaderLabel.Name = "PreviousCountOrCountedHeaderLabel"
+        PreviousCountOrCountedHeaderLabel.Size = New Size(143, 15)
+        PreviousCountOrCountedHeaderLabel.TabIndex = 44
+        PreviousCountOrCountedHeaderLabel.Text = "Previous Total Row Count"
         ' 
         ' EstimatedOrCountedRowsTextBox
         ' 
@@ -897,16 +897,15 @@ Partial Class MainForm2
         EstimatedOrCountedRowsTextBox.TabIndex = 43
         EstimatedOrCountedRowsTextBox.Text = "0"
         ' 
-        ' PreviousCountOrCountedHeaderLabel
+        ' Label11
         ' 
-        PreviousCountOrCountedHeaderLabel.Anchor = AnchorStyles.Top Or AnchorStyles.Right
-        PreviousCountOrCountedHeaderLabel.AutoSize = True
-        PreviousCountOrCountedHeaderLabel.Font = New Font("Segoe UI", 9F, FontStyle.Underline, GraphicsUnit.Point, CByte(0))
-        PreviousCountOrCountedHeaderLabel.Location = New Point(864, 7)
-        PreviousCountOrCountedHeaderLabel.Name = "PreviousCountOrCountedHeaderLabel"
-        PreviousCountOrCountedHeaderLabel.Size = New Size(143, 15)
-        PreviousCountOrCountedHeaderLabel.TabIndex = 44
-        PreviousCountOrCountedHeaderLabel.Text = "Previous Total Row Count"
+        Label11.Anchor = AnchorStyles.Top Or AnchorStyles.Right
+        Label11.AutoSize = True
+        Label11.Location = New Point(840, 29)
+        Label11.Name = "Label11"
+        Label11.Size = New Size(18, 15)
+        Label11.TabIndex = 42
+        Label11.Text = "of"
         ' 
         ' MainForm2
         ' 
