@@ -53,7 +53,6 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _CurrentStartTime As Date = Date.MinValue
-
     ''' <summary>
     ''' This property gets or sets the start time of the current run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -73,7 +72,6 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _CurrentEndTime As Date = Date.MinValue
-
     ''' <summary>
     ''' This property gets or sets the end time of the current run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -94,7 +92,6 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _PreviousStartTime As Date = Date.MinValue
-
     ''' <summary>
     ''' This property gets or sets the start time of the previous run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -114,7 +111,6 @@ Public Class RawFileInfo
     ''' the estimated time to complete processing the current file
     ''' </summary>
     Private _PreviousEndTime As Date = Date.MinValue
-
     ''' <summary>
     ''' This property gets or sets the end time of the previous run, which is used to calculate 
     ''' the estimated time to complete processing the current file
@@ -134,7 +130,6 @@ Public Class RawFileInfo
     ''' complete processing the current file
     ''' </summary>
     Private _EstimatedCommitCount As Integer
-
     ''' <summary>
     ''' This property gets or sets the estimated total number of commits to 
     ''' complete processing the current file
@@ -154,7 +149,6 @@ Public Class RawFileInfo
     ''' processing the current file
     ''' </summary>
     Private _EstimatedRemainingCommitCount As Integer
-
     ''' <summary>
     ''' This property gets or sets the estimated remaining number of 
     ''' commits to complete processing the current file
@@ -175,7 +169,6 @@ Public Class RawFileInfo
     ''' current file
     ''' </summary>
     Private _CurrentCommitTime As Date = Date.MinValue
-
     ''' <summary>
     ''' This property gets or sets the time of the current commit, which is used to 
     ''' calculate the estimated time to complete processing the 
@@ -211,7 +204,6 @@ Public Class RawFileInfo
     ''' This is the estimated amount of time in seconds to complete processing the current file
     ''' </summary>
     Private _AmountOfSecondsPerCommit As Integer = 4 ' this is an initial guestimate based on my own system
-
     ''' <summary>
     ''' This property gets or sets the estimated amount of time in seconds to complete processing the current file
     ''' </summary>
@@ -231,7 +223,6 @@ Public Class RawFileInfo
     ''' processing the current file
     ''' </summary>
     Private _PreviousCommitTime As Date = Date.MinValue
-
     ''' <summary>
     ''' This property gets or sets the time of the previous commit, which is 
     ''' used to calculate the estimated time to complete processing the current file
@@ -261,7 +252,6 @@ Public Class RawFileInfo
     ''' processing the current file
     ''' </summary>
     Private _EstimatedNumberOfSeconds As Integer
-
     ''' <summary>
     ''' This property gets or sets the estimated total time in 
     ''' seconds to complete processing the current file
@@ -291,7 +281,6 @@ Public Class RawFileInfo
     ''' complete processing the current file
     ''' </summary>
     Private _EstimatedRemainingSeconds As Integer
-
     ''' <summary>
     ''' This property gets or sets the estimated remaining time 
     ''' in seconds to complete processing the current file
@@ -310,7 +299,6 @@ Public Class RawFileInfo
     ''' This is the elapsed time in seconds since the start of processing the current file
     ''' </summary>
     Private _ElapsedSeconds As Integer
-
     ''' <summary>
     ''' This property gets or sets the elapsed time in seconds since the start of processing the current file
     ''' </summary>
@@ -339,7 +327,6 @@ Public Class RawFileInfo
     ''' since the start of processing the current file
     ''' </summary>
     Private _CurrentTime As Date = Date.MinValue
-
     ''' <summary>
     ''' This property gets or sets the current time, which is used to calculate 
     ''' the elapsed time since the start of processing the current file
@@ -366,7 +353,6 @@ Public Class RawFileInfo
     ''' This is the saved row count from the last time (or zero if no previous runs)
     ''' </summary>
     Private _LastRowCount As Long = 0
-
     ''' <summary>
     ''' Saved Row Count from the last time (or zero if no previous runs)
     ''' </summary>
@@ -421,7 +407,6 @@ Public Class RawFileInfo
     ''' we use the last row count as the total expected number of rows.
     ''' </summary>
     Private _IsBeingCounted As Boolean = False
-
     ''' <summary>
     ''' Indicates whether or not the rows are currently being counted. If not, 
     ''' we use the last row count as the total expected number of rows.
@@ -441,7 +426,6 @@ Public Class RawFileInfo
     ''' we use the last row count as the total expected number of rows.
     ''' </summary>
     Private _HasBeenCounted As Boolean = False
-
     ''' <summary>
     ''' Indicates whether or not the rows have been counted. If not, 
     ''' we use the last row count as the total expected number of rows.
@@ -469,7 +453,6 @@ Public Class RawFileInfo
     ''' This is the current number of counted rows for the current file
     ''' </summary>
     Private _CountedRows As Long = 0
-
     ''' <summary>
     ''' This is the current number of counted rows for the current file
     ''' </summary>
@@ -544,7 +527,6 @@ Public Class RawFileInfo
     ''' This is the current number of committed rows for the current file
     ''' </summary>
     Private _CurrentRowNumber As Long = 0
-
     ''' <summary>
     ''' This is the current number of committed rows for the current file
     ''' </summary>
